@@ -7,4 +7,8 @@
 @import 'typography.scss';
 @import 'typography.module.scss';
 
+/** Setup dos ícones usados pelos componentes do M3 **/
+@import url(https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded);
+:root { --md-icon-font: 'Material Symbols Rounded' }
+
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
