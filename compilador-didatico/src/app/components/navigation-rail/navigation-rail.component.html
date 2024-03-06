@@ -1,0 +1,20 @@
+<div class="navigation">
+  <md-icon-button>
+    <md-icon>menu</md-icon>
+  </md-icon-button>
+  <div class="navigation-items">
+    <div
+      *ngFor="let item of items; let i = index"
+      class="item"
+      [id]="'item-' + i"
+      [routerLink]="item.destination"
+      [routerLinkActive]="'active'"
+    >
+      <div class="active-indicator">
+        <md-icon [routerLinkActive]="'filled'">{{ item.icon }}</md-icon>
+        <md-ripple [for]="'item-' + i"></md-ripple>
+      </div>
+      <div class="label label-medium">{{ item.name }}</div>
+    </div>
+  </div>
+</div>

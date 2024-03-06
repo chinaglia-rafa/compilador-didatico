@@ -1,0 +1,59 @@
+@use '../../../assets/theme/mixins.scss' as mix;
+
+:host {
+  display: block;
+  width: 80px;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  align-items: center;
+  padding-top: 44px;
+}
+
+.navigation-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  .item {
+    height: 56px;
+    width: 100%;
+    color: var(--md-sys-color-on-surface-variant);
+    cursor: pointer;
+
+    .active-indicator {
+      position: relative;
+      width: 56px;
+      height: 32px;
+      padding: 4px 0;
+      border-radius: 28px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .label {
+      width: 100%;
+      text-align: center;
+      display: block;
+      position: relative;
+      margin-top: 4px;
+      user-select: none;
+    }
+
+    &.active {
+      color: var(--md-sys-color-on-secondary-container);
+
+      .active-indicator {
+        background-color: var(--md-sys-color-secondary-container);
+      }
+      
+      .label {
+        font-weight: bold;
+      }
+    }
+  }
+}
