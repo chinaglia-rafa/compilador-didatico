@@ -1,0 +1,29 @@
+<div class="container surface" (click)="active = !active">
+  <div class="header">
+    <live-icon [icon]="icon" [active]="active" class="icon"></live-icon>
+    <div class="text">
+      <div class="headline-small on-surface-text">{{ title }}</div>
+      <div class="subhead label-small" *ngIf="subhead && subhead !== ''">
+        {{ subhead }}
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <div
+      class="item"
+      [class.surface-container-low]="item.color === 'default'"
+      [class.error-container]="item.color === 'error'"
+      [class.tertiary-fixed]="item.color === 'success'"
+      [class.on-surface-container-low-text]="item.color === 'default'"
+      [class.on-error-container-text]="item.color === 'error'"
+      [class.on-tertiary-fixed-text]="item.color === 'success'"
+      *ngFor="let item of items"
+    >
+      <div class="value">{{ item.value }}</div>
+      <div class="label">{{ item.label }}</div>
+    </div>
+    <div class="action" *ngIf="action && action !== ''">
+      <md-text-button>{{ action }}</md-text-button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  padding: 16px;
+  gap: 16px;
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+
+    .text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .subhead {
+        opacity: 0.4;
+      }
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 16px;
+
+    .item {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 4px;
+      border-radius: 12px;
+      padding: 12px;
+
+      .value {
+        font-size: 45px;
+        line-height: 45px;
+        font-family: 'Noto Sans';
+      }
+
+    }
+    .action {
+      flex-grow: 1;
+      display: flex;
+      justify-content: flex-end;
+
+      md-text-button {
+        --md-text-button-label-text-color: var(--mds-sys-color-secondary);
+      }
+    }
+  }
+}

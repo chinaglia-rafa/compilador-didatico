@@ -52,6 +52,18 @@
 .tertiary-text {
   color: var(--md-sys-color-tertiary);
 }
+.tertiary-fixed {
+  background-color: var(--md-sys-color-tertiary-fixed);
+}
+.tertiary-fixed-text {
+  color: var(--md-sys-color-tertiary-fixed);
+}
+.on-tertiary-fixed {
+  background-color: var(--md-sys-color-on-tertiary-fixed);
+}
+.on-tertiary-fixed-text {
+  color: var(--md-sys-color-on-tertiary-fixed);
+}
 .on-tertiary {
   background-color: var(--md-sys-color-on-tertiary);
 }
@@ -117,6 +129,18 @@
 }
 .surface-container-text {
   color: var(--md-sys-color-surface);
+}
+.surface-container-low {
+  background-color: var(--md-sys-color-surface-container-low);
+}
+.surface-container-low-text {
+  color: var(--md-sys-color-surface-container-low);
+}
+.on-surface-container-low {
+  background-color: var(--md-sys-color-on-surface-container-low);
+}
+.on-surface-container-low-text {
+  color: var(--md-sys-color-on-surface-container-low);
 }
 .on-surface {
   background-color: var(--md-sys-color-on-surface);

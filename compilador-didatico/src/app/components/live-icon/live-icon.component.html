@@ -1,0 +1,9 @@
+<div class="icon">
+  <img
+    [src]="'./assets/images/icons/' + icon + '.svg'"
+    height="37"
+    width="37"
+    [alt]="icon"
+  />
+  <div [class.active]="active" class="background {{ icon }}"></div>
+</div>

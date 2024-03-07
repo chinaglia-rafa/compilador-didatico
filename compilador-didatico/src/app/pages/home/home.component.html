@@ -1,8 +1,17 @@
-<section class="master-container"></section>
-<section class="details-container">
-  <div class="sample-content surface">
-    home
-    <br />
-    <a routerLink="/sobre">ir para sobre</a>
-  </div>
-</section>
+<div class="container">
+  <section class="master-section">
+    <master-card
+      title="Código-fonte"
+      subhead="Editando teste"
+      [items]="itemsTest"
+      [action]="'Editar código'"
+      icon="code"
+    ></master-card>
+    <master-card
+      title="Análise léxica"
+      [items]="itemsTest"
+      icon="label"
+    ></master-card>
+  </section>
+  <section class="details-section surface"></section>
+</div>

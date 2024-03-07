@@ -1,0 +1,53 @@
+.icon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    position: relative;
+    z-index: 1;
+  }
+
+  .background {
+    transition: all 200ms var(--easing-standard-accelerate);
+    z-index: 0;
+    position: absolute;
+    transform: scale(1.0);
+
+    &.code {
+      background-image: url('../../../assets/images/background-code.png');
+      top: -151px;
+      left: -693px;
+      width: 788px;
+      height: 394px;
+
+      &.active {
+          top: 1px;
+          left: -810px;
+          transform: scale(1.5);
+      }
+    }
+
+    &.label {
+      background-image: url('../../../assets/images/background-label.png');
+      top: -23px;
+      left: -23.8px;
+      width: 278px;
+      height: 139px;
+
+      &.active {
+          top: -48px;
+          left: -207px;
+          transform: scale(1.5);
+      }
+    }
+
+  }
+
+}

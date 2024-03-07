@@ -1,0 +1,19 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.master-section {
+  height: inherit;
+  width: 534px;
+  min-width: 534px;
+}
+
+.details-section {
+  height: inherit;
+  width: 100%;
+  border-radius: 12px;
+}
