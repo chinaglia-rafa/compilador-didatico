@@ -1,0 +1,17 @@
+<svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_130_3360" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="38" height="38">
+<rect width="38" height="38" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_130_3360)">
+<path d="M36 19C36 9.61304 28.387 2 19 2C9.61304 2 2 9.61304 2 19M4.88261 19C4.88261 11.2391 11.1652 4.88261 19 4.88261C26.8348 4.88261 33.1174 11.2391 33.1174 19" fill="white">
+<animateTransform 
+    attributeName="transform" 
+    attributeType="XML" 
+    type="rotate"
+    dur="1s" 
+    from="0 19 19"
+    to="360 19 19" 
+    repeatCount="indefinite" />
+    </path>
+</g>
+</svg>

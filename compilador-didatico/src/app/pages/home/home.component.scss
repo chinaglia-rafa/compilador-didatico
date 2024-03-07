@@ -1,3 +1,7 @@
+:host {
+  overflow: hidden;
+}
+
 .container {
   width: 100%;
   height: 100%;
@@ -10,6 +14,9 @@
   height: inherit;
   width: 534px;
   min-width: 534px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .details-section {

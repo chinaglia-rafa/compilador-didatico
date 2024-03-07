@@ -1,9 +1,15 @@
-<div class="icon">
+<div class="container" [class.loading]="loading">
+  <img
+    [src]="'./assets/images/icons/loader.svg'"
+    height="37"
+    width="37"
+    class="loader"
+  />
   <img
     [src]="'./assets/images/icons/' + icon + '.svg'"
     height="37"
     width="37"
-    [alt]="icon"
+    class="icon"
   />
-  <div [class.active]="active" class="background {{ icon }}"></div>
+  <div class="background {{ icon }}"></div>
 </div>

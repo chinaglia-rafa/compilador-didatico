@@ -9,5 +9,5 @@ import { Component, Input } from '@angular/core';
 })
 export class LiveIconComponent {
   @Input('icon') icon: string = '';
-  @Input('active') active: boolean = false;
+  @Input('loading') loading: boolean = false;
 }

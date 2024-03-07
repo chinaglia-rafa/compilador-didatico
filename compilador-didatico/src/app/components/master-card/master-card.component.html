@@ -1,6 +1,6 @@
 <div class="container surface" (click)="active = !active">
   <div class="header">
-    <live-icon [icon]="icon" [active]="active" class="icon"></live-icon>
+    <live-icon [icon]="icon" [loading]="active" class="icon"></live-icon>
     <div class="text">
       <div class="headline-small on-surface-text">{{ title }}</div>
       <div class="subhead label-small" *ngIf="subhead && subhead !== ''">
