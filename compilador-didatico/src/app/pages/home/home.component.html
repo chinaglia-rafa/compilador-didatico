@@ -13,7 +13,7 @@
         action="Editar código"
         icon="code"
         #codigoFonteCard
-        (select)="clicked($event, codigoFonteCard)"
+        (select)="clicked($event, codigoFonteCard, 'code-editor')"
       ></master-card>
       <div class="same-line">
         <master-card
@@ -21,7 +21,7 @@
           [items]="analiseLexicaCardCompItems"
           icon="label"
           #analiseLexicaCard
-          (select)="clicked($event, analiseLexicaCard)"
+          (select)="clicked($event, analiseLexicaCard, 'lexical-analysis')"
         ></master-card>
         <div class="divider surface">
           <div class="part"></div>
@@ -32,7 +32,7 @@
           [items]="simbolosCardCompItems"
           icon="table_rows"
           #simbolosCard
-          (select)="clicked($event, simbolosCard)"
+          (select)="clicked($event, simbolosCard, 'symbols')"
         ></master-card>
       </div>
       <master-card
@@ -41,7 +41,7 @@
         action="Visualizar"
         icon="account_tree"
         #analiseSintaticaCard
-        (select)="clicked($event, analiseSintaticaCard)"
+        (select)="clicked($event, analiseSintaticaCard, 'syntactic-analysis')"
       ></master-card>
       <master-card
         title="Análise semântica"
@@ -49,7 +49,7 @@
         action="Ver mais"
         icon="square_foot"
         #analiseSemanticaCard
-        (select)="clicked($event, analiseSemanticaCard)"
+        (select)="clicked($event, analiseSemanticaCard, 'semantic-analysis')"
       ></master-card>
       <master-card
         title="Geração de código"
@@ -57,7 +57,7 @@
         action="Ver código gerado"
         icon="send"
         #geracaoDeCodigoCard
-        (select)="clicked($event, geracaoDeCodigoCard)"
+        (select)="clicked($event, geracaoDeCodigoCard, 'code-generation')"
       ></master-card>
       <master-card
         title="Otimização de código"
@@ -65,7 +65,7 @@
         action="Ver código otimizado"
         icon="trail_length_medium"
         #otimizacaoDeCodigoCard
-        (select)="clicked($event, otimizacaoDeCodigoCard)"
+        (select)="clicked($event, otimizacaoDeCodigoCard, 'optimization')"
       ></master-card>
       <master-card
         title="Resultado final"
@@ -73,9 +73,14 @@
         action="Salvar"
         icon="download"
         #resultadoFinalCard
-        (select)="clicked($event, resultadoFinalCard)"
+        (select)="clicked($event, resultadoFinalCard, 'final-results')"
       ></master-card>
     </section>
   </ng-scrollbar>
-  <section class="details-section surface"></section>
+  <section
+    [@routeAnimations]="getRouteAnimationData()"
+    class="details-section surface"
+  >
+    <router-outlet />
+  </section>
 </div>

@@ -15,7 +15,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class NavigationRailComponent {
   items = [
-    { name: 'Início', icon: 'home', destination: '/home' },
+    { name: 'Início', icon: 'home', destination: '/compiler' },
     { name: 'Sobre', icon: 'info', destination: '/sobre' },
   ];
 }

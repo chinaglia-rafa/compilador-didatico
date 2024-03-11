@@ -4,13 +4,16 @@ import {
   MasterCardItem,
 } from '../../components/master-card/master-card.component';
 import { NgScrollbarModule } from 'ngx-scrollbar';
+import { ChildrenOutletContexts, Router, RouterOutlet } from '@angular/router';
+import { customAnimations } from '../../animations';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [MasterCardComponent, NgScrollbarModule],
+  imports: [RouterOutlet, MasterCardComponent, NgScrollbarModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
+  animations: [customAnimations],
 })
 export class HomeComponent implements AfterViewInit {
   @ViewChild('codigoFonteCard')
@@ -97,6 +100,11 @@ export class HomeComponent implements AfterViewInit {
   /** Lista de todos os cards presentes na tela inicial */
   private cards: (MasterCardComponent | undefined)[] = [];
 
+  constructor(
+    private contexts: ChildrenOutletContexts,
+    private router: Router
+  ) {}
+
   ngAfterViewInit(): void {
     this.cards = [
       this.codigoFonteCardComponent,
@@ -110,7 +118,7 @@ export class HomeComponent implements AfterViewInit {
     ];
   }
 
-  clicked(event: MouseEvent, el: MasterCardComponent): void {
+  clicked(event: MouseEvent, el: MasterCardComponent, route: string): void {
     el.toggleLoading();
 
     this.cards.map((card) => card?.setSelected(false));
@@ -119,5 +127,13 @@ export class HomeComponent implements AfterViewInit {
 
     // setTimeout(() => el.toggleLoading(), 2000);
     el.toggle();
+
+    this.router.navigate(['compiler', route]);
+  }
+
+  getRouteAnimationData() {
+    return this.contexts.getContext('primary')?.route?.snapshot?.data?.[
+      'animation'
+    ];
   }
 }

@@ -3,6 +3,11 @@
     <navigation-rail></navigation-rail>
   </nav>
   <div class="content-container">
-    <router-outlet />
+    <div
+      class="animation-container"
+      [@routeAnimations]="getRouteAnimationData()"
+    >
+      <router-outlet />
+    </div>
   </div>
 </div>
