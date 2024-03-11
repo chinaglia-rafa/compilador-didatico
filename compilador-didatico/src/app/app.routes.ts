@@ -17,6 +17,11 @@ export const routes: Routes = [
     data: { animation: 'HomePage' },
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'code-editor',
+      },
+      {
         path: 'code-editor',
         component: CodeEditorComponent,
         data: { animation: 'CodeEditorPage' },

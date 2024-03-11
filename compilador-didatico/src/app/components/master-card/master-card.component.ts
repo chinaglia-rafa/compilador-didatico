@@ -61,7 +61,6 @@ export class MasterCardComponent {
    * @param event Evento de clique do Angular
    */
   clicked(event: MouseEvent): void {
-    console.log('click!');
     this.selectEmitter.emit(event);
   }
 
@@ -71,7 +70,6 @@ export class MasterCardComponent {
    * @param event Evento de clique do Angular
    */
   actionClick(event: MouseEvent): void {
-    console.log('action click!');
     event.stopPropagation();
     this.actionClickEmitter.emit(event);
   }

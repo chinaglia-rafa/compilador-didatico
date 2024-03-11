@@ -1,4 +1,10 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import {
+  AfterContentChecked,
+  AfterContentInit,
+  AfterViewInit,
+  Component,
+  ViewChild,
+} from '@angular/core';
 import {
   MasterCardComponent,
   MasterCardItem,
@@ -116,16 +122,34 @@ export class HomeComponent implements AfterViewInit {
       this.otimizacaoDeCodigoCardComponent,
       this.resultadoFinalCardComponent,
     ];
+
+    setTimeout(() => {
+      this.selectInitialMasterCard();
+    }, 100);
+  }
+
+  /**
+   * Marca o card correspondente à rota ao carregar pela primeira vez
+   */
+  selectInitialMasterCard(): void {
+    const path =
+      this.contexts.getContext('primary')?.route?.snapshot.routeConfig?.path;
+    if (!path) return;
+
+    if (path === 'code-editor') this.cards[0]?.toggle();
+    else if (path === 'lexical-analysis') this.cards[1]?.toggle();
+    else if (path === 'symbols') this.cards[2]?.toggle();
+    else if (path === 'syntactic-analysis') this.cards[3]?.toggle();
+    else if (path === 'semantic-analysis') this.cards[4]?.toggle();
+    else if (path === 'code-generation') this.cards[5]?.toggle();
+    else if (path === 'optimization') this.cards[6]?.toggle();
+    else if (path === 'final-results') this.cards[7]?.toggle();
   }
 
   clicked(event: MouseEvent, el: MasterCardComponent, route: string): void {
     el.toggleLoading();
-
     this.cards.map((card) => card?.setSelected(false));
-
     el.toggleLoading();
-
-    // setTimeout(() => el.toggleLoading(), 2000);
     el.toggle();
 
     this.router.navigate(['compiler', route]);
