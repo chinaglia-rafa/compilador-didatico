@@ -9,7 +9,7 @@
       <master-card
         title="Código-fonte"
         subhead="Editando teste"
-        [items]="itemsTest"
+        [items]="codigoFonteCardItems"
         action="Editar código"
         icon="code"
         #codigoFonteCard
@@ -18,10 +18,7 @@
       <div class="same-line">
         <master-card
           title="Análise léxica"
-          [items]="[
-            { label: 'tokens', value: '175', color: 'default' },
-            { label: 'erro léxico', value: '1', color: 'error' }
-          ]"
+          [items]="analiseLexicaCardCompItems"
           icon="label"
           #analiseLexicaCard
           (select)="clicked($event, analiseLexicaCard)"
@@ -32,7 +29,7 @@
         </div>
         <master-card
           title="Símbolos"
-          [items]="[{ label: 'símbolos', value: '23', color: 'default' }]"
+          [items]="simbolosCardCompItems"
           icon="table_rows"
           #simbolosCard
           (select)="clicked($event, simbolosCard)"
@@ -40,7 +37,7 @@
       </div>
       <master-card
         title="Análise sintática"
-        [items]="itemsTest"
+        [items]="analiseSintaticaCardCompItems"
         action="Visualizar"
         icon="account_tree"
         #analiseSintaticaCard
@@ -48,7 +45,7 @@
       ></master-card>
       <master-card
         title="Análise semântica"
-        [items]="itemsTest"
+        [items]="analiseSemanticaCardCompItems"
         action="Ver mais"
         icon="square_foot"
         #analiseSemanticaCard
@@ -56,7 +53,7 @@
       ></master-card>
       <master-card
         title="Geração de código"
-        [items]="itemsTest"
+        [items]="geracaoDeCodigoCardCompItems"
         action="Ver código gerado"
         icon="send"
         #geracaoDeCodigoCard
@@ -64,7 +61,7 @@
       ></master-card>
       <master-card
         title="Otimização de código"
-        [items]="itemsTest"
+        [items]="otimizacaoDeCodigoCardCompItems"
         action="Ver código otimizado"
         icon="trail_length_medium"
         #otimizacaoDeCodigoCard
@@ -72,7 +69,7 @@
       ></master-card>
       <master-card
         title="Resultado final"
-        [items]="itemsTest"
+        [items]="resultadoFinalCardCompItems"
         action="Salvar"
         icon="download"
         #resultadoFinalCard

@@ -22,6 +22,8 @@ export interface MasterCardItem {
    * - success
    */
   color: string;
+  /** Indica se o item deve estar visível ou não na interface */
+  visible?: boolean;
 }
 
 @Component({

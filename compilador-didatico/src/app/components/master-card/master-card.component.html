@@ -16,25 +16,29 @@
     </div>
   </div>
   <div class="content">
-    <div
-      class="item"
-      [class.surface-container-low]="!selected && item.color === 'default'"
-      [class.on-surface-container-low-text]="
-        !selected && item.color === 'default'
-      "
-      [class.secondary-container]="selected && item.color === 'default'"
-      [class.on-secondary-container-text]="selected && item.color === 'default'"
-      [class.error-container]="!selected && item.color === 'error'"
-      [class.on-error-container-text]="!selected && item.color === 'error'"
-      [class.primary-container]="selected && item.color === 'error'"
-      [class.on-primary-container-text]="selected && item.color === 'error'"
-      [class.tertiary-fixed]="item.color === 'success'"
-      [class.on-tertiary-fixed-text]="item.color === 'success'"
-      *ngFor="let item of items"
-    >
-      <div class="value">{{ item.value }}</div>
-      <div class="label body-medium">{{ item.label }}</div>
-    </div>
+    <ng-container *ngFor="let item of items">
+      <div
+        class="item"
+        *ngIf="item.visible === undefined || item.visible === true"
+        [class.surface-container-low]="!selected && item.color === 'default'"
+        [class.on-surface-container-low-text]="
+          !selected && item.color === 'default'
+        "
+        [class.secondary-container]="selected && item.color === 'default'"
+        [class.on-secondary-container-text]="
+          selected && item.color === 'default'
+        "
+        [class.error-container]="!selected && item.color === 'error'"
+        [class.on-error-container-text]="!selected && item.color === 'error'"
+        [class.primary-container]="selected && item.color === 'error'"
+        [class.on-primary-container-text]="selected && item.color === 'error'"
+        [class.tertiary-fixed]="item.color === 'success'"
+        [class.on-tertiary-fixed-text]="item.color === 'success'"
+      >
+        <div class="value">{{ item.value }}</div>
+        <div class="label body-medium">{{ item.label }}</div>
+      </div>
+    </ng-container>
     <div class="action" *ngIf="action && action !== ''">
       <md-text-button (click)="actionClick($event)">{{
         action
