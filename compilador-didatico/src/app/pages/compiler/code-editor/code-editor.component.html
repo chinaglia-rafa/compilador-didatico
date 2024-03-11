@@ -1,1 +1,8 @@
-<p>code-editor works!</p>
+<div class="container">
+  <ngx-monaco-editor
+    [options]="editorOptions"
+    [(ngModel)]="code"
+    (onInit)="initMonacoEditor($event)"
+  ></ngx-monaco-editor>
+  <div class="tabs">tabs</div>
+</div>
