@@ -1,0 +1,12 @@
+<svg width="46" height="23" viewBox="0 0 46 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M46 23C46 10.3 35.7 0 23 0C10.3 0 0 10.3 0 23M3.9 23C3.9 12.5 12.4 3.9 23 3.9C33.6 3.9 42.1 12.5 42.1 23" fill="white">
+  <animateTransform 
+    attributeName="transform" 
+    attributeType="XML" 
+    type="rotate"
+    dur="1s" 
+    from="0 50 50"
+    to="360 50 50" 
+    repeatCount="indefinite" />
+  </path>
+</svg>

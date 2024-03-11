@@ -1,47 +1,84 @@
 <div class="container">
-  <section class="master-section">
-    <master-card
-      title="Código-fonte"
-      subhead="Editando teste"
-      [items]="itemsTest"
-      [action]="'Editar código'"
-      icon="code"
-    ></master-card>
-    <master-card
-      title="Análise léxica"
-      [items]="itemsTest"
-      icon="label"
-    ></master-card>
-    <master-card
-      title="Símbolos"
-      [items]="itemsTest"
-      icon="table_rows"
-    ></master-card>
-    <master-card
-      title="Análise sintática"
-      [items]="itemsTest"
-      icon="account_tree"
-    ></master-card>
-    <master-card
-      title="Análise semântica"
-      [items]="itemsTest"
-      icon="square_foot"
-    ></master-card>
-    <master-card
-      title="Geração de código"
-      [items]="itemsTest"
-      icon="send"
-    ></master-card>
-    <master-card
-      title="Otimização de código"
-      [items]="itemsTest"
-      icon="trail_length_medium"
-    ></master-card>
-    <master-card
-      title="Resultado final"
-      [items]="itemsTest"
-      icon="download"
-    ></master-card>
-  </section>
+  <ng-scrollbar
+    visibility="hover"
+    appearance="compact"
+    position="invertY"
+    class="master-section-scroll"
+  >
+    <section class="master-section">
+      <master-card
+        title="Código-fonte"
+        subhead="Editando teste"
+        [items]="itemsTest"
+        action="Editar código"
+        icon="code"
+        #codigoFonteCard
+        (select)="clicked($event, codigoFonteCard)"
+      ></master-card>
+      <div class="same-line">
+        <master-card
+          title="Análise léxica"
+          [items]="[
+            { label: 'tokens', value: '175', color: 'default' },
+            { label: 'erro léxico', value: '1', color: 'error' }
+          ]"
+          icon="label"
+          #analiseLexicaCard
+          (select)="clicked($event, analiseLexicaCard)"
+        ></master-card>
+        <div class="divider surface">
+          <div class="part"></div>
+          <div class="part"></div>
+        </div>
+        <master-card
+          title="Símbolos"
+          [items]="[{ label: 'símbolos', value: '23', color: 'default' }]"
+          icon="table_rows"
+          #simbolosCard
+          (select)="clicked($event, simbolosCard)"
+        ></master-card>
+      </div>
+      <master-card
+        title="Análise sintática"
+        [items]="itemsTest"
+        action="Visualizar"
+        icon="account_tree"
+        #analiseSintaticaCard
+        (select)="clicked($event, analiseSintaticaCard)"
+      ></master-card>
+      <master-card
+        title="Análise semântica"
+        [items]="itemsTest"
+        action="Ver mais"
+        icon="square_foot"
+        #analiseSemanticaCard
+        (select)="clicked($event, analiseSemanticaCard)"
+      ></master-card>
+      <master-card
+        title="Geração de código"
+        [items]="itemsTest"
+        action="Ver código gerado"
+        icon="send"
+        #geracaoDeCodigoCard
+        (select)="clicked($event, geracaoDeCodigoCard)"
+      ></master-card>
+      <master-card
+        title="Otimização de código"
+        [items]="itemsTest"
+        action="Ver código otimizado"
+        icon="trail_length_medium"
+        #otimizacaoDeCodigoCard
+        (select)="clicked($event, otimizacaoDeCodigoCard)"
+      ></master-card>
+      <master-card
+        title="Resultado final"
+        [items]="itemsTest"
+        action="Salvar"
+        icon="download"
+        #resultadoFinalCard
+        (select)="clicked($event, resultadoFinalCard)"
+      ></master-card>
+    </section>
+  </ng-scrollbar>
   <section class="details-section surface"></section>
 </div>
