@@ -15,5 +15,15 @@
 
   .tabs {
     height: 300px;
+    display: flex;
+    flex-direction: column;
+
+    md-tabs md-secondary-tab {
+      --md-secondary-tab-label-text-font: var(--md-sys-typescale-title-large-font-family-name);
+    }
+
+    .panel {
+      height: 100%;
+    }
   }
 }

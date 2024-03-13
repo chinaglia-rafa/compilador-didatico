@@ -1,14 +1,24 @@
-import { Component } from '@angular/core';
+import {
+  CUSTOM_ELEMENTS_SCHEMA,
+  Component,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MonacoEditorModule,
   NGX_MONACO_EDITOR_CONFIG,
 } from 'ngx-monaco-editor-v2';
+import '@material/web/tabs/tabs';
+import '@material/web/tabs/primary-tab';
+import '@material/web/tabs/secondary-tab';
+import { ConsoleComponent } from '../../../components/console/console.component';
 
 @Component({
   selector: 'app-code-editor',
   standalone: true,
-  imports: [MonacoEditorModule, FormsModule],
+  imports: [MonacoEditorModule, FormsModule, ConsoleComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     { provide: NGX_MONACO_EDITOR_CONFIG, useValue: NGX_MONACO_EDITOR_CONFIG },
   ],
@@ -16,6 +26,10 @@ import {
   styleUrl: './code-editor.component.scss',
 })
 export class CodeEditorComponent {
+  @ViewChild('panel1Element') panel1?: ElementRef;
+  @ViewChild('panel2Element') panel2?: ElementRef;
+  @ViewChild('panel3Element') panel3?: ElementRef;
+
   editorOptions = {
     minimap: { enabled: false },
     scrollbar: { verticalScrollbarSize: '5px', horizontalScrollbarSize: '5px' },
@@ -32,11 +46,16 @@ export class CodeEditorComponent {
     language: 'LALG',
   };
   code: string = `// teste
+{
+  teste
+  teste
+  teste!
+}
 program teste;
   int alfa, beta;
   boolean omega;
   begin
-      alfa:=false;
+      alfa:= false;
       beta:= 1 + 1
   end.
   `;
@@ -49,13 +68,8 @@ program teste;
     this.monaco.languages.register({ id: 'LALG' });
     const keywords = [
       'program',
-      ';',
-      '.',
       'procedure',
       'var',
-      '(',
-      ')',
-      ':',
       'int',
       'boolean',
       'read',
@@ -69,6 +83,12 @@ program teste;
       'else',
       'while',
       'do',
+    ];
+
+    const symbols = [';', '.', '(', ')', ':', '[', ']'];
+
+    const operators = [
+      ':=',
       '=',
       '<>',
       '>',
@@ -82,16 +102,16 @@ program teste;
       'and',
       'or',
       'not',
-      '[',
-      ']',
     ];
 
     this.monaco.languages.setMonarchTokensProvider('LALG', {
       keywords,
+      operators,
+      symbols,
       tokenizer: {
         root: [
           [
-            /@?[a-zA-Z][\w$]*/,
+            /[a-zA-Z][\w$]*/,
             {
               cases: {
                 '@keywords': 'keyword',
@@ -99,9 +119,22 @@ program teste;
               },
             },
           ],
-          // [/".*?"/, 'string'],
+          [
+            /[\+\-\<\>\*\=\:\;\.\(\)\\[\]\,]+$/,
+            {
+              cases: {
+                '@symbols': 'symbols',
+                '@operators': 'operator',
+              },
+            },
+          ],
           [/\d+/, 'number'],
           [/\/\/.*/, 'comment'],
+          [/{/, 'comment', '@comment'],
+        ],
+        comment: [
+          [/}/, 'comment', '@pop'],
+          [/./, 'comment.content'],
         ],
       },
     });
@@ -120,6 +153,8 @@ program teste;
       },
       rules: [
         { token: 'keyword', foreground: '#a13e2c', fontStyle: 'bold' },
+        { token: 'operator', foreground: '#231917' },
+        { token: 'symbols', foreground: '#231917' },
         { token: 'comment', foreground: '#999999' },
         { token: 'number', foreground: '#4caf50' },
         { token: 'variable', foreground: '#686000' },
@@ -135,13 +170,27 @@ program teste;
     ]);
 
     this.monaco.editor.setTheme('LALG-theme');
-    // this.editorOptions.theme = 'LALG-theme';
   }
 
   initMonacoEditor(editor: any): void {
-    // editor.languages.register({ id: 'mylang' });
-    console.log('editor', editor.getPosition());
     this.monaco = (window as any).monaco;
     this.registerLanguage(this.monaco);
+  }
+
+  /**
+   * Implementa manualmente a troca de abas (sem animação, por enquanto)
+   * TODO: adicionar animações :)
+   * @param event Evento vindo de md-tabs
+   * @returns
+   */
+  tabChange(event: Event): void {
+    const index = (event.target as any)?.activeTabIndex;
+    console.log(event);
+
+    if (index === undefined) return;
+
+    const tabs = [this.panel1, this.panel2, this.panel3];
+    for (const tab of tabs) tab?.nativeElement.setAttribute('hidden', true);
+    tabs[index]?.nativeElement.removeAttribute('hidden');
   }
 }

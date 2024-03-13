@@ -4,5 +4,47 @@
     [(ngModel)]="code"
     (onInit)="initMonacoEditor($event)"
   ></ngx-monaco-editor>
-  <div class="tabs">tabs</div>
+  <div class="tabs">
+    <md-tabs aria-label="Content to view" (change)="tabChange($event)">
+      <md-secondary-tab id="tab-1" aria-controls="panel-1">
+        Console
+      </md-secondary-tab>
+      <md-secondary-tab id="tab-2" aria-controls="panel-2">
+        Erros
+      </md-secondary-tab>
+      <md-secondary-tab id="tab-3" aria-controls="panel-3">
+        Logs
+      </md-secondary-tab>
+    </md-tabs>
+
+    <div
+      #panel1Element
+      id="panel-1"
+      role="tabpanel"
+      class="panel"
+      aria-labelledby="tab-1"
+    >
+      <app-console></app-console>
+    </div>
+    <div
+      #panel2Element
+      id="panel-2"
+      role="tabpanel"
+      class="panel"
+      aria-labelledby="tab-2"
+      hidden
+    >
+      tuti
+    </div>
+    <div
+      #panel3Element
+      id="panel-3"
+      role="tabpanel"
+      class="panel"
+      aria-labelledby="tab-3"
+      hidden
+    >
+      firah
+    </div>
+  </div>
 </div>
