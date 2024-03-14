@@ -1,4 +1,9 @@
 <div class="container">
+  <div class="actions">
+    <md-text-button>Novo</md-text-button>
+    <md-text-button>Abrir</md-text-button>
+    <md-text-button disabled>Salvar</md-text-button>
+  </div>
   <ngx-monaco-editor
     [options]="editorOptions"
     [(ngModel)]="code"
@@ -12,7 +17,7 @@
       <md-secondary-tab id="tab-2" aria-controls="panel-2">
         Erros
       </md-secondary-tab>
-      <md-secondary-tab id="tab-3" aria-controls="panel-3">
+      <md-secondary-tab id="tab-3" active aria-controls="panel-3">
         Logs
       </md-secondary-tab>
     </md-tabs>
@@ -23,6 +28,7 @@
       role="tabpanel"
       class="panel"
       aria-labelledby="tab-1"
+      hidden
     >
       <app-console></app-console>
     </div>
@@ -42,9 +48,8 @@
       role="tabpanel"
       class="panel"
       aria-labelledby="tab-3"
-      hidden
     >
-      firah
+      <logger-display></logger-display>
     </div>
   </div>
 </div>

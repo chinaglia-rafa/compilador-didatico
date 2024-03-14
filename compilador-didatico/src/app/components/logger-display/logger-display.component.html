@@ -1,1 +1,5 @@
-<p>logger-display works!</p>
+<ng-scrollbar visibility="hover" appearance="compact" class="scrollable">
+  <div class="logs">
+    <log-item *ngFor="let log of logs" [log]="log"></log-item>
+  </div>
+</ng-scrollbar>

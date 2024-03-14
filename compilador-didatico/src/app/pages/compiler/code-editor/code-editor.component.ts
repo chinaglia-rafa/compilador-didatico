@@ -12,12 +12,19 @@ import {
 import '@material/web/tabs/tabs';
 import '@material/web/tabs/primary-tab';
 import '@material/web/tabs/secondary-tab';
+import '@material/web/button/filled-tonal-button';
 import { ConsoleComponent } from '../../../components/console/console.component';
+import { LoggerDisplayComponent } from '../../../components/logger-display/logger-display.component';
 
 @Component({
   selector: 'app-code-editor',
   standalone: true,
-  imports: [MonacoEditorModule, FormsModule, ConsoleComponent],
+  imports: [
+    MonacoEditorModule,
+    FormsModule,
+    ConsoleComponent,
+    LoggerDisplayComponent,
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     { provide: NGX_MONACO_EDITOR_CONFIG, useValue: NGX_MONACO_EDITOR_CONFIG },

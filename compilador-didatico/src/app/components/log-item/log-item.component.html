@@ -1,0 +1,23 @@
+<div class="log">
+  <div class="type">
+    <md-icon>{{
+      log.type === "dev"
+        ? "code"
+        : log.type === "stp"
+        ? "arrow_right"
+        : log.type === "edu"
+        ? "chat_bubble"
+        : log.type === "err"
+        ? "error"
+        : ""
+    }}</md-icon>
+  </div>
+  <div class="text body-medium">{{ log.text }}</div>
+  <div class="path label-medium">
+    <span class="hidden-trick">{{ log.path[log.path.length - 1] }}</span>
+    <div class="path-full">
+      <div class="path-part" *ngFor="let part of log.path">{{ part }}</div>
+    </div>
+  </div>
+</div>
+<div class="divider"></div>

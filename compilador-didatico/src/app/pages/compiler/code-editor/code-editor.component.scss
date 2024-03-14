@@ -9,14 +9,22 @@
   display: flex;
   flex-direction: column;
 
+  .actions {
+    width: 100%;
+    padding: 8px 8px;
+    display: flex;
+    gap: 8px;
+  }
+
   ngx-monaco-editor {
     flex-grow: 1;
+    // margin-right: 32px;
   }
 
   .tabs {
     height: 300px;
-    display: flex;
-    flex-direction: column;
+    // display: flex;
+    // flex-direction: column;
 
     md-tabs md-secondary-tab {
       --md-secondary-tab-label-text-font: var(--md-sys-typescale-title-large-font-family-name);
