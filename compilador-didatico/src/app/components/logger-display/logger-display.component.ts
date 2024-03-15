@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { LogEntry, LoggerService } from '../../services/logger/logger.service';
-import { NgScrollbarModule } from 'ngx-scrollbar';
+import { NgScrollbar, NgScrollbarModule } from 'ngx-scrollbar';
 import { LogItemComponent } from '../log-item/log-item.component';
 import { CommonModule } from '@angular/common';
 
@@ -12,6 +12,8 @@ import { CommonModule } from '@angular/common';
   styleUrl: './logger-display.component.scss',
 })
 export class LoggerDisplayComponent implements OnInit {
+  @ViewChild('scrollbarComponent') scrollbar: NgScrollbar;
+
   logs: LogEntry[] = [];
 
   constructor(private loggerService: LoggerService) {}
@@ -44,5 +46,21 @@ export class LoggerDisplayComponent implements OnInit {
       ['Compilador', 'análise léxica', 'tokenização', 'scan()'],
       1
     );
+
+    setInterval(() => {
+      this.loggerService.log(
+        'Erro: gramática mal-configurada.',
+        'err',
+        ['Compilador', 'análise léxica', 'tokenização', 'scan()'],
+        1
+      );
+
+      if (
+        this.scrollbar.nativeElement.scrollTop ==
+        this.scrollbar.nativeElement.scrollHeight -
+          this.scrollbar.nativeElement.clientHeight
+      )
+        this.scrollbar.scrollTo({ bottom: -48 });
+    }, 10000);
   }
 }

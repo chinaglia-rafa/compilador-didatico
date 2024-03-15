@@ -1,4 +1,4 @@
-<div class="log">
+<div class="log" [class.error-text]="log.type === 'err'">
   <div class="type">
     <md-icon>{{
       log.type === "dev"
@@ -15,7 +15,7 @@
   <div class="text body-medium">{{ log.text }}</div>
   <div class="path label-medium">
     <span class="hidden-trick">{{ log.path[log.path.length - 1] }}</span>
-    <div class="path-full">
+    <div class="path-full" [class.no-border]="log.path.length <= 1">
       <div class="path-part" *ngFor="let part of log.path">{{ part }}</div>
     </div>
   </div>

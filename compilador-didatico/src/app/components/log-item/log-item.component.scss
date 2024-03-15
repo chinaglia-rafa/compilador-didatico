@@ -7,6 +7,7 @@
   flex-direction: row;
   align-items: center;
   position: relative;
+  min-height: 32px;
 
   .text {
     flex: 1 auto;
@@ -36,12 +37,16 @@
     align-items: center;
     background-color: var(--md-sys-color-surface);
     color: var(--md-sys-color-on-surface);
-    // box-shadow: -10px 0px 4px 5px var(--md-sys-color-surface);
     border-left: 0px solid var(--md-sys-color-outline-variant);
     padding-left: 0px;
     width: fit-content;
-    height: 100%;
+    min-height: 32px;
+    padding-bottom: 4px;
     cursor: default;
+
+    &.no-border {
+      border: none !important;
+    }
 
     .path-part {
       text-wrap: nowrap;

@@ -192,7 +192,6 @@ program teste;
    */
   tabChange(event: Event): void {
     const index = (event.target as any)?.activeTabIndex;
-    console.log(event);
 
     if (index === undefined) return;
 
