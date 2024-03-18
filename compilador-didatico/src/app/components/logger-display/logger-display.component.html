@@ -1,8 +1,46 @@
+<div class="header surface">
+  <div class="actions">
+    <md-icon-button
+      class="small"
+      (click)="clear()"
+      [disabled]="logs.length === 0"
+    >
+      <md-icon>block</md-icon>
+    </md-icon-button>
+    <md-icon-button class="small" (click)="toggleFilters()">
+      <md-icon [class.error-text]="filterOpened" [class.filled]="filterOpened"
+        >filter_alt</md-icon
+      >
+    </md-icon-button>
+    <div class="filters" [class.hidden]="!filterOpened">
+      Nível de logs:
+      <md-outlined-select
+        class="filter-input"
+        [disabled]="!filterOpened"
+        #logLevelComponent
+        (change)="logLevelChange(logLevelComponent.value)"
+        [value]="currentLogLevel.toString()"
+      >
+        <md-select-option value="0">
+          <div slot="headline">Mínimo</div>
+        </md-select-option>
+        <md-select-option selected value="1">
+          <div slot="headline">Padrão</div>
+        </md-select-option>
+        <md-select-option value="2">
+          <div slot="headline">Todos os logs</div>
+        </md-select-option>
+      </md-outlined-select>
+    </div>
+  </div>
+  <div class="divider" [class.hidden]="!scrolled"></div>
+</div>
 <ng-scrollbar
   #scrollbarComponent
   visibility="hover"
   appearance="compact"
   class="scrollable"
+  (scroll)="scrollUpdate()"
 >
   <div class="logs">
     <log-item *ngFor="let log of logs" [log]="log"></log-item>

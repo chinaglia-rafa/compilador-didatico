@@ -56,6 +56,7 @@ export class LoggerService {
     }
 
     this.level = level;
+    console.log('novo nivel de logs é:', level);
   }
 
   /**
