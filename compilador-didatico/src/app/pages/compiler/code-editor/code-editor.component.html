@@ -1,8 +1,18 @@
 <div class="container">
   <div class="actions">
     <md-text-button>Novo</md-text-button>
-    <md-text-button>Abrir</md-text-button>
+    <open-file></open-file>
     <md-text-button disabled>Salvar</md-text-button>
+    <div class="flex-spacer"></div>
+    <md-filled-tonal-button
+      (click)="compile()"
+      (document:keydown.control.enter)="compile()"
+      [disabled]="code == ''"
+      >Compilar
+      <span style="font-size: 12px; opacity: 0.7"
+        >ctrl + enter</span
+      ></md-filled-tonal-button
+    >
   </div>
   <ngx-monaco-editor
     [options]="editorOptions"

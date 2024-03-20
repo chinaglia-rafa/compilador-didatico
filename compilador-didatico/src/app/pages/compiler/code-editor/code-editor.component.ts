@@ -2,6 +2,8 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   Component,
   ElementRef,
+  NgZone,
+  OnInit,
   ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +17,9 @@ import '@material/web/tabs/secondary-tab';
 import '@material/web/button/filled-tonal-button';
 import { ConsoleComponent } from '../../../components/console/console.component';
 import { LoggerDisplayComponent } from '../../../components/logger-display/logger-display.component';
+import { LoggerService } from '../../../services/logger/logger.service';
+import { OpenFileComponent } from '../../../components/open-file/open-file.component';
+import { FilemanagerService } from '../../../services/filemanager/filemanager.service';
 
 @Component({
   selector: 'app-code-editor',
@@ -24,6 +29,7 @@ import { LoggerDisplayComponent } from '../../../components/logger-display/logge
     FormsModule,
     ConsoleComponent,
     LoggerDisplayComponent,
+    OpenFileComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
@@ -32,7 +38,7 @@ import { LoggerDisplayComponent } from '../../../components/logger-display/logge
   templateUrl: './code-editor.component.html',
   styleUrl: './code-editor.component.scss',
 })
-export class CodeEditorComponent {
+export class CodeEditorComponent implements OnInit {
   @ViewChild('panel1Element') panel1?: ElementRef;
   @ViewChild('panel2Element') panel2?: ElementRef;
   @ViewChild('panel3Element') panel3?: ElementRef;
@@ -69,7 +75,15 @@ program teste;
 
   monaco: any;
 
-  ngAfterViewInit(): void {}
+  constructor(
+    private loggerService: LoggerService,
+    private ngZone: NgZone,
+    private filemanager: FilemanagerService,
+  ) {}
+
+  ngOnInit(): void {
+    this.filemanager.sourceText$.subscribe((data) => (this.code = data));
+  }
 
   registerLanguage(monaco: any): void {
     this.monaco.languages.register({ id: 'LALG' });
@@ -179,9 +193,25 @@ program teste;
     this.monaco.editor.setTheme('LALG-theme');
   }
 
+  setCommands(editor: any): void {
+    editor.addAction({
+      id: 'compile',
+      label: 'Compilar',
+      keybindings: [this.monaco.KeyMod.CtrlCmd | this.monaco.KeyCode.Enter],
+      precondition: null,
+      keybindingContext: null,
+      contextMenuGroupId: 'navigation',
+      contextMenuOrder: 0,
+      run: () => {
+        this.compile();
+      },
+    });
+  }
+
   initMonacoEditor(editor: any): void {
     this.monaco = (window as any).monaco;
     this.registerLanguage(this.monaco);
+    this.setCommands(editor);
   }
 
   /**
@@ -198,5 +228,11 @@ program teste;
     const tabs = [this.panel1, this.panel2, this.panel3];
     for (const tab of tabs) tab?.nativeElement.setAttribute('hidden', true);
     tabs[index]?.nativeElement.removeAttribute('hidden');
+  }
+
+  compile(): void {
+    this.ngZone.run(() => {
+      this.loggerService.log('Compilando.', 'stp', ['Compilador', 'editor'], 0);
+    });
   }
 }

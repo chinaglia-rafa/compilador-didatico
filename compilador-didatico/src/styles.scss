@@ -2,12 +2,19 @@
 @import url(./assets/theme/theme.scss);
 @import url(./assets/theme/transitions.scss);
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
-  font-family: 'Noto Sans';
+  font-family: "Noto Sans";
 }
 
 * {
   box-sizing: border-box;
 }
+
+/** classe responsável por estilizar alguns textos de log */
+.monospace {
+  font-family: monospace;
+}
+

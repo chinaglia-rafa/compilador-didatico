@@ -1,7 +1,6 @@
 import {
   CUSTOM_ELEMENTS_SCHEMA,
   Component,
-  EventEmitter,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -39,51 +38,18 @@ export class LoggerDisplayComponent implements OnInit {
   constructor(private loggerService: LoggerService) {}
 
   ngOnInit(): void {
-    this.loggerService.logs$.subscribe((logs) => (this.logs = logs));
-
-    this.currentLogLevel = this.loggerService.level;
-
-    this.loggerService.log('Primeiro log do projeto', 'dev', ['logger'], 0);
-    this.loggerService.log(
-      'Segundo log bem aqui.',
-      'dev',
-      ['logger', 'log()'],
-      1,
-    );
-    this.loggerService.log(
-      'Aqui nós usaremos as tabelas First e Follow para validar uma certa entrada de tokens. Essa tabela pode ser calculada para qualquer gramática regular, mas a nossa já está em cache :)',
-      'edu',
-      ['Compilador', 'análise léxica', 'tokenização', 'scan()'],
-      1,
-    );
-    this.loggerService.log(
-      'Executando análise léxica...',
-      'stp',
-      ['logger', 'log()'],
-      1,
-    );
-    this.loggerService.log(
-      'Erro: gramática mal-configurada.',
-      'err',
-      ['Compilador', 'análise léxica', 'tokenização', 'scan()'],
-      1,
-    );
-
-    setInterval(() => {
-      this.loggerService.log(
-        'Erro: gramática mal-configurada.',
-        'err',
-        ['Compilador', 'análise léxica', 'tokenização', 'scan()'],
-        1,
-      );
-
+    this.loggerService.logs$.subscribe((logs) => {
+      this.logs = logs;
       if (
+        this.scrollbar &&
         this.scrollbar.nativeElement.scrollTop ==
-        this.scrollbar.nativeElement.scrollHeight -
-          this.scrollbar.nativeElement.clientHeight
+          this.scrollbar.nativeElement.scrollHeight -
+            this.scrollbar.nativeElement.clientHeight
       )
         this.scrollbar.scrollTo({ bottom: -48 });
-    }, 10000);
+    });
+
+    this.currentLogLevel = this.loggerService.level;
   }
 
   scrollUpdate(): void {

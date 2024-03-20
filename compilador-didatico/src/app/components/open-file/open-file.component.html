@@ -1,0 +1,9 @@
+<md-text-button (click)="uploadInput.value = ''; uploadInput.click()"
+  >Abrir</md-text-button
+>
+<input
+  (change)="inputChange(uploadInput?.files[0])"
+  class="oculto"
+  #uploadInput
+  type="file"
+/>
