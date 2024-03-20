@@ -235,4 +235,18 @@ program teste;
       this.loggerService.log('Compilando.', 'stp', ['Compilador', 'editor'], 0);
     });
   }
+
+  download(): void {
+    let file = this.filemanager.returnNewFile(this.code);
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(file);
+
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
 }

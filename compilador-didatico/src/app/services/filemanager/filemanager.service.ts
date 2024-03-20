@@ -58,4 +58,10 @@ export class FilemanagerService {
       reader.readAsText(arq);
     });
   }
+
+  returnNewFile(content: string): File {
+    const arr = [content];
+    let file = new File(arr, 'new.txt', { type: 'text/plain' });
+    return file;
+  }
 }

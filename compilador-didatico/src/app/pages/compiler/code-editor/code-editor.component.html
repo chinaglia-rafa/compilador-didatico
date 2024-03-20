@@ -2,7 +2,9 @@
   <div class="actions">
     <md-text-button>Novo</md-text-button>
     <open-file></open-file>
-    <md-text-button disabled>Salvar</md-text-button>
+    <md-text-button (click)="download()" [disabled]="code == ''"
+      >Salvar</md-text-button
+    >
     <div class="flex-spacer"></div>
     <md-filled-tonal-button
       (click)="compile()"
