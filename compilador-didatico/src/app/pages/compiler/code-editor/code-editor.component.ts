@@ -20,6 +20,7 @@ import { LoggerDisplayComponent } from '../../../components/logger-display/logge
 import { LoggerService } from '../../../services/logger/logger.service';
 import { OpenFileComponent } from '../../../components/open-file/open-file.component';
 import { FilemanagerService } from '../../../services/filemanager/filemanager.service';
+import { CompilerService } from '../../../services/compiler/compiler.service';
 
 @Component({
   selector: 'app-code-editor',
@@ -79,6 +80,7 @@ program teste;
     private loggerService: LoggerService,
     private ngZone: NgZone,
     private filemanager: FilemanagerService,
+    private compilerService: CompilerService,
   ) {}
 
   ngOnInit(): void {
@@ -233,6 +235,7 @@ program teste;
   compile(): void {
     this.ngZone.run(() => {
       this.loggerService.log('Compilando.', 'stp', ['Compilador', 'editor'], 0);
+      this.compilerService.compile();
     });
   }
 
