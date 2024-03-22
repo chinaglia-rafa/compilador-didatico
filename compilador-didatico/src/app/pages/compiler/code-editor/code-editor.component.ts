@@ -235,7 +235,7 @@ program teste;
   compile(): void {
     this.ngZone.run(() => {
       this.loggerService.log('Compilando.', 'stp', ['Compilador', 'editor'], 0);
-      this.compilerService.compile();
+      this.compilerService.compile(this.code);
     });
   }
 

@@ -1,10 +1,4 @@
-import {
-  AfterContentChecked,
-  AfterContentInit,
-  AfterViewInit,
-  Component,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import {
   MasterCardComponent,
   MasterCardItem,
@@ -12,6 +6,8 @@ import {
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { ChildrenOutletContexts, Router, RouterOutlet } from '@angular/router';
 import { customAnimations } from '../../animations';
+import { CompilerService } from '../../services/compiler/compiler.service';
+import { LexicalAnalysisService } from '../../services/lexical-analysis/lexical-analysis.service';
 
 @Component({
   selector: 'app-home',
@@ -21,7 +17,7 @@ import { customAnimations } from '../../animations';
   styleUrl: './home.component.scss',
   animations: [customAnimations],
 })
-export class HomeComponent implements AfterViewInit {
+export class HomeComponent implements AfterViewInit, OnInit {
   @ViewChild('codigoFonteCard')
   codigoFonteCardComponent?: MasterCardComponent;
   @ViewChild('analiseLexicaCard')
@@ -38,39 +34,6 @@ export class HomeComponent implements AfterViewInit {
   otimizacaoDeCodigoCardComponent?: MasterCardComponent;
   @ViewChild('resultadoFinalCard')
   resultadoFinalCardComponent?: MasterCardComponent;
-
-  /* backup
-   * codigoFonteCardItems = [
-    { label: 'linhas digitadas', value: '42', color: 'default' },
-    { label: 'erros', value: '3', color: 'error', visible: false },
-  ];
-  analiseLexicaCardCompItems = [
-    { label: 'tokens', value: '175', color: 'default' },
-    { label: 'erro léxico', value: '1', color: 'error', visible: false },
-  ];
-  simbolosCardCompItems = [
-    { label: 'símbolos', value: '23', color: 'default' },
-  ];
-  analiseSintaticaCardCompItems = [
-    { label: 'nós', value: '1008', color: 'default' },
-    { label: 'erros sintáticos', value: '38', color: 'error', visible: false },
-  ];
-  analiseSemanticaCardCompItems = [
-    { label: 'identificadores', value: '9', color: 'default' },
-    { label: 'erros semânticos', value: '5', color: 'error', visible: false },
-  ];
-  geracaoDeCodigoCardCompItems = [
-    { label: 'Kb', value: '1,6', color: 'default' },
-    { label: 'comandos', value: '63', color: 'default' },
-  ];
-  otimizacaoDeCodigoCardCompItems = [
-    { label: 'Kb', value: '0,8', color: 'default' },
-    { label: '%', value: '49', color: 'success' },
-  ];
-  resultadoFinalCardCompItems = [
-    { label: 'Kb', value: '0,8', color: 'default' },
-  ];
-   */
 
   codigoFonteCardItems: MasterCardItem[] = [
     { label: 'linhas digitadas', value: '0', color: 'default' },
@@ -108,8 +71,28 @@ export class HomeComponent implements AfterViewInit {
 
   constructor(
     private contexts: ChildrenOutletContexts,
-    private router: Router
+    private router: Router,
+    private compilerService: CompilerService,
+    private lexicalAnalysisService: LexicalAnalysisService,
   ) {}
+
+  ngOnInit(): void {
+    this.compilerService.loading$.subscribe((loadingStates) => {
+      for (let i = 0; i < this.cards.length; i++) {
+        if (loadingStates[i] === true) this.cards[i].startLoading();
+        else this.cards[i].endLoading();
+      }
+    });
+
+    this.lexicalAnalysisService.errors$.subscribe((data) => {
+      this.analiseLexicaCardCompItems[1].value = data.length.toString();
+      this.analiseLexicaCardCompItems[1].visible = data.length > 0;
+    });
+
+    this.lexicalAnalysisService.tokens$.subscribe((data) => {
+      this.analiseLexicaCardCompItems[0].value = data.length.toString();
+    });
+  }
 
   ngAfterViewInit(): void {
     this.cards = [
@@ -124,6 +107,7 @@ export class HomeComponent implements AfterViewInit {
     ];
 
     setTimeout(() => {
+      /** TODO: aprender finalmente como lidar com esse tipo de hax chato */
       this.selectInitialMasterCard();
     }, 100);
   }

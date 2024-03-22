@@ -82,6 +82,20 @@ export class MasterCardComponent {
   }
 
   /**
+   * Seta o valor de loading para true, alterando o ícone para "carregando..."
+   */
+  startLoading(): void {
+    this.loading = true;
+  }
+
+  /**
+   * Seta o valor de loading para false, alterando o ícone para o ícone padrão
+   */
+  endLoading(): void {
+    this.loading = false;
+  }
+
+  /**
    * Alterna o estado do componente para "selecionado"
    */
   toggle(): void {
