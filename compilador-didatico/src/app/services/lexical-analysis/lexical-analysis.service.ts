@@ -118,7 +118,7 @@ export class LexicalAnalysisService implements OnInit {
         alphabet: this.alfabeto,
         reservedWords: this.reservedWords,
         dividers: this.dividers,
-        oneLineComment: '//',
+        oneLineComment: '/',
         code,
       };
 

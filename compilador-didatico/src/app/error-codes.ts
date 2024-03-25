@@ -9,4 +9,6 @@ export const ERROR_CODES = {
   LEX_IDENTIFIER_TOO_BIG: 103,
   /** A token é um identificador inválido */
   LEX_INVALID_IDETIFIER: 104,
+  /** O arquivo acabou de forma inexperada. Havia algo a ser fechado, provavelmente. */
+  LEX_UNEXPECTED_EOF: 105,
 };

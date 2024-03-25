@@ -108,6 +108,7 @@ function consolidateToken(
 }
 
 function newToken(): Token {
+  // TODO: deixar de ser preguiçoso e criar uma classe ao invés de uma interface
   return {
     lexema: '',
     token: '',
@@ -124,8 +125,6 @@ addEventListener('message', ({ data }) => {
   receivedData = data;
   /** indica se a tokenização está no modo comentário */
   let isInComment = false;
-
-  const response = `worker received ${receivedData}`;
 
   /** Divide o código-fonte em linhas */
   const code = receivedData.code.split('\n');
@@ -201,13 +200,94 @@ addEventListener('message', ({ data }) => {
           consolidateToken(currentToken, row, col, currentLine);
           currentToken = newToken();
         }
+
+        if (currentChar === ' ' || currentChar === '\t') continue;
+
+        /**
+         *  ===========================================================
+         *  Identificando tokens como:
+         *  := <> <= >=
+         *  ===========================================================
+         */
+        if (currentChar === ':' && currentLine[col + 1] === '=') {
+          // Caso seja :=
+          currentToken.lexema = ':=';
+        } else if (currentChar === '>' && currentLine[col + 1] === '=') {
+          // Caso seja >=
+          currentToken.lexema = '>=';
+        } else if (currentChar === '<') {
+          // Caso seja <=
+          if (currentLine[col + 1] === '=') currentToken.lexema = '<=';
+          // Caso seja <>
+          else if (currentLine[col + 1] === '>') currentToken.lexema = '<>';
+          // Caso seja apenas <
+          else currentToken.lexema = currentChar;
+          // Caso seja um divisor diferente dos citados acima
+        } else currentToken.lexema = currentChar;
+        /**
+         *  Agora que o divisor foi identificado, deve-se
+         *  consolidá-lo como token
+         */
+        currentToken.token = identifyToken(currentToken.lexema);
+        consolidateToken(currentToken, row, col, currentLine);
+        // Caso seja uma token com divisor composta,
+        // deve-se saltar 2x no loop de colunas.
+        if ([':=', '>=', '<=', '<>'].includes(currentToken.lexema)) {
+          col += 1;
+        }
+        currentToken = newToken();
+
+        continue;
+      } else if (currentChar === '.' && currentToken.lexema === 'end') {
+        // O algoritmo entra nesse if caso haja um ponto final precedido de um "end",
+        // o que indica que o ponto não é um indicador de casa decimal de um número real,
+        // mas sim a token ponto-final
+
+        /** Consolida o "end" que está acumulado na token atual */
+        currentToken.token = identifyToken(currentToken.lexema);
+        consolidateToken(currentToken, row, col, currentLine);
+
+        currentToken = newToken();
+
+        /** consolida o "." final */
+        currentToken.lexema = currentChar;
+        currentToken.token = identifyToken(currentToken.lexema);
+        consolidateToken(currentToken, row, col, currentLine);
+
+        currentToken = newToken();
       }
-
-      if (currentChar === ' ' || currentChar === '\t') continue;
-
+      /**
+       *  Caso não tenha sido encontrado divisor de nenhum tipo,
+       *  então o lexema atual ainda está sendo construído, e
+       *  portanto o caractere atual deve ser acumulado ao
+       *  lexema corrente.
+       */
       currentToken.lexema += currentChar;
     }
+    /**
+     *  ao chegar ao fim da linha (após sua última coluna), haverá
+     *  uma token possivelmente acumulada em currentToken. Por isso,
+     *  deve-se consolidá-la, se presente.
+     */
+    if (currentToken.token !== '') {
+      currentToken.token = identifyToken(currentToken.lexema);
+      consolidateToken(currentToken, row, currentLine.length - 1, currentLine);
+    }
   }
+
+  /**
+   *  Se o arquivo chegou ao fim no modo isInComment, então o arquivo está
+   *  incorretamente finalizado.
+   */
+  if (isInComment === true) {
+    errors.push({
+      errorCode: ERROR_CODES.LEX_UNEXPECTED_EOF,
+      row: code.length - 1,
+      col: 0,
+      lineContent: '',
+    });
+  }
+
   postMessage({
     tokens,
     errors,
