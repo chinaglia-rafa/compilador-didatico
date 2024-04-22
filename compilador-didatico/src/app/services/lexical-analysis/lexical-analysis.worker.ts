@@ -22,8 +22,10 @@ export interface LexicalAnalysisOutput {
 /** Representa um erro encontrado na análise léxica */
 export interface LexicalAnalysisError {
   errorCode: number;
-  row: number;
-  col: number;
+  startRow: number;
+  startCol: number;
+  endRow: number;
+  endCol: number;
   /** conteúdo da linha onde o erro ocorreu */
   lineContent: string;
 }
@@ -74,30 +76,38 @@ function consolidateToken(
 
   if (token.token === 'número-real-mal-formatado') {
     errors.push({
-      errorCode: ERROR_CODES.LEX_MALFORMED_FLOAT,
-      row,
-      col,
+      errorCode: ERROR_CODES.LEX_MALFORMED_FLOAT.code,
+      startRow: row,
+      startCol: col,
+      endRow: row,
+      endCol: col + token.lexema.length,
       lineContent: line,
     });
   } else if (token.token === 'número-natural-muito-longo') {
     errors.push({
-      errorCode: ERROR_CODES.LEX_NUMER_TOO_BIG,
-      row,
-      col,
+      errorCode: ERROR_CODES.LEX_NUMBER_TOO_BIG.code,
+      startRow: row,
+      startCol: col,
+      endRow: row,
+      endCol: col + token.lexema.length,
       lineContent: line,
     });
   } else if (token.token === 'identificador-muito-longo') {
     errors.push({
-      errorCode: ERROR_CODES.LEX_MALFORMED_FLOAT,
-      row,
-      col,
+      errorCode: ERROR_CODES.LEX_MALFORMED_FLOAT.code,
+      startRow: row,
+      startCol: col,
+      endRow: row,
+      endCol: col + token.lexema.length,
       lineContent: line,
     });
   } else if (token.token === 'identificador-inválido') {
     errors.push({
-      errorCode: ERROR_CODES.LEX_INVALID_IDETIFIER,
-      row,
-      col,
+      errorCode: ERROR_CODES.LEX_INVALID_IDETIFIER.code,
+      startRow: row,
+      startCol: col,
+      endRow: row,
+      endCol: col + token.lexema.length,
       lineContent: line,
     });
   }
@@ -173,17 +183,31 @@ addEventListener('message', ({ data }) => {
       /**
        *  ===========================================================
        *  Validação do alfabeto. Cada caractere do código deve estar
-       *  contio no alfabeto da linguagem.
+       *  contido no alfabeto da linguagem.
        *  ===========================================================
        */
       if (!isInAphabet(currentChar)) {
         console.log('Caractere não contido no alfabeto');
+
+        currentToken.token = identifyToken(currentToken.lexema);
+        consolidateToken(currentToken, row, col, currentLine);
+        currentToken = newToken();
+
+        currentToken.lexema = currentChar;
+
+        currentToken.token = identifyToken(currentToken.lexema);
+        consolidateToken(currentToken, row, col, currentLine);
+
         errors.push({
-          errorCode: ERROR_CODES.LEX_NOT_IN_ALPHABET,
-          row,
-          col,
+          errorCode: ERROR_CODES.LEX_NOT_IN_ALPHABET.code,
+          startRow: row,
+          startCol: col,
+          endRow: row,
+          endCol: col + 1,
           lineContent: currentLine,
         });
+
+        currentToken = newToken();
 
         continue;
       }
@@ -281,9 +305,11 @@ addEventListener('message', ({ data }) => {
    */
   if (isInComment === true) {
     errors.push({
-      errorCode: ERROR_CODES.LEX_UNEXPECTED_EOF,
-      row: code.length - 1,
-      col: 0,
+      errorCode: ERROR_CODES.LEX_UNEXPECTED_EOF.code,
+      startRow: code.length - 1,
+      startCol: 0,
+      endRow: code.length - 1,
+      endCol: 0,
       lineContent: '',
     });
   }

@@ -1,17 +1,54 @@
 import { Injectable, OnInit } from '@angular/core';
 import { LexicalAnalysisService } from '../lexical-analysis/lexical-analysis.service';
 import { BehaviorSubject } from 'rxjs';
+import { ErrorsService } from '../errors/errors.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CompilerService implements OnInit {
-  constructor(private lexicalAnalysisService: LexicalAnalysisService) {
+  constructor(
+    private lexicalAnalysisService: LexicalAnalysisService,
+    private errorsService: ErrorsService,
+  ) {
     this.lexicalAnalysisService.loading$.subscribe((loading) => {
       const states = this.loading$.value;
       states[1] = loading;
       this.loading$.next(states);
     });
+
+    this.lexicalAnalysisService.errors$.subscribe((errors) => {
+      this.errorsService.reset();
+      if (!errors) return;
+      for (const error of errors) {
+        this.errorsService.add(
+          error.errorCode,
+          error.startRow,
+          error.startCol,
+          error.endRow,
+          error.endCol,
+        );
+      }
+    });
+
+    setTimeout(() => {
+      const c = `// teste
+{
+  teste
+  teste
+  teste!
+}
+program teste;
+  int alfa, beta;
+  boolean omega;
+  begin
+      aaaaaaaaaaaaaaaa := 0;
+      alfa:= false;
+      beta:= .1 + 1;
+  end.
+`;
+      this.compile(c);
+    }, 1000);
   }
 
   /** Observable que emite booleanos indicando quais partes da compilação estão carregando */
@@ -25,6 +62,8 @@ export class CompilerService implements OnInit {
     false,
     false,
   ]);
+  /** contagem de linhas sendo processadas na compilação */
+  linesCount$ = new BehaviorSubject<number>(0);
 
   ngOnInit(): void {}
 
@@ -34,6 +73,7 @@ export class CompilerService implements OnInit {
    * @param code código-fonte a ser compilado
    */
   compile(code: string): void {
+    this.linesCount$.next(code.split('\n').length);
     this.lexicalAnalysisService.scan(code);
   }
 }

@@ -8,6 +8,7 @@ import { ChildrenOutletContexts, Router, RouterOutlet } from '@angular/router';
 import { customAnimations } from '../../animations';
 import { CompilerService } from '../../services/compiler/compiler.service';
 import { LexicalAnalysisService } from '../../services/lexical-analysis/lexical-analysis.service';
+import { SymbolsTableService } from '../../services/symbols-table/symbols-table.service';
 
 @Component({
   selector: 'app-home',
@@ -74,6 +75,7 @@ export class HomeComponent implements AfterViewInit, OnInit {
     private router: Router,
     private compilerService: CompilerService,
     private lexicalAnalysisService: LexicalAnalysisService,
+    private symbolsTableService: SymbolsTableService,
   ) {}
 
   ngOnInit(): void {
@@ -82,6 +84,14 @@ export class HomeComponent implements AfterViewInit, OnInit {
         if (loadingStates[i] === true) this.cards[i].startLoading();
         else this.cards[i].endLoading();
       }
+    });
+
+    this.compilerService.linesCount$.subscribe((count) => {
+      this.codigoFonteCardItems[0].value = count.toString();
+    });
+
+    this.symbolsTableService.count$.subscribe((count) => {
+      this.simbolosCardCompItems[0].value = count.toString();
     });
 
     this.lexicalAnalysisService.errors$.subscribe((data) => {

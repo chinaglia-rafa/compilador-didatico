@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 /** Linha da tabela de símbolos */
 export interface TableItem {
@@ -15,6 +16,8 @@ export interface TableItem {
 })
 export class SymbolsTableService {
   table: TableItem[] = [];
+  /** tamanho da tabela de símbolos */
+  count$ = new BehaviorSubject<number>(0);
 
   constructor() {}
 
@@ -32,15 +35,19 @@ export class SymbolsTableService {
 
     newTableItem.lexema = lexema;
 
-    if (tokenType === 'numero-natural') {
+    if (tokenType === 'número-natural') {
       newTableItem.value = parseInt(lexema);
       newTableItem.type = 'int';
-    } else if (tokenType === 'numero-real') {
+    } else if (tokenType === 'número-real') {
       newTableItem.value = parseFloat(lexema);
       newTableItem.type = 'float';
+    } else if (tokenType === 'identificador-válido') {
+      const index = this.table.findIndex((el) => el.lexema === lexema);
+      if (index >= 0) return index;
     }
-
     this.table.push(newTableItem);
+
+    this.count$.next(this.table.length);
 
     return this.table.length - 1;
   }

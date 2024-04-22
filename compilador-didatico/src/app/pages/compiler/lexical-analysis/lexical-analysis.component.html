@@ -1,16 +1,36 @@
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
-<p>lexical-analysis works!</p>
+<div class="tokens">
+  <ng-scrollbar
+    #scrollbarComponent
+    visibility="hover"
+    appearance="compact"
+    class="scrollable"
+  >
+    <table cellspacing="0" cellpadding="0">
+      <tr class="title-large on-surface-text">
+        <th></th>
+        <th>lexema</th>
+        <th>token</th>
+        <th>posição</th>
+        <th>símbolo</th>
+      </tr>
+      <tr
+        *ngFor="let token of tokens; let i = index"
+        class="body-large token-line on-surface-text"
+        [class.error]="
+          [
+            'identificador-inválido',
+            'número-real-mal-formatado',
+            'número-natural-muito-longo',
+            'identificador-muito-longo'
+          ].includes(token.token)
+        "
+      >
+        <td>{{ i + 1 }}</td>
+        <td class="monospace">{{ token.lexema }}</td>
+        <td>{{ token.token }}</td>
+        <td>{{ token.row + 1 }}:{{ token.col + 1 }}</td>
+        <td>{{ token.symbolIndex >= 0 ? token.symbolIndex + 1 : "" }}</td>
+      </tr>
+    </table>
+  </ng-scrollbar>
+</div>

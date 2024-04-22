@@ -21,6 +21,46 @@ import { LoggerService } from '../../../services/logger/logger.service';
 import { OpenFileComponent } from '../../../components/open-file/open-file.component';
 import { FilemanagerService } from '../../../services/filemanager/filemanager.service';
 import { CompilerService } from '../../../services/compiler/compiler.service';
+import { ErrorsService } from '../../../services/errors/errors.service';
+import { ErrorDisplayComponent } from '../../../components/error-display/error-display.component';
+
+export const EDITOR_KEYWORDS = [
+  'program',
+  'procedure',
+  'var',
+  'int',
+  'boolean',
+  'read',
+  'write',
+  'true',
+  'false',
+  'begin',
+  'end',
+  'if',
+  'then',
+  'else',
+  'while',
+  'do',
+];
+
+export const EDITOR_SYMBOLS = [';', '.', '(', ')', ':', '[', ']'];
+
+export const EDITOR_OPERATORS = [
+  ':=',
+  '=',
+  '<>',
+  '>',
+  '<',
+  '<=',
+  '=>',
+  '+',
+  '-',
+  '*',
+  'div',
+  'and',
+  'or',
+  'not',
+];
 
 @Component({
   selector: 'app-code-editor',
@@ -31,6 +71,7 @@ import { CompilerService } from '../../../services/compiler/compiler.service';
     ConsoleComponent,
     LoggerDisplayComponent,
     OpenFileComponent,
+    ErrorDisplayComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
@@ -69,8 +110,9 @@ program teste;
   int alfa, beta;
   boolean omega;
   begin
+      aaaaaaaaaaaaaaaa := 0;
       alfa:= false;
-      beta:= 1 + 1
+      beta:= .1 + 1;
   end.
   `;
 
@@ -81,6 +123,7 @@ program teste;
     private ngZone: NgZone,
     private filemanager: FilemanagerService,
     private compilerService: CompilerService,
+    private errorService: ErrorsService,
   ) {}
 
   ngOnInit(): void {
@@ -89,55 +132,18 @@ program teste;
 
   registerLanguage(monaco: any): void {
     this.monaco.languages.register({ id: 'LALG' });
-    const keywords = [
-      'program',
-      'procedure',
-      'var',
-      'int',
-      'boolean',
-      'read',
-      'write',
-      'true',
-      'false',
-      'begin',
-      'end',
-      'if',
-      'then',
-      'else',
-      'while',
-      'do',
-    ];
-
-    const symbols = [';', '.', '(', ')', ':', '[', ']'];
-
-    const operators = [
-      ':=',
-      '=',
-      '<>',
-      '>',
-      '<',
-      '<=',
-      '=>',
-      '+',
-      '-',
-      '*',
-      'div',
-      'and',
-      'or',
-      'not',
-    ];
 
     this.monaco.languages.setMonarchTokensProvider('LALG', {
-      keywords,
-      operators,
-      symbols,
+      EDITOR_KEYWORDS,
+      EDITOR_OPERATORS,
+      EDITOR_SYMBOLS,
       tokenizer: {
         root: [
           [
             /[a-zA-Z][\w$]*/,
             {
               cases: {
-                '@keywords': 'keyword',
+                '@EDITOR_KEYWORDS': 'keyword',
                 '@default': 'variable',
               },
             },
@@ -146,8 +152,8 @@ program teste;
             /[\+\-\<\>\*\=\:\;\.\(\)\\[\]\,]+$/,
             {
               cases: {
-                '@symbols': 'symbols',
-                '@operators': 'operator',
+                '@EDITOR_SYMBOLS': 'symbols',
+                '@EDITOR_OPERATORS': 'operator',
               },
             },
           ],
@@ -214,6 +220,21 @@ program teste;
     this.monaco = (window as any).monaco;
     this.registerLanguage(this.monaco);
     this.setCommands(editor);
+
+    this.errorService.errors$.subscribe((errors) => {
+      this.monaco.editor.setModelMarkers(
+        editor.getModel(),
+        'test',
+        errors.map((err) => ({
+          startLineNumber: err.startRow + 1,
+          startColumn: err.startCol,
+          endLineNumber: err.endRow + 1,
+          startLine: err.endCol,
+          message: err.description,
+          severity: this.monaco.MarkerSeverity.Error,
+        })),
+      );
+    });
   }
 
   /**
