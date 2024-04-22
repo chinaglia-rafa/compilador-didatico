@@ -72,42 +72,42 @@ function consolidateToken(
   line: string,
 ): Token {
   token.row = row;
-  token.col = col;
+  token.col = col - token.lexema.length;
 
   if (token.token === 'número-real-mal-formatado') {
     errors.push({
       errorCode: ERROR_CODES.LEX_MALFORMED_FLOAT.code,
       startRow: row,
-      startCol: col,
+      startCol: col - token.lexema.length,
       endRow: row,
-      endCol: col + token.lexema.length,
+      endCol: col,
       lineContent: line,
     });
   } else if (token.token === 'número-natural-muito-longo') {
     errors.push({
       errorCode: ERROR_CODES.LEX_NUMBER_TOO_BIG.code,
       startRow: row,
-      startCol: col,
+      startCol: col - token.lexema.length,
       endRow: row,
-      endCol: col + token.lexema.length,
+      endCol: col,
       lineContent: line,
     });
   } else if (token.token === 'identificador-muito-longo') {
     errors.push({
-      errorCode: ERROR_CODES.LEX_MALFORMED_FLOAT.code,
+      errorCode: ERROR_CODES.LEX_IDENTIFIER_TOO_BIG.code,
       startRow: row,
-      startCol: col,
+      startCol: col - token.lexema.length,
       endRow: row,
-      endCol: col + token.lexema.length,
+      endCol: col,
       lineContent: line,
     });
   } else if (token.token === 'identificador-inválido') {
     errors.push({
       errorCode: ERROR_CODES.LEX_INVALID_IDETIFIER.code,
       startRow: row,
-      startCol: col,
+      startCol: col - token.lexema.length,
       endRow: row,
-      endCol: col + token.lexema.length,
+      endCol: col,
       lineContent: line,
     });
   }
@@ -138,7 +138,6 @@ addEventListener('message', ({ data }) => {
 
   /** Divide o código-fonte em linhas */
   const code = receivedData.code.split('\n');
-  console.log('linhas', code);
 
   for (let row = 0; row < code.length; row++) {
     /** linha sendo trabalhada no momento */
