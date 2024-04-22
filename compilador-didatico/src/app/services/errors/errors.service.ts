@@ -16,6 +16,8 @@ export interface Error {
   endRow: number;
   /** coluna onde o erro termina */
   endCol: number;
+  /** caminho de onde o erro surgiu */
+  path: string[];
 }
 
 @Injectable({
@@ -45,6 +47,7 @@ export class ErrorsService {
     startCol: number,
     endRow: number,
     endCol: number,
+    path: string[],
   ): void {
     const err: Error = {
       errorCode,
@@ -53,6 +56,7 @@ export class ErrorsService {
       startCol,
       endRow,
       endCol,
+      path,
     };
     this.errors$.next([...this.errors$.value, err]);
   }

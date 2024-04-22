@@ -27,6 +27,7 @@ export class CompilerService implements OnInit {
           error.startCol,
           error.endRow,
           error.endCol,
+          ['Compilador', 'Análise léxica'],
         );
       }
     });

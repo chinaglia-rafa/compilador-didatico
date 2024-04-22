@@ -227,9 +227,9 @@ program teste;
         'test',
         errors.map((err) => ({
           startLineNumber: err.startRow + 1,
-          startColumn: err.startCol,
+          startColumn: err.startCol + 1,
           endLineNumber: err.endRow + 1,
-          startLine: err.endCol,
+          startLine: err.endCol + 1,
           message: err.description,
           severity: this.monaco.MarkerSeverity.Error,
         })),

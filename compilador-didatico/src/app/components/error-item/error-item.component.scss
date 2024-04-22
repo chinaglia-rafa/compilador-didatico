@@ -1,0 +1,98 @@
+:host {
+  display: block;
+}
+
+.log {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  min-height: 32px;
+
+  .text {
+    flex: 1 auto;
+    padding-right: 16px;
+  }
+
+  .type {
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+
+    md-icon {
+      font-size: 14px;
+    }
+  }
+
+  .location {
+    width: 70px;
+  }
+
+  .path {
+    color: transparent;
+    user-select: none;
+    text-wrap: nowrap;
+  }
+
+  .path-full {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    border-left: 0px solid var(--md-sys-color-outline-variant);
+    padding-left: 0px;
+    width: fit-content;
+    min-height: 32px;
+    padding-bottom: 4px;
+    cursor: default;
+
+    &.no-border {
+      border: none !important;
+    }
+
+    .path-part {
+      text-wrap: nowrap;
+      border-radius: 4px;
+      border: 0px solid var(--md-sys-color-outline-variant);
+      padding: 2px 0;
+      overflow: hidden;
+      text-wrap: nowrap;
+      margin-right: 0px;
+      max-width: 0;
+      transition: all 200ms var(--easing-standard-accelerate);
+
+      &:last-of-type {
+        max-width: 100%;
+        padding: 2px 4px;
+        margin-right: 0px !important;
+        background-color: var(--md-sys-color-outline-variant);
+        border: 1px solid var(--md-sys-color-outline-variant);
+        color: var(--md-sys-color-on-surface);
+      }
+    }
+
+    &:hover {
+      border-left: 1px solid var(--md-sys-color-outline-variant);
+      padding-left: 8px;
+
+      .path-part {
+        padding: 2px 4px;
+        margin-right: 4px;
+        border: 1px solid var(--md-sys-color-outline-variant);
+        max-width: 200px;
+        transition: all 200ms var(--easing-standard-decelerate);
+      }
+    }
+  }
+}
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--md-sys-color-outline-variant);
+  margin: 2px 0 8px 24px;
+  opacity: 0.5;
+}

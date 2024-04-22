@@ -1,0 +1,17 @@
+<div class="log">
+  <div class="type">
+    <md-icon>arrow_right</md-icon>
+  </div>
+  <div class="text body-medium" [innerHTML]="error.description"></div>
+  <div class="location label-medium">
+    {{ error.startRow + 1 }} : {{ error.startCol + 1 }}
+  </div>
+
+  <div class="path label-medium">
+    <span class="hidden-trick">{{ error.path[error.path.length - 1] }}</span>
+    <div class="path-full" [class.no-border]="error.path.length <= 1">
+      <div class="path-part" *ngFor="let part of error.path">{{ part }}</div>
+    </div>
+  </div>
+</div>
+<div class="divider"></div>

@@ -1,1 +1,23 @@
-<p>error-display works!</p>
+<div class="header surface">
+  <div class="actions">
+    <md-icon-button
+      class="small"
+      (click)="clear()"
+      [disabled]="errors.length === 0"
+    >
+      <md-icon>block</md-icon>
+    </md-icon-button>
+  </div>
+  <div class="divider" [class.hidden]="!scrolled"></div>
+</div>
+<ng-scrollbar
+  #scrollbarComponent
+  visibility="hover"
+  appearance="compact"
+  class="scrollable"
+  (scroll)="scrollUpdate()"
+>
+  <div class="logs">
+    <error-item *ngFor="let error of errors" [error]="error"></error-item>
+  </div>
+</ng-scrollbar>
