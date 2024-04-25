@@ -1,1 +1,28 @@
-<p>symbols-table works!</p>
+<div class="symbols">
+  <ng-scrollbar
+    #scrollbarComponent
+    visibility="hover"
+    appearance="compact"
+    class="scrollable"
+  >
+    <table cellspacing="0" cellpadding="0">
+      <tr class="title-large on-surface-text">
+        <th></th>
+        <th>símbolo</th>
+        <th>tipo</th>
+        <th>valor</th>
+        <th>escopo</th>
+      </tr>
+      <tr
+        *ngFor="let symbol of symbols; let i = index"
+        class="body-large token-line on-surface-text"
+      >
+        <td>{{ i + 1 }}</td>
+        <td class="monospace">{{ symbol.lexema }}</td>
+        <td>{{ symbol.type }}</td>
+        <td>{{ symbol.value }}</td>
+        <td></td>
+      </tr>
+    </table>
+  </ng-scrollbar>
+</div>

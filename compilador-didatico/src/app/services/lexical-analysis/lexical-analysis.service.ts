@@ -117,12 +117,13 @@ export class LexicalAnalysisService implements OnInit {
       }
       return token;
     });
-    console.table(this.symbolsTable.table);
     return a;
   }
 
   scan(code: string): void {
     this.loading$.next(true);
+
+    this.symbolsTable.reset();
 
     if (typeof Worker !== 'undefined') {
       const worker = new Worker(

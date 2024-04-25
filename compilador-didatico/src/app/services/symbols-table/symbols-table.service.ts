@@ -15,7 +15,7 @@ export interface TableItem {
   providedIn: 'root',
 })
 export class SymbolsTableService {
-  table: TableItem[] = [];
+  table$ = new BehaviorSubject<TableItem[]>([]);
   /** tamanho da tabela de símbolos */
   count$ = new BehaviorSubject<number>(0);
 
@@ -42,14 +42,14 @@ export class SymbolsTableService {
       newTableItem.value = parseFloat(lexema);
       newTableItem.type = 'float';
     } else if (tokenType === 'identificador-válido') {
-      const index = this.table.findIndex((el) => el.lexema === lexema);
+      const index = this.table$.value.findIndex((el) => el.lexema === lexema);
       if (index >= 0) return index;
     }
-    this.table.push(newTableItem);
+    this.table$.next([...this.table$.value, newTableItem]);
 
-    this.count$.next(this.table.length);
+    this.count$.next(this.table$.value.length);
 
-    return this.table.length - 1;
+    return this.table$.value.length - 1;
   }
 
   /**
@@ -59,6 +59,10 @@ export class SymbolsTableService {
    * @returns TableItem com o item ou null caso não seja encontrado.
    */
   get(index: number): TableItem {
-    return this.table[index] || null;
+    return this.table$.value[index] || null;
+  }
+
+  reset(): void {
+    this.table$.next([]);
   }
 }
