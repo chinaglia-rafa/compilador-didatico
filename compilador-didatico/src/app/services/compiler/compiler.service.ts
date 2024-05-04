@@ -2,6 +2,7 @@ import { Injectable, OnInit } from '@angular/core';
 import { LexicalAnalysisService } from '../lexical-analysis/lexical-analysis.service';
 import { BehaviorSubject } from 'rxjs';
 import { ErrorsService } from '../errors/errors.service';
+import { SyntacticAnalysisService } from '../syntactic-analysis/syntactic-analysis.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +10,7 @@ import { ErrorsService } from '../errors/errors.service';
 export class CompilerService implements OnInit {
   constructor(
     private lexicalAnalysisService: LexicalAnalysisService,
+    private syntacticAnalysisService: SyntacticAnalysisService,
     private errorsService: ErrorsService,
   ) {
     this.lexicalAnalysisService.loading$.subscribe((loading) => {
