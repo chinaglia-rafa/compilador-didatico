@@ -37,6 +37,10 @@ export class LoggerService {
   /** Nível padrão de visualização de logs */
   level = 2;
 
+  static escapeHTML(str: string): string {
+    return str.replace('<', '&lt;').replace('>', '&gt;');
+  }
+
   /**
    * Limpa todo o histórico de logs
    */

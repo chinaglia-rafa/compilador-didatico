@@ -40,3 +40,35 @@ export class Production {
     else this.rightSide = rightSide;
   }
 }
+
+/**
+ *  Tabela sintática responsável por ser a base para a
+ *  validação de tokens.
+ */
+export class TabelaSintatica {
+  /** Cada linha da tabela sintática, contendo um <não-terminal> como cabeçalho e cada terminal como coluna */
+  row: LinhaSintatica[] = [];
+}
+
+export class LinhaSintatica {
+  /** nome do símbolo <não-terminal> do qual células da linha derivam. */
+  header: string;
+  /** Lista de colunas da tabela sintática */
+  col: ColunaSintantica[] = [];
+
+  constructor(header: string) {
+    this.header = header;
+  }
+}
+
+/** Uma coluna da tabela sintática */
+export class ColunaSintantica {
+  /** nome do símbolo terminal que será alcançado ao derivar cell */
+  header: string;
+  /** célula da tabela sintática, que contém a derivação que leva ao símbolo terminal em header.  */
+  cell: string[] = [];
+
+  constructor(header: string) {
+    this.header = header;
+  }
+}

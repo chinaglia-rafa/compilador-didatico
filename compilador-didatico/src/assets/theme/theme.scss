@@ -1,13 +1,11 @@
+@import "animations.scss";
 
-@import 'animations.scss';
+@import "light.scss";
+@import "dark.scss";
+@import "colors.module.scss";
 
-@import 'light.scss';
-@import 'dark.scss';
-@import 'colors.module.scss';
-
-@import 'typography.scss';
-@import 'typography.module.scss';
-
+@import "typography.scss";
+@import "typography.module.scss";
 
 /** state layers **/
 :root {
@@ -19,10 +17,12 @@
 
 /** Setup dos ícones usados pelos componentes do M3 **/
 @import url(https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1);
-:root { --md-icon-font: 'Material Symbols Rounded' }
-md-icon[filled], md-icon.filled {
-  font-variation-settings: 'FILL' 1;
+:root {
+  --md-icon-font: "Material Symbols Rounded";
+}
+md-icon[filled],
+md-icon.filled {
+  font-variation-settings: "FILL" 1;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
-
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");

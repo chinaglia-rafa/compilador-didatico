@@ -38,6 +38,8 @@ lalg.productions.push(
   ]),
 );
 
+lalg.productions.push(new Production('<tipo>', [['int'], ['boolean']]));
+
 lalg.productions.push(
   new Production('<lista_de_identificadores>', [
     ['<identificador>', "<lista_de_identificadores'>"],
@@ -101,7 +103,7 @@ lalg.productions.push(
 
 lalg.productions.push(
   new Production("<comando_composto'>", [
-    [';', '<comando>', "comando_composto'>"],
+    [';', '<comando>', "<comando_composto'>"],
     [EPSION],
   ]),
 );
@@ -122,7 +124,7 @@ lalg.productions.push(
 
 lalg.productions.push(
   new Production('<chamada_de_procedimento>', [
-    ['<identificador>', "chamada_de_procedimento'>"],
+    ['<identificador>', "<chamada_de_procedimento'>"],
   ]),
 );
 
@@ -166,7 +168,7 @@ lalg.productions.push(
 
 lalg.productions.push(
   new Production('<expressão_simples>', [
-    ['<op>', '<termo>', "expressão_simples'>"],
+    ['<op>', '<termo>', "<expressão_simples'>"],
   ]),
 );
 
@@ -174,7 +176,7 @@ lalg.productions.push(new Production('<op>', [['+'], ['-'], [EPSION]]));
 
 lalg.productions.push(
   new Production("<expressão_simples'>", [
-    ['<op2>', '<termo>', "expressão_simples'>"],
+    ['<op2>', '<termo>', "<expressão_simples'>"],
     [EPSION],
   ]),
 );
@@ -214,13 +216,13 @@ lalg.productions.push(
 
 lalg.productions.push(
   new Production("<lista_de_expressões'>", [
-    [',', '<expressão>', "lista_de_expressões'>"],
+    [',', '<expressão>', "<lista_de_expressões'>"],
     [EPSION],
   ]),
 );
 
-lalg.productions.push(new Production('<número>', [['<CONVERT_TO_FINAL>']]));
+lalg.productions.push(new Production('<número>', [['[0-9]+']]));
 
 lalg.productions.push(
-  new Production('<identificador>', [['<CONVERT_TO_FINAL>']]),
+  new Production('<identificador>', [['[a-zA-z_][a-zA-z_0-9]*']]),
 );

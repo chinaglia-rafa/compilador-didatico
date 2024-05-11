@@ -40,13 +40,18 @@
       </div>
       <master-card
         title="Análise sintática"
+        sublink-title="Ver gramática"
         [items]="analiseSintaticaCardCompItems"
+        sublink-button="description"
         action="Visualizar"
         icon="account_tree"
         #analiseSintaticaCard
         (select)="clicked($event, analiseSintaticaCard, 'syntactic-analysis')"
         (actionClick)="
           clicked($event, analiseSintaticaCard, 'syntactic-analysis')
+        "
+        (sublinkClick)="
+          clicked($event, analiseSintaticaCard, 'language-viewer', true)
         "
       ></master-card>
       <master-card

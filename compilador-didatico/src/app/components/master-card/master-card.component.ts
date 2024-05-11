@@ -7,6 +7,9 @@ import {
   Output,
 } from '@angular/core';
 import '@material/web/button/text-button';
+import '@material/web/iconbutton/filled-tonal-icon-button';
+import '@material/web/iconbutton/filled-icon-button';
+import '@material/web/iconbutton/icon-button';
 import { LiveIconComponent } from '../live-icon/live-icon.component';
 
 /** Interface de cada item mostrado na parte inferior dos Cards */
@@ -37,6 +40,8 @@ export interface MasterCardItem {
 export class MasterCardComponent {
   /** Título do card */
   @Input('title') title: string = '';
+  /** Título do sublink */
+  @Input('sublink-title') sublinlkTitle: string = '';
   /** Subtítulo do card */
   @Input('subhead') subhead: string = '';
   /** Texto do botão de ação do card. Se estiver vazio, nenhum botão será exibido. */
@@ -45,15 +50,20 @@ export class MasterCardComponent {
   @Input('icon') icon: string = '';
   /** Lista de itens no formato MasterCardItem[] para serem exibidos na parte inferior do card */
   @Input('items') items: MasterCardItem[] = [];
+  /** Ícone do botão de sub-link */
+  @Input('sublink-button') sublinkButton: string = '';
   /** Evento quando o card é clicado */
   @Output('select') selectEmitter = new EventEmitter<MouseEvent>();
   /** Evento quando o botão de ação é clicado */
   @Output('actionClick') actionClickEmitter = new EventEmitter<MouseEvent>();
+  @Output('sublinkClick') sublinkClickEmitter = new EventEmitter<MouseEvent>();
 
   /** Controla o estado de carregamento do componente */
   protected loading = false;
   /** Controla o estado de seleção do componente */
   protected selected = false;
+  /** Controla o estado de seleção do subitem do componente */
+  protected sublinkSelected = false;
 
   /**
    * Função chamada ao clicar no componente
@@ -103,10 +113,30 @@ export class MasterCardComponent {
   }
 
   /**
+   * Atribui valor para sublinkSelected
+   * @param state Valor a ser atribuído
+   */
+  setSublinkSelected(state: boolean): void {
+    this.sublinkSelected = state;
+  }
+
+  /**
+   * Alterna o estado do componente para "subitem selecionado"
+   */
+  toggleSublink(): void {
+    this.sublinkSelected = !this.sublinkSelected;
+  }
+
+  /**
    * Atribui valor para selected
    * @param state Valor a ser atribuído
    */
   setSelected(state: boolean): void {
     this.selected = state;
+  }
+
+  sublinkClicked(event: MouseEvent): void {
+    event.stopPropagation();
+    this.sublinkClickEmitter.emit(event);
   }
 }

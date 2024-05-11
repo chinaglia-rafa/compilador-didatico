@@ -1,0 +1,81 @@
+<div
+  class="container"
+  (document:keydown.control.f)="$event.preventDefault(); search.focus()"
+>
+  <div class="actions">
+    <md-filled-text-field class="search" #search placeholder="Procurar símbolo">
+      <md-icon slot="leading-icon">search</md-icon>
+      <md-icon-button
+        (document:keydown.escape)="search.value = ''"
+        (click)="search.value = ''"
+        slot="trailing-icon"
+        *ngIf="search.value != ''"
+      >
+        <md-icon>close</md-icon>
+      </md-icon-button>
+    </md-filled-text-field>
+  </div>
+  <ng-scrollbar
+    #scrollbarComponent
+    visibility="hover"
+    appearance="compact"
+    class="scrollable"
+  >
+    <div class="content">
+      <div class="production" *ngFor="let production of grammar.productions">
+        <div
+          [class.found]="
+            search.value && production.leftSide.includes(search.value)
+          "
+          class="symbol label-large secondary-container on-secondary-container-text"
+        >
+          {{ production.leftSide }}
+        </div>
+        <md-icon class="arrow secondary-text">arrow_forward</md-icon>
+        <div class="derivations">
+          <div
+            class="derivation"
+            *ngFor="let derivation of production.rightSide; let i = index"
+          >
+            <div *ngIf="i > 0" class="vertical-divider"></div>
+            <div
+              *ngFor="let part of derivation"
+              [class.secondary-container]="
+                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
+              "
+              [class.on-secondary-container-text]="
+                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
+              "
+              [class.label-large]="
+                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
+              "
+              [class.title-medium]="
+                part[0] !== '<' ||
+                part === '<>' ||
+                part === '<=' ||
+                part === '<'
+              "
+              [class.on-surface-text]="
+                part[0] !== '<' ||
+                part === '<>' ||
+                part === '<=' ||
+                part === '<'
+              "
+              [class.bold]="
+                part[0] !== '<' ||
+                part === '<>' ||
+                part === '<=' ||
+                part === '<'
+              "
+              [class.epsilon]="part[0] === 'ε'"
+              class="symbol"
+              [class.found]="search.value && part.includes(search.value)"
+            >
+              {{ part }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-scrollbar>
+</div>

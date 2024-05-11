@@ -1,0 +1,12 @@
+.actions {
+  width: 100%;
+  padding: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.search {
+  width: 100%;
+  /** --md-sys-shape-corner-full */
+  --md-outlined-text-field-container-shape: 56px;
+}

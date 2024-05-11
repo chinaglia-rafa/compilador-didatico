@@ -1,0 +1,17 @@
+<div class="fullscreen surface" [class.fullscreen--full]="fullscreen">
+  <div class="actions">
+    <div>
+      <md-text-button>Ver passo-a-passo</md-text-button>
+      <md-filled-tonal-button>Próximo passo</md-filled-tonal-button>
+    </div>
+    <md-icon-button
+      class="fullscreen-button"
+      (document:keydown.escape)="fullscreen = false"
+      (document:keydown.alt.enter)="fullscreen = !fullscreen"
+      (click)="fullscreen = !fullscreen"
+    >
+      <md-icon *ngIf="!fullscreen">fullscreen</md-icon>
+      <md-icon *ngIf="fullscreen">close_fullscreen</md-icon>
+    </md-icon-button>
+  </div>
+</div>

@@ -6,11 +6,16 @@
   gap: 16px;
   cursor: pointer;
   user-select: none;
-  transition: background 200ms var(--easing-standard-decelerate), color 200ms var(--easing-standard-decelerate);
+  transition:
+    background 200ms var(--easing-standard-decelerate),
+    color 200ms var(--easing-standard-decelerate);
 
-  .header {
+  .header,
+  .header div:first-of-type {
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
 
     .text {
@@ -37,14 +42,15 @@
       gap: 4px;
       border-radius: 12px;
       padding: 12px;
-      transition: background 200ms var(--easing-standard-decelerate), color 200ms var(--easing-standard-decelerate);
+      transition:
+        background 200ms var(--easing-standard-decelerate),
+        color 200ms var(--easing-standard-decelerate);
 
       .value {
         font-size: 45px;
         line-height: 45px;
-        font-family: 'Noto Sans';
+        font-family: "Noto Sans";
       }
-
     }
     .action {
       flex-grow: 1;

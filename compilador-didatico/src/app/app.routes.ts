@@ -4,6 +4,8 @@ import { HomeComponent } from './pages/home/home.component';
 import { CodeEditorComponent } from './pages/compiler/code-editor/code-editor.component';
 import { LexicalAnalysisComponent } from './pages/compiler/lexical-analysis/lexical-analysis.component';
 import { SymbolsTableComponent } from './pages/compiler/symbols-table/symbols-table.component';
+import { SyntacticAnalysisComponent } from './pages/compiler/syntactic-analysis/syntactic-analysis.component';
+import { LanguageViewerComponent } from './pages/compiler/language-viewer/language-viewer.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'compiler' },
@@ -35,6 +37,16 @@ export const routes: Routes = [
       {
         path: 'symbols',
         component: SymbolsTableComponent,
+        data: { animation: 'LexicalAnalysisPage' },
+      },
+      {
+        path: 'syntactic-analysis',
+        component: SyntacticAnalysisComponent,
+        data: { animation: 'LexicalAnalysisPage' },
+      },
+      {
+        path: 'language-viewer',
+        component: LanguageViewerComponent,
         data: { animation: 'LexicalAnalysisPage' },
       },
     ],

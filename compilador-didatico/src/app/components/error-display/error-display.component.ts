@@ -38,7 +38,6 @@ export class ErrorDisplayComponent implements OnInit {
 
   ngOnInit(): void {
     this.errorsService.errors$.subscribe((errors) => {
-      console.log(errors);
       this.errors = errors;
     });
   }

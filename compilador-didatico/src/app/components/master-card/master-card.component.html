@@ -7,13 +7,31 @@
   (click)="clicked($event)"
 >
   <div class="header">
-    <live-icon [icon]="icon" [loading]="loading" class="icon"></live-icon>
-    <div class="text">
-      <div class="headline-small">{{ title }}</div>
-      <div class="subhead label-small" *ngIf="subhead && subhead !== ''">
-        {{ subhead }}
+    <div>
+      <live-icon [icon]="icon" [loading]="loading" class="icon"></live-icon>
+      <div class="text">
+        <div class="headline-small">{{ title }}</div>
+        <div class="subhead label-small" *ngIf="subhead && subhead !== ''">
+          {{ subhead }}
+        </div>
       </div>
     </div>
+    <md-icon-button
+      [title]="sublinlkTitle"
+      [class.selected]="sublinkSelected"
+      (click)="sublinkClicked($event)"
+      *ngIf="!sublinkSelected && sublinkButton !== ''"
+    >
+      <md-icon>{{ sublinkButton }}</md-icon>
+    </md-icon-button>
+    <md-filled-icon-button
+      [title]="sublinlkTitle"
+      [class.selected]="sublinkSelected"
+      (click)="sublinkClicked($event)"
+      *ngIf="sublinkSelected && sublinkButton !== ''"
+    >
+      <md-icon>{{ sublinkButton }}</md-icon>
+    </md-filled-icon-button>
   </div>
   <div class="content">
     <ng-container *ngFor="let item of items">

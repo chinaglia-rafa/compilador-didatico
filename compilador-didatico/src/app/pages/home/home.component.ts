@@ -134,19 +134,31 @@ export class HomeComponent implements AfterViewInit, OnInit {
     else if (path === 'lexical-analysis') this.cards[1]?.toggle();
     else if (path === 'symbols') this.cards[2]?.toggle();
     else if (path === 'syntactic-analysis') this.cards[3]?.toggle();
-    else if (path === 'semantic-analysis') this.cards[4]?.toggle();
+    else if (path === 'language-viewer') {
+      this.cards[3]?.toggle();
+      this.cards[3]?.toggleSublink();
+    } else if (path === 'semantic-analysis') this.cards[4]?.toggle();
     else if (path === 'code-generation') this.cards[5]?.toggle();
     else if (path === 'optimization') this.cards[6]?.toggle();
     else if (path === 'final-results') this.cards[7]?.toggle();
   }
 
-  clicked(event: MouseEvent, el: MasterCardComponent, route: string): void {
+  clicked(
+    event: MouseEvent,
+    el: MasterCardComponent,
+    route: string,
+    isSublink: boolean = false,
+  ): void {
     el.toggleLoading();
-    this.cards.map((card) => card?.setSelected(false));
+    this.cards.map((card) => {
+      card?.setSelected(false);
+      card?.setSublinkSelected(false);
+    });
     el.toggleLoading();
     el.toggle();
+    if (isSublink) el.toggleSublink();
 
-    this.router.navigate(['compiler', route]);
+    this.router.navigate(['compiler', ...route.split('/')]);
   }
 
   getRouteAnimationData() {
