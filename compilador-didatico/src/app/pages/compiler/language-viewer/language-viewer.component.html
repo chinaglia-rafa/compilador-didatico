@@ -3,11 +3,17 @@
   (document:keydown.control.f)="$event.preventDefault(); search.focus()"
 >
   <div class="actions">
-    <md-filled-text-field class="search" #search placeholder="Procurar símbolo">
+    <md-filled-text-field
+      (keyup)="searchNext($event)"
+      class="search"
+      #search
+      placeholder="Procurar símbolo"
+      [supportingText]="totalFound > 0 ? focused + 1 + '/' + totalFound : ''"
+    >
       <md-icon slot="leading-icon">search</md-icon>
       <md-icon-button
-        (document:keydown.escape)="search.value = ''"
-        (click)="search.value = ''"
+        (document:keydown.escape)="resetSearch()"
+        (click)="resetSearch()"
         slot="trailing-icon"
         *ngIf="search.value != ''"
       >
@@ -21,13 +27,20 @@
     appearance="compact"
     class="scrollable"
   >
-    <div class="content">
-      <div class="production" *ngFor="let production of grammar.productions">
+    <div class="content" #content>
+      <div
+        class="production"
+        *ngFor="let production of grammar.productions; let i = index"
+      >
         <div
           [class.found]="
             search.value && production.leftSide.includes(search.value)
           "
+          [class.hovered]="toBeHighlighted === production.leftSide"
           class="symbol label-large secondary-container on-secondary-container-text"
+          (mouseenter)="mouseEnter(production.leftSide)"
+          (mouseleave)="mouseLeave()"
+          (click)="selectSymbol(production.leftSide)"
         >
           {{ production.leftSide }}
         </div>
@@ -68,8 +81,12 @@
                 part === '<'
               "
               [class.epsilon]="part[0] === 'ε'"
+              (mouseenter)="mouseEnter(part)"
+              (mouseleave)="mouseLeave()"
+              (click)="selectSymbol(part)"
               class="symbol"
               [class.found]="search.value && part.includes(search.value)"
+              [class.hovered]="toBeHighlighted === part"
             >
               {{ part }}
             </div>

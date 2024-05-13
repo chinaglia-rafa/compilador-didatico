@@ -43,6 +43,12 @@
     border-radius: 20px;
     padding: 4px 8px;
     transition: all 200ms var(--easing-standard);
+    cursor: default;
+
+    &.focused {
+      background: var(--md-sys-color-tertiary);
+      color: var(--md-sys-color-on-tertiary);
+    }
   }
 
   .derivations {
@@ -78,6 +84,16 @@
 }
 
 .found.bold {
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+}
+
+.hovered:not(.bold) {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.hovered.bold {
   color: var(--md-sys-color-primary);
   text-decoration: underline;
 }
