@@ -14,6 +14,8 @@ import { NgScrollbar, NgScrollbarModule } from 'ngx-scrollbar';
 import '@material/web/textfield/outlined-text-field';
 import '@material/web/textfield/filled-text-field';
 import '@material/web/icon/icon';
+import '@material/web/divider/divider';
+import '@material/web/tabs/primary-tab';
 import '@material/web/iconbutton/icon-button';
 import { Grammar } from '../../../grammar/grammar.model';
 
@@ -45,6 +47,10 @@ export class LanguageViewerComponent {
   @ViewChild('content') contentElement: ElementRef;
   @ViewChild('scrollbarComponent') scrollbar: NgScrollbar;
   @ViewChild('search') searchComponent: ElementRef;
+
+  @ViewChild('panel1Element') panel1?: ElementRef;
+  @ViewChild('panel2Element') panel2?: ElementRef;
+  @ViewChild('panel3Element') panel3?: ElementRef;
 
   constructor(private syntacticAnalysisService: SyntacticAnalysisService) {
     this.syntacticAnalysisService.ready.subscribe((status) => {
@@ -111,5 +117,21 @@ export class LanguageViewerComponent {
       .forEach((el: HTMLElement) => {
         el.classList.remove('focused');
       });
+  }
+
+  /**
+   * Implementa manualmente a troca de abas (sem animação, por enquanto)
+   * TODO: adicionar animações :)
+   * @param event Evento vindo de md-tabs
+   * @returns
+   */
+  tabChange(event: Event): void {
+    const index = (event.target as any)?.activeTabIndex;
+
+    if (index === undefined) return;
+
+    const tabs = [this.panel1, this.panel2, this.panel3];
+    for (const tab of tabs) tab?.nativeElement.setAttribute('hidden', true);
+    tabs[index]?.nativeElement.removeAttribute('hidden');
   }
 }

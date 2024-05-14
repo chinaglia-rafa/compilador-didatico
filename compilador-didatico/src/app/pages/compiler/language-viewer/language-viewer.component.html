@@ -1,98 +1,214 @@
+<div class="tabs">
+  <md-tabs aria-label="Content to view" (change)="tabChange($event)">
+    <md-primary-tab id="tab-1" active aria-controls="panel-1">
+      Gramática
+    </md-primary-tab>
+    <md-primary-tab id="tab-2" aria-controls="panel-2">
+      Firsts & Follows
+    </md-primary-tab>
+    <md-primary-tab id="tab-4" aria-controls="panel-4">
+      Tabela Sintática
+    </md-primary-tab>
+  </md-tabs>
+</div>
+
 <div
-  class="container"
+  #panel1Element
+  id="panel-1"
   (document:keydown.control.f)="$event.preventDefault(); search.focus()"
+  role="tabpanel"
+  class="panel"
+  aria-labelledby="tab-1"
 >
-  <div class="actions">
-    <md-filled-text-field
-      (keyup)="searchNext($event)"
-      class="search"
-      #search
-      placeholder="Procurar símbolo"
-      [supportingText]="totalFound > 0 ? focused + 1 + '/' + totalFound : ''"
-    >
-      <md-icon slot="leading-icon">search</md-icon>
-      <md-icon-button
-        (document:keydown.escape)="resetSearch()"
-        (click)="resetSearch()"
-        slot="trailing-icon"
-        *ngIf="search.value != ''"
+  <div class="tab-content">
+    <div class="actions">
+      <md-filled-text-field
+        (keyup)="searchNext($event)"
+        class="search"
+        #search
+        placeholder="Procurar símbolo"
+        [supportingText]="
+          totalFound > 0 ? focused + 1 + '/' + totalFound : '&nbsp;'
+        "
       >
-        <md-icon>close</md-icon>
-      </md-icon-button>
-    </md-filled-text-field>
-  </div>
-  <ng-scrollbar
-    #scrollbarComponent
-    visibility="hover"
-    appearance="compact"
-    class="scrollable"
-  >
-    <div class="content" #content>
-      <div
-        class="production"
-        *ngFor="let production of grammar.productions; let i = index"
-      >
-        <div
-          [class.found]="
-            search.value && production.leftSide.includes(search.value)
-          "
-          [class.hovered]="toBeHighlighted === production.leftSide"
-          class="symbol label-large secondary-container on-secondary-container-text"
-          (mouseenter)="mouseEnter(production.leftSide)"
-          (mouseleave)="mouseLeave()"
-          (click)="selectSymbol(production.leftSide)"
+        <md-icon slot="leading-icon">search</md-icon>
+        <md-icon-button
+          (document:keydown.escape)="resetSearch()"
+          (click)="resetSearch()"
+          slot="trailing-icon"
+          *ngIf="search.value != ''"
         >
-          {{ production.leftSide }}
-        </div>
-        <md-icon class="arrow secondary-text">arrow_forward</md-icon>
-        <div class="derivations">
+          <md-icon>close</md-icon>
+        </md-icon-button>
+      </md-filled-text-field>
+    </div>
+    <ng-scrollbar
+      #scrollbarComponent
+      visibility="hover"
+      appearance="compact"
+      class="scrollable"
+    >
+      <div class="content" #content>
+        <div
+          class="production"
+          *ngFor="let production of grammar.productions; let i = index"
+        >
           <div
-            class="derivation"
-            *ngFor="let derivation of production.rightSide; let i = index"
+            [class.found]="
+              search.value && production.leftSide.includes(search.value)
+            "
+            [class.hovered]="toBeHighlighted === production.leftSide"
+            class="symbol label-large secondary-container on-secondary-container-text"
+            (mouseenter)="mouseEnter(production.leftSide)"
+            (mouseleave)="mouseLeave()"
+            (click)="selectSymbol(production.leftSide)"
           >
-            <div *ngIf="i > 0" class="vertical-divider"></div>
+            {{ production.leftSide }}
+          </div>
+          <md-icon class="arrow secondary-text">arrow_forward</md-icon>
+          <div class="derivations">
             <div
-              *ngFor="let part of derivation"
-              [class.secondary-container]="
-                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
-              "
-              [class.on-secondary-container-text]="
-                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
-              "
-              [class.label-large]="
-                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
-              "
-              [class.title-medium]="
-                part[0] !== '<' ||
-                part === '<>' ||
-                part === '<=' ||
-                part === '<'
-              "
-              [class.on-surface-text]="
-                part[0] !== '<' ||
-                part === '<>' ||
-                part === '<=' ||
-                part === '<'
-              "
-              [class.bold]="
-                part[0] !== '<' ||
-                part === '<>' ||
-                part === '<=' ||
-                part === '<'
-              "
-              [class.epsilon]="part[0] === 'ε'"
-              (mouseenter)="mouseEnter(part)"
-              (mouseleave)="mouseLeave()"
-              (click)="selectSymbol(part)"
-              class="symbol"
-              [class.found]="search.value && part.includes(search.value)"
-              [class.hovered]="toBeHighlighted === part"
+              class="derivation"
+              *ngFor="let derivation of production.rightSide; let i = index"
             >
-              {{ part }}
+              <div *ngIf="i > 0" class="vertical-divider"></div>
+              <div
+                *ngFor="let part of derivation"
+                [class.secondary-container]="
+                  part[0] === '<' &&
+                  part[1] &&
+                  part[1] !== '>' &&
+                  part[1] !== '='
+                "
+                [class.on-secondary-container-text]="
+                  part[0] === '<' &&
+                  part[1] &&
+                  part[1] !== '>' &&
+                  part[1] !== '='
+                "
+                [class.label-large]="
+                  part[0] === '<' &&
+                  part[1] &&
+                  part[1] !== '>' &&
+                  part[1] !== '='
+                "
+                [class.title-medium]="
+                  part[0] !== '<' ||
+                  part === '<>' ||
+                  part === '<=' ||
+                  part === '<'
+                "
+                [class.on-surface-text]="
+                  part[0] !== '<' ||
+                  part === '<>' ||
+                  part === '<=' ||
+                  part === '<'
+                "
+                [class.bold]="
+                  part[0] !== '<' ||
+                  part === '<>' ||
+                  part === '<=' ||
+                  part === '<'
+                "
+                [class.epsilon]="part[0] === 'ε'"
+                (mouseenter)="mouseEnter(part)"
+                (mouseleave)="mouseLeave()"
+                (click)="selectSymbol(part)"
+                class="symbol"
+                [class.found]="search.value && part.includes(search.value)"
+                [class.hovered]="toBeHighlighted === part"
+              >
+                {{ part }}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </ng-scrollbar>
+    </ng-scrollbar>
+  </div>
+</div>
+<div
+  #panel2Element
+  id="panel-2"
+  role="tabpane2"
+  class="panel"
+  aria-labelledby="tab-2"
+  hidden
+>
+  <div class="tab-content on-surface-text">
+    <ng-scrollbar visibility="hover" appearance="compact" class="scrollable">
+      <h1 class="headline-large primary-text">Firsts</h1>
+      <p>
+        O conjunto first(&lt;símbolo&gt;) de cada símbolo corresponde ao
+        conjunto de possíveis símbolos terminais que serão vistos primeiro na
+        derivação do símbolo &lt;símbolo&gt;
+      </p>
+      <table cellPadding="0" cellSpacing="0">
+        <tr>
+          <th></th>
+          <th>Símbolo</th>
+          <th>First(símbolo)</th>
+        </tr>
+        <tr class="line" *ngFor="let first of firsts; let i = index">
+          <td class="line">{{ i }}</td>
+          <td class="label-large">
+            <div
+              class="symbol label-large secondary-container on-secondary-container-text"
+            >
+              {{ first.symbol }}
+            </div>
+          </td>
+          <td>
+            &#123;
+            <div
+              *ngFor="let derivation of first.first; let i = index"
+              class="symbol bold"
+            >
+              <span>"</span>{{ derivation }}<span>"</span>
+              <span>{{ i < first.first.length - 1 ? "," : "" }}</span>
+            </div>
+            &#125;
+          </td>
+        </tr>
+      </table>
+      <md-divider></md-divider>
+      <h1 class="headline-large primary-text">Follows</h1>
+      <p>
+        O conjunto follow(&lt;símbolo&gt;) de cada símbolo corresponde ao
+        conjunto de possíveis símbolos terminais que serão vistos imediatamente
+        após a derivação do símbolo &lt;símbolo&gt;. O símbolo "$" representa o
+        fim da pilha de símbolos da Análise Sintática, e é usado para validar se
+        uma dada entrada é válida ou não de acordo com a gramática.
+      </p>
+      <table cellPadding="0" cellSpacing="0">
+        <tr>
+          <th></th>
+          <th>Símbolo</th>
+          <th>First(símbolo)</th>
+        </tr>
+        <tr class="line" *ngFor="let follow of follows; let i = index">
+          <td class="line">{{ i }}</td>
+          <td class="label-large">
+            <div
+              class="symbol label-large secondary-container on-secondary-container-text"
+            >
+              {{ follow.symbol }}
+            </div>
+          </td>
+
+          <td>
+            &#123;
+            <div
+              *ngFor="let derivation of follow.follow; let i = index"
+              class="symbol bold"
+            >
+              <span>"</span>{{ derivation }}<span>"</span>
+              <span>{{ i < follow.follow.length - 1 ? "," : "" }}</span>
+            </div>
+            &#125;
+          </td>
+        </tr>
+      </table>
+    </ng-scrollbar>
+  </div>
 </div>

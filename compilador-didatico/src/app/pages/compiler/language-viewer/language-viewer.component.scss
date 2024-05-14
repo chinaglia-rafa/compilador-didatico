@@ -1,8 +1,23 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .container {
   height: 100%;
   padding: 16px 0;
+}
+
+.panel {
+  height: 100%;
+  overflow: hidden;
+}
+
+.tab-content {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .content {
@@ -14,6 +29,7 @@
   padding: 0 8px 8px 8px;
   display: flex;
   gap: 8px;
+  margin-top: 16px;
 }
 
 .search {
@@ -33,22 +49,12 @@
   display: flex;
   align-items: flex-start;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  &:last-of-type {
+    border-bottom-color: transparent;
+  }
 
   .arrow {
     margin: 0px 4px;
-  }
-
-  .symbol {
-    display: inline-block;
-    border-radius: 20px;
-    padding: 4px 8px;
-    transition: all 200ms var(--easing-standard);
-    cursor: default;
-
-    &.focused {
-      background: var(--md-sys-color-tertiary);
-      color: var(--md-sys-color-on-tertiary);
-    }
   }
 
   .derivations {
@@ -63,10 +69,6 @@
       flex-wrap: wrap;
       gap: 4px;
 
-      .bold {
-        font-weight: bold;
-      }
-
       .vertical-divider {
         margin: 0px 4px;
         height: 100%;
@@ -75,6 +77,14 @@
         background: var(--md-sys-color-outline);
       }
     }
+  }
+}
+
+.bold {
+  font-weight: bold;
+
+  span {
+    font-weight: normal;
   }
 }
 
@@ -96,4 +106,55 @@
 .hovered.bold {
   color: var(--md-sys-color-primary);
   text-decoration: underline;
+}
+
+.symbol {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 4px 8px;
+  transition: all 200ms var(--easing-standard);
+  cursor: default;
+
+  &.focused {
+    background: var(--md-sys-color-tertiary);
+    color: var(--md-sys-color-on-tertiary);
+  }
+}
+#panel-2 {
+  p {
+    padding: 0 16px 16px 16px;
+  }
+  h1 {
+    padding-left: 16px;
+  }
+}
+
+table {
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 32px;
+
+  tr th {
+    text-align: left;
+    padding: 0 8px 16px 8px;
+  }
+
+  tr:nth-child(even) {
+    background: var(--md-sys-color-surface-container-low);
+  }
+
+  tr td {
+    padding: 8px;
+    border: none;
+  }
+
+  .line {
+    td:first-of-type {
+      opacity: 0.5;
+    }
+  }
+}
+
+.center {
+  text-align: center;
 }
