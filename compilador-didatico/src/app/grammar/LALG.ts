@@ -1,4 +1,4 @@
-import { EPSION, Grammar, Production } from './grammar.model';
+import { EPSILON, Grammar, Production } from './grammar.model';
 
 export const lalg = new Grammar('LALG', []);
 
@@ -21,14 +21,14 @@ lalg.productions.push(
 lalg.productions.push(
   new Production('<parte_de_declarações_de_variáveis>', [
     ['<declaração_de_variáveis>', ';', "<declaração_de_variáveis'>"],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
 lalg.productions.push(
   new Production("<declaração_de_variáveis'>", [
     ['<declaração_de_variáveis>', "<declaração_de_variáveis'>", ';'],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
@@ -49,21 +49,21 @@ lalg.productions.push(
 lalg.productions.push(
   new Production("<lista_de_identificadores'>", [
     [',', '<identificador>', "<lista_de_identificadores'>"],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
 lalg.productions.push(
   new Production('<parte_de_declarações_de_subrotinas>', [
     ['<declaração_de_procedimento>', ';', "<declaração_de_procedimento'>"],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
 lalg.productions.push(
   new Production("<declaração_de_procedimento'>", [
     ['<declaração_de_procedimento>', "<declaração_de_procedimento'>", ';'],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
@@ -76,14 +76,14 @@ lalg.productions.push(
 lalg.productions.push(
   new Production('<parâmetros_formais>', [
     ['(', '<seção_de_parâmetros_formais>', "<parâmetros_formais'>", ')'],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
 lalg.productions.push(
   new Production("<parâmetros_formais'>", [
     [';', '<seção_de_parâmetros_formais>', "<parâmetros_formais'>"],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
@@ -93,7 +93,7 @@ lalg.productions.push(
   ]),
 );
 
-lalg.productions.push(new Production('<var>', [['var'], [EPSION]]));
+lalg.productions.push(new Production('<var>', [['var'], [EPSILON]]));
 
 lalg.productions.push(
   new Production('<comando_composto>', [
@@ -104,7 +104,7 @@ lalg.productions.push(
 lalg.productions.push(
   new Production("<comando_composto'>", [
     [';', '<comando>', "<comando_composto'>"],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
@@ -131,7 +131,7 @@ lalg.productions.push(
 lalg.productions.push(
   new Production("<chamada_de_procedimento'>", [
     ['(', '<lista_de_expressões>', ')'],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
@@ -142,7 +142,7 @@ lalg.productions.push(
 );
 
 lalg.productions.push(
-  new Production('<else>', [['else', '<comando>'], [EPSION]]),
+  new Production('<else>', [['else', '<comando>'], [EPSILON]]),
 );
 
 lalg.productions.push(
@@ -158,7 +158,7 @@ lalg.productions.push(
 lalg.productions.push(
   new Production("<expressão'>", [
     ['<relação>', '<expressão_simples>'],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
@@ -172,12 +172,12 @@ lalg.productions.push(
   ]),
 );
 
-lalg.productions.push(new Production('<op>', [['+'], ['-'], [EPSION]]));
+lalg.productions.push(new Production('<op>', [['+'], ['-'], [EPSILON]]));
 
 lalg.productions.push(
   new Production("<expressão_simples'>", [
     ['<op2>', '<termo>', "<expressão_simples'>"],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 
@@ -186,7 +186,7 @@ lalg.productions.push(new Production('<op2>', [['+'], ['-'], ['or']]));
 lalg.productions.push(new Production('<termo>', [['<fator>', "<termo'>"]]));
 
 lalg.productions.push(
-  new Production("<termo'>", [['<op3>', '<fator>', "<termo'>"], [EPSION]]),
+  new Production("<termo'>", [['<op3>', '<fator>', "<termo'>"], [EPSILON]]),
 );
 
 lalg.productions.push(new Production('<op3>', [['*'], ['div'], ['and']]));
@@ -205,7 +205,7 @@ lalg.productions.push(
 );
 
 lalg.productions.push(
-  new Production("<variável'>", [['[', '<expressão>', ']'], [EPSION]]),
+  new Production("<variável'>", [['[', '<expressão>', ']'], [EPSILON]]),
 );
 
 lalg.productions.push(
@@ -217,7 +217,7 @@ lalg.productions.push(
 lalg.productions.push(
   new Production("<lista_de_expressões'>", [
     [',', '<expressão>', "<lista_de_expressões'>"],
-    [EPSION],
+    [EPSILON],
   ]),
 );
 

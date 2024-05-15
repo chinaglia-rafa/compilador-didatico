@@ -1,5 +1,5 @@
 /** Facilita o uso do carcatere "vazio" quando necessário */
-export const EPSION = 'ε';
+export const EPSILON = 'ε';
 
 export class Grammar {
   /** nome da gramática para referência */

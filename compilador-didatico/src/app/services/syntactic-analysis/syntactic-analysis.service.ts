@@ -1,7 +1,9 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import {
-  EPSION,
+  ColunaSintantica,
+  EPSILON,
   Grammar,
+  LinhaSintatica,
   Production,
   TabelaSintatica,
 } from '../../grammar/grammar.model';
@@ -96,6 +98,7 @@ export class SyntacticAnalysisService {
 
     console.log('this.firsts', this.firsts);
     console.log('this.follows', this.follows);
+    console.log('this.table', this.syntacticTable);
 
     this.ready.next(true);
   }
@@ -190,7 +193,7 @@ export class SyntacticAnalysisService {
             );
             // Regra 4: se um dado <X> não-terminal tem uma produção -> <A><B> e
             // first(<A>) contém ε, então first(<X>) inclui first(<B>) também
-            if (!firstsForCurrentPart.has(EPSION)) break;
+            if (!firstsForCurrentPart.has(EPSILON)) break;
           }
         } else {
           // Regra 3: dado um símbolo terminal a, first(a) = {a}
@@ -291,11 +294,11 @@ export class SyntacticAnalysisService {
             }
 
             firstFromCurrentSymbol.first
-              .filter((f) => f !== EPSION)
+              .filter((f) => f !== EPSILON)
               .map((f) => follows.add(f));
             // Regra 3: Se existe uma produção do tipo <A> -> α<X> ou <A> -> α<X>β onde
             // first(β) contém ε, então follow(<X>) deve conter follow(<A>)
-            if (firstFromCurrentSymbol.first.includes(EPSION)) {
+            if (firstFromCurrentSymbol.first.includes(EPSILON)) {
               this.findFollowsFor(symbol.leftSide).map((f) => follows.add(f));
             }
           }
@@ -322,6 +325,80 @@ export class SyntacticAnalysisService {
     follows: FollowList[],
   ): TabelaSintatica {
     const table = new TabelaSintatica();
+
+    for (const currentFirst of firsts) {
+      /** Linha atual da tabela sintática sendo construída */
+      const row = new LinhaSintatica(currentFirst.symbol);
+      /** símbolo e derivações referentes a currentFirst */
+      const symbol = this.selectedGrammar.productions.find(
+        (el) => el.leftSide === currentFirst.symbol,
+      );
+
+      for (const production of symbol.rightSide) {
+        for (const part of production) {
+          const firstsOfPart: FirstList = firsts.find(
+            (f) => f.symbol === part,
+          ) || {
+            symbol: part,
+            first: [part],
+          };
+
+          let foundEpsilon = false;
+          // Regra 1: Na produção A -> α, para cada x terminal em first(α), adicionar A -> α em Tabela[A, x]
+          for (const terminal of firstsOfPart.first) {
+            // Regra 2: Se first(α) contém ε, adicione A -> α a M[A, b] para cada terminal b que estiver em
+            // follow(A).
+            if (terminal === EPSILON) {
+              foundEpsilon = true;
+
+              const followsForSymbol = follows.find(
+                (f) => f.symbol === symbol.leftSide,
+              );
+
+              for (const currentFollow of followsForSymbol.follow) {
+                // Verifica se o símbolo currentFollow já não está em first(symbol)
+                const found = row.col.findIndex(
+                  (c) => c.header === currentFollow,
+                );
+                if (found !== -1) continue;
+
+                // Adiciona A -> ε a M[A, b] onde b está em follow(A) e é igual a ε
+                const col = new ColunaSintantica(currentFollow);
+                col.cell = [EPSILON];
+                row.col.push(col);
+              }
+              continue;
+            }
+            // Caso a coluna não exista, crie uma nova, caso contrário, sobrescreva sua cell pela produção encontrada
+            const existingCol = row.col.find((c) => c.header === terminal);
+            const col = existingCol
+              ? existingCol
+              : new ColunaSintantica(terminal);
+            col.cell = production;
+            if (existingCol === undefined) row.col.push(col);
+          }
+          if (!foundEpsilon) break;
+        }
+      }
+      // Agora é hora de adicionar as tokens de sincronização, que serão usadas para tentar recuperar a
+      // análise sintática de uma situação de erro. As células que vão receber a token de sincronização
+      // serão, para cada não-terminal, as células correspondentes aos terminais que compõem seu follow()
+      const followsForSymbol = follows.find(
+        (f) => f.symbol === symbol.leftSide,
+      );
+      if (followsForSymbol) {
+        for (const terminal of followsForSymbol.follow) {
+          const found = row.col.findIndex((c) => c.header === terminal);
+          if (found === -1) {
+            const col = new ColunaSintantica(terminal);
+            col.cell = ['TOKEN_SYNC'];
+            row.col.push(col);
+          }
+        }
+      }
+      table.row.push(row);
+    }
+
     return table;
   }
 
