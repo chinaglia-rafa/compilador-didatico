@@ -1,8 +1,15 @@
 <div class="fullscreen surface" [class.fullscreen--full]="fullscreen">
   <div class="actions">
     <div>
-      <md-text-button>Ver passo-a-passo</md-text-button>
-      <md-filled-tonal-button>Próximo passo</md-filled-tonal-button>
+      <md-text-button (click)="stepByStep()">Ver passo-a-passo</md-text-button>
+      <md-filled-tonal-button
+        (click)="next()"
+        [disabled]="
+          syntacticAnalysisService.autoMode ||
+          syntacticAnalysisService.ready.value !== true
+        "
+        >Próximo passo</md-filled-tonal-button
+      >
     </div>
     <md-icon-button
       class="fullscreen-button"
@@ -14,4 +21,5 @@
       <md-icon *ngIf="fullscreen">close_fullscreen</md-icon>
     </md-icon-button>
   </div>
+  {{ syntacticAnalysisService.started }}
 </div>

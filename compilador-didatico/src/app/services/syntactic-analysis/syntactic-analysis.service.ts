@@ -55,6 +55,14 @@ export class SyntacticAnalysisService {
    * gramática.
    */
   ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  /** Indica se a análise sintática chegou ao final da entrada com panicMode = true */
+  eof = false;
+  /** Indica se a análise sintática está no Modo Pânico */
+  panicMode = false;
+  /** Último terminal visto na análise sintática */
+  lastTerminal: Token;
+  /** Indica se a compilação foi iniciada */
+  started: boolean = false;
 
   private _path: string[] = ['Compilador', 'Análise Sintática'];
 
@@ -68,11 +76,15 @@ export class SyntacticAnalysisService {
   }
 
   reset(): void {
+    this.eof = false;
+    this.lastTerminal = null;
+    this.panicMode = false;
     this.input = [];
     this.stack = [];
     this.firsts = [];
     this.follows = [];
     this.syntacticTable = new TabelaSintatica();
+    this.started = false;
   }
 
   /**
@@ -406,225 +418,234 @@ export class SyntacticAnalysisService {
     /** Variável usada para os logs */
     const path = this._path.concat(['parse()']);
 
-    const input = [].concat(ipt);
+    if (!this.started) {
+      this.input = [].concat(ipt);
 
-    /** token representando o final da entrada de tokens */
-    const endToken: Token = {
-      lexema: '$',
-      token: '$',
-      col: input[input.length - 1].col,
-      row: input[input.length - 1].row,
-    };
+      /** token representando o final da entrada de tokens */
+      const endToken: Token = {
+        lexema: '$',
+        token: '$',
+        col: this.input[this.input.length - 1].col,
+        row: this.input[this.input.length - 1].row,
+      };
 
-    input.push(endToken);
+      this.input.push(endToken);
 
-    this.stack = [endToken.lexema];
-    const root = this.selectedGrammar.productions[0].leftSide;
-    this.stack.push(root);
+      this.stack = [endToken.lexema];
+      const root = this.selectedGrammar.productions[0].leftSide;
+      this.stack.push(root);
 
-    /** Indica se a análise sintática chegou ao final da entrada com panicMode = true */
-    let eof = false;
-    /** Indica se a análise sintática está no Modo Pânico */
-    let panicMode = false;
-    let lastTerminal: Token;
+      this.started = true;
+    }
 
     while (
       this.stack[this.stack.length - 1] !== '$' ||
-      input[0].lexema !== '$'
+      this.input[0].lexema !== '$'
     ) {
-      eof = false;
-      let currentToken = input[0];
-      if (!currentToken) break;
+      const actionToTake = this.parseStep();
 
-      console.log('stack:', this.stack.join(' | '));
-      //console.log('input:', input[0].lexema);
-      console.log('input:', input.map((el) => el.lexema).join(' | '));
-      console.log('================================');
+      if (actionToTake === 'break') break;
+      else if (actionToTake === 'continue') continue;
 
-      //console.log('Current Token', currentToken);
-
-      // TODO: análise semântica
-      if (this.stack[this.stack.length - 1].match(/\[\[.+\]\]/g)) {
-        continue;
-      }
-
-      /*if (
-        [
-          'número-natural',
-          'número-real',
-          'identificador-válido',
-          'boolean-verdadeiro',
-          'boolean-falso',
-        ].includes(currentToken.token)
-      ) {
-        currentToken = {
-          ...currentToken,
-          lexema: input[0].lexema[0],
-        };
-      }*/
-
-      if (this.stack[this.stack.length - 1].match(/<.+>/g) !== null) {
-        if (this.stack[this.stack.length - 1] === '<identificador>') {
-          console.log('identificador esperado');
-          if (
-            ![
-              'identificador-válido',
-              'boolean-verdadeiro',
-              'boolean-falso',
-            ].includes(currentToken.token)
-          ) {
-            this.errorService.add(
-              200,
-              currentToken.row,
-              currentToken.col,
-              currentToken.row,
-              currentToken.col + currentToken.lexema.length,
-              path,
-              `${currentToken.lexema} (${currentToken.token}) encontrado.`,
-            );
-            this.stack.pop();
-            lastTerminal = input.shift();
-            continue;
-          } else {
-            console.log(
-              'tudo certo, validei',
-              currentToken.lexema,
-              'manualmente',
-            );
-          }
-          this.stack.pop();
-          lastTerminal = input.shift();
-          continue;
-        } else if (this.stack[this.stack.length - 1] === '<número>') {
-          if (
-            currentToken.token !== 'número-natural' &&
-            currentToken.token !== 'número-real'
-          ) {
-            this.errorService.add(
-              201,
-              currentToken.row,
-              currentToken.col,
-              currentToken.row,
-              currentToken.col + currentToken.lexema.length,
-              path,
-              `${currentToken.lexema} (${currentToken.token}) encontrado.`,
-            );
-            this.stack.pop();
-            lastTerminal = input.shift();
-            continue;
-          }
-          this.stack.pop();
-          lastTerminal = input.shift();
-          continue;
-        }
-
-        const row = this.syntacticTable.row.find(
-          (r) => r.header === this.stack[this.stack.length - 1],
-        );
-        const col = row.col.find((c) => {
-          let searchFor = currentToken.lexema;
-          if (
-            [
-              'identificador-válido',
-              'boolean-verdadeiro',
-              'boolean-falso',
-            ].includes(currentToken.token)
-          ) {
-            searchFor = '[a-zA-Z_][a-zA-Z_0-9]*';
-          } else if (
-            ['número-natural', 'número-real'].includes(currentToken.token)
-          ) {
-            searchFor = '[0-9]+';
-          }
-          return c.header === searchFor;
-        });
-        const expected = row.col
-          .filter((c) => c.cell[0] !== 'TOKEN_SYNC' && c.header !== '$')
-          .map((c) => c.header)
-          .join(', ');
-        if (col === undefined) {
-          lastTerminal = input.shift();
-          this.errorService.add(
-            202,
-            currentToken.row,
-            currentToken.col,
-            currentToken.row,
-            currentToken.col + currentToken.lexema.length,
-            path,
-            `Entretanto, "${currentToken.lexema}" (${currentToken.token}) foi encontrado. ${expected} esperado.`,
-          );
-          continue;
-        }
-        if (col?.cell[0] === 'TOKEN_SYNC') {
-          if (input[0].lexema !== '$') {
-            this.stack.pop();
-            continue;
-          } else {
-            this.errorService.add(
-              203,
-              currentToken.row,
-              currentToken.col,
-              currentToken.row,
-              currentToken.col + currentToken.lexema.length,
-              path,
-              `Uma das seguintes tokens era esperada: ${expected}.`,
-            );
-            eof = true;
-            break;
-          }
-        }
-        this.stack.pop();
-        if (col.cell[0] === EPSILON) continue;
-        /**
-         * Inversão da derivação a ser empilhada em stack, para que seja
-         * empilhada na ordem correta.
-         */
-        const invertedDerivation = [];
-        for (const e of col?.cell) invertedDerivation.unshift(e);
-        this.stack.push(...invertedDerivation);
-      } else {
-        console.log(
-          '>> comparando',
-          this.stack[this.stack.length - 1],
-          'e',
-          currentToken.lexema,
-          '<<',
-        );
-        // O topo da stack é um terminal
-        if (this.stack[this.stack.length - 1] === currentToken.lexema) {
-          console.log('equals');
-          lastTerminal = input.shift();
-          this.stack.pop();
-        } else {
-          console.log(
-            'descartando topo da pilha:',
-            this.stack[this.stack.length - 1],
-          );
-          this.stack.pop();
-        }
-      }
+      if (!this.autoMode) break;
     }
-    if (this.stack[this.stack.length - 1] === '$' && input[0].lexema === '$') {
+    if (
+      this.stack[this.stack.length - 1] === '$' &&
+      this.input[0].lexema === '$'
+    ) {
       this.loggerService.log(
         'Análise Sintática concluída com sucesso. Texto-fonte foi validado.',
         'stp',
         path,
         1,
       );
+      this.started = false;
     } else {
-      if (!eof) {
+      if (!this.eof) {
         this.errorService.add(
           203,
-          input[0].row,
-          input[0].col,
-          input[0].row,
-          input[0].col + input[0].lexema.length,
+          this.input[0].row,
+          this.input[0].col,
+          this.input[0].row,
+          this.input[0].col + this.input[0].lexema.length,
           path,
           this.stack[this.stack.length - 1] === '$'
             ? undefined
             : `${this.stack[this.stack.length - 1]} esperado.`,
         );
+        this.started = false;
       }
     }
+  }
+
+  /**
+   * Passo da compilação, de forma que possa ser feita
+   * automaticamente ou passo-a-passo.
+   *
+   * @return 'break' ou 'continue'
+   */
+  parseStep(): string {
+    /** Variável usada para os logs */
+    const path = this._path.concat(['parse()', 'parseStep()']);
+    this.eof = false;
+    let currentToken = this.input[0];
+    if (!currentToken) return 'break';
+
+    console.log('stack:', this.stack.join(' | '));
+    //console.log('input:', input[0].lexema);
+    console.log('input:', this.input.map((el) => el.lexema).join(' | '));
+    console.log('================================');
+
+    //console.log('Current Token', currentToken);
+
+    // TODO: análise semântica
+    if (this.stack[this.stack.length - 1].match(/\[\[.+\]\]/g)) {
+      return 'continue';
+    }
+
+    if (this.stack[this.stack.length - 1].match(/<.+>/g) !== null) {
+      if (this.stack[this.stack.length - 1] === '<identificador>') {
+        console.log('identificador esperado');
+        if (
+          ![
+            'identificador-válido',
+            'boolean-verdadeiro',
+            'boolean-falso',
+          ].includes(currentToken.token)
+        ) {
+          this.errorService.add(
+            200,
+            currentToken.row,
+            currentToken.col,
+            currentToken.row,
+            currentToken.col + currentToken.lexema.length,
+            path,
+            `${currentToken.lexema} (${currentToken.token}) encontrado.`,
+          );
+          this.stack.pop();
+          this.lastTerminal = this.input.shift();
+          return 'continue';
+        } else {
+          console.log(
+            'tudo certo, validei',
+            currentToken.lexema,
+            'manualmente',
+          );
+        }
+        this.stack.pop();
+        this.lastTerminal = this.input.shift();
+        return 'continue';
+      } else if (this.stack[this.stack.length - 1] === '<número>') {
+        if (
+          currentToken.token !== 'número-natural' &&
+          currentToken.token !== 'número-real'
+        ) {
+          this.errorService.add(
+            201,
+            currentToken.row,
+            currentToken.col,
+            currentToken.row,
+            currentToken.col + currentToken.lexema.length,
+            path,
+            `${currentToken.lexema} (${currentToken.token}) encontrado.`,
+          );
+          this.stack.pop();
+          this.lastTerminal = this.input.shift();
+          return 'continue';
+        }
+        this.stack.pop();
+        this.lastTerminal = this.input.shift();
+        return 'continue';
+      }
+
+      const row = this.syntacticTable.row.find(
+        (r) => r.header === this.stack[this.stack.length - 1],
+      );
+      const col = row.col.find((c) => {
+        let searchFor = currentToken.lexema;
+        if (
+          [
+            'identificador-válido',
+            'boolean-verdadeiro',
+            'boolean-falso',
+          ].includes(currentToken.token)
+        ) {
+          searchFor = '[a-zA-Z_][a-zA-Z_0-9]*';
+        } else if (
+          ['número-natural', 'número-real'].includes(currentToken.token)
+        ) {
+          searchFor = '[0-9]+';
+        }
+        return c.header === searchFor;
+      });
+      const expected = row.col
+        .filter((c) => c.cell[0] !== 'TOKEN_SYNC' && c.header !== '$')
+        .map((c) => c.header)
+        .join(', ');
+
+      if (col === undefined) {
+        this.lastTerminal = this.input.shift();
+        this.errorService.add(
+          202,
+          currentToken.row,
+          currentToken.col,
+          currentToken.row,
+          currentToken.col + currentToken.lexema.length,
+          path,
+          `Entretanto, "${currentToken.lexema}" (${currentToken.token}) foi encontrado. ${expected} esperado.`,
+        );
+        return 'continue';
+      }
+      if (col?.cell[0] === 'TOKEN_SYNC') {
+        if (this.input[0].lexema !== '$') {
+          this.stack.pop();
+          return 'continue';
+        } else {
+          this.errorService.add(
+            203,
+            currentToken.row,
+            currentToken.col,
+            currentToken.row,
+            currentToken.col + currentToken.lexema.length,
+            path,
+            `Uma das seguintes tokens era esperada: ${expected}.`,
+          );
+          this.eof = true;
+          return 'break';
+        }
+      }
+
+      this.stack.pop();
+      if (col.cell[0] === EPSILON) return 'continue';
+      /**
+       * Inversão da derivação a ser empilhada em stack, para que seja
+       * empilhada na ordem correta.
+       */
+      const invertedDerivation = [];
+      for (const e of col?.cell) invertedDerivation.unshift(e);
+      this.stack.push(...invertedDerivation);
+    } else {
+      console.log(
+        '>> comparando',
+        this.stack[this.stack.length - 1],
+        'e',
+        currentToken.lexema,
+        '<<',
+      );
+      // O topo da stack é um terminal
+      if (this.stack[this.stack.length - 1] === currentToken.lexema) {
+        console.log('equals');
+        this.lastTerminal = this.input.shift();
+        this.stack.pop();
+      } else {
+        console.log(
+          'descartando topo da pilha:',
+          this.stack[this.stack.length - 1],
+        );
+        this.stack.pop();
+      }
+    }
+
+    return '';
   }
 }

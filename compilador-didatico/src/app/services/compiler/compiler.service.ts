@@ -1,6 +1,6 @@
 import { Injectable, OnInit } from '@angular/core';
 import { LexicalAnalysisService } from '../lexical-analysis/lexical-analysis.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, first } from 'rxjs';
 import { ErrorsService } from '../errors/errors.service';
 import { SyntacticAnalysisService } from '../syntactic-analysis/syntactic-analysis.service';
 
@@ -78,7 +78,7 @@ program teste;
   compile(code: string): void {
     this.linesCount$.next(code.split('\n').length);
     this.lexicalAnalysisService.scan(code);
-    this.lexicalAnalysisService.tokens$.subscribe((tokens) => {
+    this.lexicalAnalysisService.tokens$.pipe(first()).subscribe((tokens) => {
       if (!tokens || tokens.length === 0) return;
       this.syntacticAnalysisService.parse(tokens);
     });
