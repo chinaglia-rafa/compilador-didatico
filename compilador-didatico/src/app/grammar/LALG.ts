@@ -224,5 +224,5 @@ lalg.productions.push(
 lalg.productions.push(new Production('<número>', [['[0-9]+']]));
 
 lalg.productions.push(
-  new Production('<identificador>', [['[a-zA-z_][a-zA-z_0-9]*']]),
+  new Production('<identificador>', [['[a-zA-Z_][a-zA-Z_0-9]*']]),
 );

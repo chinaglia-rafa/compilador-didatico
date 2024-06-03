@@ -17,7 +17,7 @@ import '@material/web/icon/icon';
 import '@material/web/divider/divider';
 import '@material/web/tabs/primary-tab';
 import '@material/web/iconbutton/icon-button';
-import { Grammar } from '../../../grammar/grammar.model';
+import { Grammar, TabelaSintatica } from '../../../grammar/grammar.model';
 
 @Component({
   selector: 'app-language-viewer',
@@ -32,6 +32,10 @@ export class LanguageViewerComponent {
 
   firsts: FirstList[];
   follows: FollowList[];
+  syntacticTable: string[][][] = [];
+
+  syntacticTableRows: string[] = [];
+  syntacticTableCols: string[] = [];
 
   grammar: Grammar;
 
@@ -43,6 +47,8 @@ export class LanguageViewerComponent {
   focused: number = -1;
 
   foundCache: HTMLElement[] = [];
+
+  fullscreen = false;
 
   @ViewChild('content') contentElement: ElementRef;
   @ViewChild('scrollbarComponent') scrollbar: NgScrollbar;
@@ -59,6 +65,32 @@ export class LanguageViewerComponent {
       this.grammar = this.syntacticAnalysisService.selectedGrammar;
       this.firsts = this.syntacticAnalysisService.firsts;
       this.follows = this.syntacticAnalysisService.follows;
+      this.syntacticAnalysisService.syntacticTable.row.map((r) => {
+        this.syntacticTableRows.push(r.header);
+        r.col.map((c) => {
+          // Aidiciona o $ no final apenas para facilitar visualização
+          if (c.header === '$') return;
+          if (!this.syntacticTableCols.includes(c.header))
+            this.syntacticTableCols.push(c.header);
+        });
+      });
+      this.syntacticTableCols.push('$');
+
+      for (let i = 0; i < this.syntacticTableRows.length; i++) {
+        this.syntacticTable.push([]);
+        const currentRow =
+          this.syntacticAnalysisService.syntacticTable.row.find(
+            (r) => r.header === this.syntacticTableRows[i],
+          );
+        for (let j = 0; j < this.syntacticTableCols.length; j++) {
+          const currentCol = currentRow.col.find(
+            (c) => c.header === this.syntacticTableCols[j],
+          );
+          this.syntacticTable[i].push(
+            currentCol !== undefined ? currentCol.cell : ['ERRO'],
+          );
+        }
+      }
     });
   }
 

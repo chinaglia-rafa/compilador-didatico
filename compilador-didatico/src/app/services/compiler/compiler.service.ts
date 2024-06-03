@@ -78,5 +78,9 @@ program teste;
   compile(code: string): void {
     this.linesCount$.next(code.split('\n').length);
     this.lexicalAnalysisService.scan(code);
+    this.lexicalAnalysisService.tokens$.subscribe((tokens) => {
+      if (!tokens || tokens.length === 0) return;
+      this.syntacticAnalysisService.parse(tokens);
+    });
   }
 }

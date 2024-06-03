@@ -11,6 +11,7 @@ import { lalg } from '../../grammar/LALG';
 import { Token } from '../lexical-analysis/lexical-analysis.service';
 import { LoggerService } from '../logger/logger.service';
 import { BehaviorSubject } from 'rxjs';
+import { ErrorsService } from '../errors/errors.service';
 
 export interface FirstList {
   symbol: string;
@@ -46,6 +47,8 @@ export class SyntacticAnalysisService {
    * Pilha de símbolos cujo cálculo de follow está na pilha de recursão.
    * Esta variável é usada para impedir loops de recursão infinitas. */
   pendingFollowRecursions: string[] = [];
+  /** Indica se a análise sintática deve ser feita automaticamente ou passo-a-passo */
+  autoMode: boolean = true;
 
   /**
    * Evento que é emitido quando o serviço termina de preparar a
@@ -55,10 +58,11 @@ export class SyntacticAnalysisService {
 
   private _path: string[] = ['Compilador', 'Análise Sintática'];
 
-  constructor(private loggerService: LoggerService) {
+  constructor(
+    private loggerService: LoggerService,
+    private errorService: ErrorsService,
+  ) {
     this.selectedGrammar = lalg;
-
-    console.log('LALG:', this.selectedGrammar);
 
     this.prepare();
   }
@@ -95,10 +99,6 @@ export class SyntacticAnalysisService {
       this.firsts,
       this.follows,
     );
-
-    console.log('this.firsts', this.firsts);
-    console.log('this.follows', this.follows);
-    console.log('this.table', this.syntacticTable);
 
     this.ready.next(true);
   }
@@ -402,5 +402,183 @@ export class SyntacticAnalysisService {
     return table;
   }
 
-  parse(input: Token[]): void {}
+  parse(input: Token[]): void {
+    /** Variável usada para os logs */
+    const path = this._path.concat(['parse()']);
+
+    /** token representando o final da entrada de tokens */
+    const endToken: Token = {
+      lexema: '$',
+      token: '$',
+      col: input[input.length - 1].col,
+      row: input[input.length - 1].row,
+    };
+
+    input.push(endToken);
+
+    this.stack = [endToken.lexema];
+    const root = this.selectedGrammar.productions[0].leftSide;
+    this.stack.push(root);
+
+    /** Indica se a análise sintática chegou ao final da entrada com panicMode = true */
+    let eof = false;
+    /** Indica se a análise sintática está no Modo Pânico */
+    let panicMode = false;
+    let lastTerminal: Token;
+
+    while (
+      this.stack[this.stack.length - 1] !== '$' ||
+      input[0].lexema !== '$'
+    ) {
+      eof = false;
+      let currentToken = input[0];
+      if (!currentToken) break;
+
+      console.log('Current Token', currentToken);
+
+      // TODO: análise semântica
+      if (this.stack[this.stack.length - 1].match(/\[\[.+\]\]/g)) {
+        continue;
+      }
+
+      if (
+        [
+          'número-natural',
+          'número-real',
+          'identificador-válido',
+          'boolean-verdadeiro',
+          'boolean-falso',
+        ].includes(currentToken.token)
+      ) {
+        currentToken = {
+          ...currentToken,
+          lexema: input[0].lexema[0],
+        };
+      }
+
+      if (this.stack[this.stack.length - 1].match(/<.+>/g) !== null) {
+        if (this.stack[this.stack.length - 1] === '<identificador>') {
+          if (
+            ![
+              'identificador-válido',
+              'boolean-verdadeiro',
+              'boolean-falso',
+            ].includes(currentToken.token)
+          ) {
+            this.errorService.add(
+              200,
+              currentToken.row,
+              currentToken.col,
+              currentToken.row,
+              currentToken.col + currentToken.lexema.length,
+              path,
+              `${currentToken.lexema} (${currentToken.token}) encontrado.`,
+            );
+            this.stack.pop();
+            lastTerminal = input.shift();
+            continue;
+          }
+          this.stack.pop();
+          lastTerminal = input.shift();
+          continue;
+        } else if (this.stack[this.stack.length - 1] === '<número>') {
+          if (
+            currentToken.token !== 'número-natural' &&
+            currentToken.token !== 'número-real'
+          ) {
+            this.errorService.add(
+              201,
+              currentToken.row,
+              currentToken.col,
+              currentToken.row,
+              currentToken.col + currentToken.lexema.length,
+              path,
+              `${currentToken.lexema} (${currentToken.token}) encontrado.`,
+            );
+            this.stack.pop();
+            lastTerminal = input.shift();
+            continue;
+          }
+          this.stack.pop();
+          lastTerminal = input.shift();
+          continue;
+        }
+
+        const row = this.syntacticTable.row.find(
+          (r) => r.header === this.stack[this.stack.length - 1],
+        );
+        const col = row.col.find((c) => c.header === currentToken.lexema);
+        const expected = row.col
+          .filter((c) => c.cell[0] !== 'TOKEN_SYNC' && c.header !== '$')
+          .map((c) => c.header)
+          .join(', ');
+        if (col === undefined) {
+          lastTerminal = input.shift();
+          this.errorService.add(
+            202,
+            currentToken.row,
+            currentToken.col,
+            currentToken.row,
+            currentToken.col + currentToken.lexema.length,
+            path,
+            `Entretanto, "${currentToken.lexema}" (${currentToken.token}) foi encontrado. ${expected} esperado.`,
+          );
+          continue;
+        }
+        if (col?.cell[0] === 'TOKEN_SYNC') {
+          if (input[0].lexema !== '$') {
+            this.stack.pop();
+            continue;
+          } else {
+            this.errorService.add(
+              203,
+              currentToken.row,
+              currentToken.col,
+              currentToken.row,
+              currentToken.col + currentToken.lexema.length,
+              path,
+              `Uma das seguintes tokens era esperada: ${expected}.`,
+            );
+            eof = true;
+            break;
+          }
+        }
+        this.stack.pop();
+        if (col.cell[0] === EPSILON) continue;
+        /**
+         * Inversão da derivação a ser empilhada em stack, para que seja
+         * empilhada na ordem correta.
+         */
+        const invertedDerivation = [];
+        for (const e of col?.cell) invertedDerivation.unshift(e);
+        this.stack.push(...invertedDerivation);
+      } else {
+        // O topo da stack é um terminal
+        if (this.stack[this.stack.length - 1] === currentToken.lexema) {
+          lastTerminal = input.shift();
+          this.stack.pop();
+        } else {
+          this.stack.pop();
+        }
+      }
+    }
+    console.log(input.join(', '));
+    if (this.stack[this.stack.length - 1] === '$' && input[0].lexema === '$') {
+      this.loggerService.log('Análise Sintática concluída.', 'stp', path, 1);
+    } else {
+      if (!eof) {
+        this.errorService.add(
+          203,
+          input[0].row,
+          input[0].col,
+          input[0].row,
+          input[0].col + input[0].lexema.length,
+          path,
+          this.stack[this.stack.length - 1] === '$'
+            ? undefined
+            : `${this.stack[this.stack.length - 1]} esperado.`,
+        );
+      }
+    }
+  }
 }

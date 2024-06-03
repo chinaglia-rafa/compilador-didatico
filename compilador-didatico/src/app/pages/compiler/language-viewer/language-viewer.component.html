@@ -212,3 +212,100 @@
     </ng-scrollbar>
   </div>
 </div>
+<div
+  #panel3Element
+  id="panel-3"
+  role="tabpane3"
+  class="panel"
+  aria-labelledby="tab-3"
+  hidden
+>
+  <div
+    class="tab-content on-surface-text fullscreen surface"
+    [class.fullscreen--full]="fullscreen"
+  >
+    <div class="tab-actions">
+      <md-icon-button
+        class="fullscreen-button"
+        (document:keydown.escape)="
+          !panel3Element.hidden ? (fullscreen = false) : null
+        "
+        (document:keydown.alt.enter)="
+          !panel3Element.hidden ? (fullscreen = !fullscreen) : null
+        "
+        (click)="!panel3Element.hidden ? (fullscreen = !fullscreen) : null"
+      >
+        <md-icon *ngIf="!fullscreen">fullscreen</md-icon>
+        <md-icon *ngIf="fullscreen">close_fullscreen</md-icon>
+      </md-icon-button>
+    </div>
+    <ng-scrollbar visibility="hover" appearance="compact" class="scrollable">
+      <table cellPadding="0" cellSpacing="0" class="bordered">
+        <tr>
+          <th></th>
+          <th
+            class="label-large vertical"
+            *ngFor="let col of syntacticTableCols; let j = index"
+          >
+            <div class="symbol bold">
+              {{ col }}
+            </div>
+          </th>
+        </tr>
+        <tr
+          class="label-large"
+          *ngFor="let row of syntacticTableRows; let i = index"
+        >
+          <td>
+            <div class="symbol secondary-container on-secondary-container-text">
+              {{ row }}
+            </div>
+          </td>
+          <td *ngFor="let cell of syntacticTable[i]">
+            <div
+              [class.secondary-container]="
+                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
+              "
+              [class.on-secondary-container-text]="
+                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
+              "
+              [class.label-large]="
+                part[0] === '<' && part[1] && part[1] !== '>' && part[1] !== '='
+              "
+              [class.title-medium]="
+                part !== 'ERRO' &&
+                part !== 'TOKEN_SYNC' &&
+                (part[0] !== '<' ||
+                  part === '<>' ||
+                  part === '<=' ||
+                  part === '<')
+              "
+              [class.on-surface-text]="
+                part !== 'ERRO' &&
+                part !== 'TOKEN_SYNC' &&
+                (part[0] !== '<' ||
+                  part === '<>' ||
+                  part === '<=' ||
+                  part === '<')
+              "
+              [class.bold]="
+                part !== 'ERRO' &&
+                part !== 'TOKEN_SYNC' &&
+                (part[0] !== '<' ||
+                  part === '<>' ||
+                  part === '<=' ||
+                  part === '<')
+              "
+              [class.label-medium]="part === 'ERRO' || part === 'TOKEN_SYNC'"
+              [class.error-text]="part === 'ERRO' || part === 'TOKEN_SYNC'"
+              class="symbol"
+              *ngFor="let part of cell"
+            >
+              {{ part }}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </ng-scrollbar>
+  </div>
+</div>

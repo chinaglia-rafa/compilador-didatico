@@ -48,10 +48,11 @@ export class ErrorsService {
     endRow: number,
     endCol: number,
     path: string[],
+    extras: string = '',
   ): void {
     const err: Error = {
       errorCode,
-      description: this.parseDescription(errorCode),
+      description: this.parseDescription(errorCode) + ' ' + extras,
       startRow,
       startCol,
       endRow,

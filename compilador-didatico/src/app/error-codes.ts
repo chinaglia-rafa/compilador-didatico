@@ -29,4 +29,20 @@ export const ERROR_CODES = {
     code: 105,
     desc: 'O arquivo acabou de forma inesperada. Talvez haja um } faltante.',
   },
+  SYN_VALUE_EXPECTED: {
+    code: 200,
+    desc: 'Identificador válido ou valor experado.',
+  },
+  SYN_NUMBER_EXPECTED: {
+    code: 201,
+    desc: 'Número esperado não foi encontrado.',
+  },
+  SYN_UNEXPECTED_TOKEN: {
+    code: 202,
+    desc: 'Trecho inesperado encontrado.',
+  },
+  SYN_UNEXPECTED_EOF: {
+    code: 203,
+    desc: 'O arquivo acabou de forma inesperada. Token esperada não foi encontrada.',
+  },
 };
