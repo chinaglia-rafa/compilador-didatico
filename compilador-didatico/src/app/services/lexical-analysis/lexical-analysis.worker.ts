@@ -292,7 +292,7 @@ addEventListener('message', ({ data }) => {
      *  uma token possivelmente acumulada em currentToken. Por isso,
      *  deve-se consolidá-la, se presente.
      */
-    if (currentToken.token !== '') {
+    if (currentToken.lexema !== '') {
       currentToken.token = identifyToken(currentToken.lexema);
       consolidateToken(currentToken, row, currentLine.length - 1, currentLine);
     }
