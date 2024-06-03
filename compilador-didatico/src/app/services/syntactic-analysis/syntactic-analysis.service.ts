@@ -402,9 +402,11 @@ export class SyntacticAnalysisService {
     return table;
   }
 
-  parse(input: Token[]): void {
+  parse(ipt: Token[]): void {
     /** Variável usada para os logs */
     const path = this._path.concat(['parse()']);
+
+    const input = [].concat(ipt);
 
     /** token representando o final da entrada de tokens */
     const endToken: Token = {
@@ -434,14 +436,19 @@ export class SyntacticAnalysisService {
       let currentToken = input[0];
       if (!currentToken) break;
 
-      console.log('Current Token', currentToken);
+      console.log('stack:', this.stack.join(' | '));
+      //console.log('input:', input[0].lexema);
+      console.log('input:', input.map((el) => el.lexema).join(' | '));
+      console.log('================================');
+
+      //console.log('Current Token', currentToken);
 
       // TODO: análise semântica
       if (this.stack[this.stack.length - 1].match(/\[\[.+\]\]/g)) {
         continue;
       }
 
-      if (
+      /*if (
         [
           'número-natural',
           'número-real',
@@ -454,10 +461,11 @@ export class SyntacticAnalysisService {
           ...currentToken,
           lexema: input[0].lexema[0],
         };
-      }
+      }*/
 
       if (this.stack[this.stack.length - 1].match(/<.+>/g) !== null) {
         if (this.stack[this.stack.length - 1] === '<identificador>') {
+          console.log('identificador esperado');
           if (
             ![
               'identificador-válido',
@@ -477,6 +485,12 @@ export class SyntacticAnalysisService {
             this.stack.pop();
             lastTerminal = input.shift();
             continue;
+          } else {
+            console.log(
+              'tudo certo, validei',
+              currentToken.lexema,
+              'manualmente',
+            );
           }
           this.stack.pop();
           lastTerminal = input.shift();
@@ -507,7 +521,23 @@ export class SyntacticAnalysisService {
         const row = this.syntacticTable.row.find(
           (r) => r.header === this.stack[this.stack.length - 1],
         );
-        const col = row.col.find((c) => c.header === currentToken.lexema);
+        const col = row.col.find((c) => {
+          let searchFor = currentToken.lexema;
+          if (
+            [
+              'identificador-válido',
+              'boolean-verdadeiro',
+              'boolean-falso',
+            ].includes(currentToken.token)
+          ) {
+            searchFor = '[a-zA-Z_][a-zA-Z_0-9]*';
+          } else if (
+            ['número-natural', 'número-real'].includes(currentToken.token)
+          ) {
+            searchFor = '[0-9]+';
+          }
+          return c.header === searchFor;
+        });
         const expected = row.col
           .filter((c) => c.cell[0] !== 'TOKEN_SYNC' && c.header !== '$')
           .map((c) => c.header)
@@ -553,18 +583,34 @@ export class SyntacticAnalysisService {
         for (const e of col?.cell) invertedDerivation.unshift(e);
         this.stack.push(...invertedDerivation);
       } else {
+        console.log(
+          '>> comparando',
+          this.stack[this.stack.length - 1],
+          'e',
+          currentToken.lexema,
+          '<<',
+        );
         // O topo da stack é um terminal
         if (this.stack[this.stack.length - 1] === currentToken.lexema) {
+          console.log('equals');
           lastTerminal = input.shift();
           this.stack.pop();
         } else {
+          console.log(
+            'descartando topo da pilha:',
+            this.stack[this.stack.length - 1],
+          );
           this.stack.pop();
         }
       }
     }
-    console.log(input.join(', '));
     if (this.stack[this.stack.length - 1] === '$' && input[0].lexema === '$') {
-      this.loggerService.log('Análise Sintática concluída.', 'stp', path, 1);
+      this.loggerService.log(
+        'Análise Sintática concluída com sucesso. Texto-fonte foi validado.',
+        'stp',
+        path,
+        1,
+      );
     } else {
       if (!eof) {
         this.errorService.add(

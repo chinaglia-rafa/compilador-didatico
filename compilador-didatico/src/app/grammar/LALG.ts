@@ -110,11 +110,17 @@ lalg.productions.push(
 
 lalg.productions.push(
   new Production('<comando>', [
-    ['<atribuição>'],
-    ['<chamada_de_procedimento>'],
+    ['<identificador>', "<comando'>"],
     ['<comando_condicional_1>'],
     ['<comando_repetitivo_1>'],
     ['<comando_composto>'],
+  ]),
+);
+
+lalg.productions.push(
+  new Production("<comando'>", [
+    [':=', '<expressão>'],
+    ['(', "<chamada_de_procedimento'>"],
   ]),
 );
 

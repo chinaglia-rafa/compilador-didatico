@@ -45,9 +45,9 @@ program teste;
   int alfa, beta;
   boolean omega;
   begin
-      aaaaaaaaaaaaaaaa := 0;
+      aaaaaa := 0;
       alfa:= false;
-      beta:= .1 + 1;
+      beta:= 1 + 1;
   end.
 `;
       this.compile(c);
