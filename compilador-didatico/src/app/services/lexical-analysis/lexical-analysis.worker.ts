@@ -278,6 +278,8 @@ addEventListener('message', ({ data }) => {
         consolidateToken(currentToken, row, col, currentLine);
 
         currentToken = newToken();
+
+        continue;
       }
       /**
        *  Caso não tenha sido encontrado divisor de nenhum tipo,
