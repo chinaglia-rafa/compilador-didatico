@@ -27,6 +27,10 @@ export class FilemanagerService {
 
   constructor(private loggerService: LoggerService) {}
 
+  setSourceText(str: string): void {
+    this.sourceText$.next(str);
+  }
+
   /**
    * função responsável para subir um arquivo do tipo text/plain
    * @param arq arquivo que vai ser enviado

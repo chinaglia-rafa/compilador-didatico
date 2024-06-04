@@ -5,7 +5,6 @@ import '@material/web/button/text-button';
 import '@material/web/button/filled-tonal-button';
 
 import { SyntacticAnalysisService } from '../../../services/syntactic-analysis/syntactic-analysis.service';
-import { CompilerService } from '../../../services/compiler/compiler.service';
 
 @Component({
   selector: 'app-syntactic-analysis',
@@ -18,16 +17,13 @@ import { CompilerService } from '../../../services/compiler/compiler.service';
 export class SyntacticAnalysisComponent {
   fullscreen = false;
 
-  constructor(
-    private compilerSerivce: CompilerService,
-    public syntacticAnalysisService: SyntacticAnalysisService,
-  ) {}
+  constructor(public syntacticAnalysisService: SyntacticAnalysisService) {}
 
   next(): void {
     this.syntacticAnalysisService.parseStep();
   }
 
   stepByStep(): void {
-    this.syntacticAnalysisService.autoMode = false;
+    this.syntacticAnalysisService.startStepByStep();
   }
 }

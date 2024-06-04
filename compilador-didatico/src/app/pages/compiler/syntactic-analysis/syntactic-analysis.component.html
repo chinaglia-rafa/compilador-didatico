@@ -6,7 +6,7 @@
         (click)="next()"
         [disabled]="
           syntacticAnalysisService.autoMode ||
-          syntacticAnalysisService.ready.value !== true
+          syntacticAnalysisService.started !== true
         "
         >Próximo passo</md-filled-tonal-button
       >

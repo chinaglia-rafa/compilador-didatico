@@ -120,6 +120,11 @@ export class LexicalAnalysisService implements OnInit {
     return a;
   }
 
+  reset(): void {
+    this.errors$.next([]);
+    this.tokens$.next([]);
+  }
+
   scan(code: string): void {
     this.loading$.next(true);
 

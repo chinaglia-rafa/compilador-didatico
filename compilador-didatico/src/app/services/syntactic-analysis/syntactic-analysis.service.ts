@@ -32,6 +32,12 @@ export class SyntacticAnalysisService {
   syntacticTable: TabelaSintatica = new TabelaSintatica();
   /** Lista de tokens vindas da Análise Léxica */
   input: Token[] = [];
+  /**
+   * Backup da lista de tokens vindas da Análise Léxica.
+   * É usada para que se possa repetir a Análise Sintática sem compilar novamente
+   */
+  originalInput: Token[] = [];
+
   /** Pilha usada na análise sintática descendente */
   stack: string[] = [];
 
@@ -57,8 +63,8 @@ export class SyntacticAnalysisService {
   ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   /** Indica se a análise sintática chegou ao final da entrada com panicMode = true */
   eof = false;
-  /** Indica se a análise sintática está no Modo Pânico */
-  panicMode = false;
+  /** Indica se a análise sintática teve erros */
+  hasErrors = false;
   /** Último terminal visto na análise sintática */
   lastTerminal: Token;
   /** Indica se a compilação foi iniciada */
@@ -78,13 +84,19 @@ export class SyntacticAnalysisService {
   reset(): void {
     this.eof = false;
     this.lastTerminal = null;
-    this.panicMode = false;
+    this.hasErrors = false;
     this.input = [];
     this.stack = [];
     this.firsts = [];
     this.follows = [];
     this.syntacticTable = new TabelaSintatica();
     this.started = false;
+  }
+
+  startStepByStep(): void {
+    this.started = false;
+    this.autoMode = false;
+    this.parse(this.originalInput);
   }
 
   /**
@@ -415,11 +427,9 @@ export class SyntacticAnalysisService {
   }
 
   parse(ipt: Token[]): void {
-    /** Variável usada para os logs */
-    const path = this._path.concat(['parse()']);
-
     if (!this.started) {
       this.input = [].concat(ipt);
+      this.originalInput = [].concat(ipt);
 
       /** token representando o final da entrada de tokens */
       const endToken: Token = {
@@ -438,43 +448,13 @@ export class SyntacticAnalysisService {
       this.started = true;
     }
 
-    while (
-      this.stack[this.stack.length - 1] !== '$' ||
-      this.input[0].lexema !== '$'
-    ) {
+    while (this.stack.length > 0 || this.input.length > 0) {
       const actionToTake = this.parseStep();
 
       if (actionToTake === 'break') break;
       else if (actionToTake === 'continue') continue;
 
       if (!this.autoMode) break;
-    }
-    if (
-      this.stack[this.stack.length - 1] === '$' &&
-      this.input[0].lexema === '$'
-    ) {
-      this.loggerService.log(
-        'Análise Sintática concluída com sucesso. Texto-fonte foi validado.',
-        'stp',
-        path,
-        1,
-      );
-      this.started = false;
-    } else {
-      if (!this.eof) {
-        this.errorService.add(
-          203,
-          this.input[0].row,
-          this.input[0].col,
-          this.input[0].row,
-          this.input[0].col + this.input[0].lexema.length,
-          path,
-          this.stack[this.stack.length - 1] === '$'
-            ? undefined
-            : `${this.stack[this.stack.length - 1]} esperado.`,
-        );
-        this.started = false;
-      }
     }
   }
 
@@ -496,7 +476,44 @@ export class SyntacticAnalysisService {
     console.log('input:', this.input.map((el) => el.lexema).join(' | '));
     console.log('================================');
 
-    //console.log('Current Token', currentToken);
+    /**
+     * Verifica se, no passo atual da análise, toda a cadeia de entrada
+     * foi validada com sucesso.
+     */
+    if (
+      this.stack[this.stack.length - 1] === '$' &&
+      this.input[0].lexema === '$'
+    ) {
+      this.loggerService.log(
+        this.hasErrors
+          ? 'Análise Sintática concluída com erros. Texto-fonte <strong>não é válido</strong>.'
+          : 'Análise Sintática concluída com sucesso. Texto-fonte foi validado.',
+        'stp',
+        path,
+        1,
+      );
+      this.started = false;
+      return 'break';
+    } else if (
+      (this.stack[this.stack.length - 1] === '$' &&
+        this.input[0].lexema !== '$') ||
+      (this.stack[this.stack.length - 1] !== '$' &&
+        this.input[0].lexema === '$')
+    ) {
+      if (!this.eof) {
+        this.errorService.add(
+          203,
+          this.input[0].row,
+          this.input[0].col,
+          this.input[0].row,
+          this.input[0].col + this.input[0].lexema.length,
+          path,
+        );
+        this.hasErrors = true;
+      }
+      this.started = false;
+      return 'break';
+    }
 
     // TODO: análise semântica
     if (this.stack[this.stack.length - 1].match(/\[\[.+\]\]/g)) {
@@ -522,6 +539,7 @@ export class SyntacticAnalysisService {
             path,
             `${currentToken.lexema} (${currentToken.token}) encontrado.`,
           );
+          this.hasErrors = true;
           this.stack.pop();
           this.lastTerminal = this.input.shift();
           return 'continue';
@@ -549,6 +567,7 @@ export class SyntacticAnalysisService {
             path,
             `${currentToken.lexema} (${currentToken.token}) encontrado.`,
           );
+          this.hasErrors = true;
           this.stack.pop();
           this.lastTerminal = this.input.shift();
           return 'continue';
@@ -594,6 +613,7 @@ export class SyntacticAnalysisService {
           path,
           `Entretanto, "${currentToken.lexema}" (${currentToken.token}) foi encontrado. ${expected} esperado.`,
         );
+        this.hasErrors = true;
         return 'continue';
       }
       if (col?.cell[0] === 'TOKEN_SYNC') {
@@ -610,6 +630,7 @@ export class SyntacticAnalysisService {
             path,
             `Uma das seguintes tokens era esperada: ${expected}.`,
           );
+          this.hasErrors = true;
           this.eof = true;
           return 'break';
         }

@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   NgZone,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -80,7 +81,7 @@ export const EDITOR_OPERATORS = [
   templateUrl: './code-editor.component.html',
   styleUrl: './code-editor.component.scss',
 })
-export class CodeEditorComponent implements OnInit {
+export class CodeEditorComponent implements OnInit, OnDestroy {
   @ViewChild('panel1Element') panel1?: ElementRef;
   @ViewChild('panel2Element') panel2?: ElementRef;
   @ViewChild('panel3Element') panel3?: ElementRef;
@@ -100,21 +101,7 @@ export class CodeEditorComponent implements OnInit {
     theme: 'vs-light',
     language: 'LALG',
   };
-  code: string = `// teste
-{
-  teste
-  teste
-  teste!
-}
-program teste;
-  int alfa, beta;
-  boolean omega;
-  begin
-      aaaaaa := 0;
-      alfa:= false;
-      beta:= 1 + 1;
-  end.
-`;
+  code: string = '';
 
   monaco: any;
 
@@ -128,6 +115,10 @@ program teste;
 
   ngOnInit(): void {
     this.filemanager.sourceText$.subscribe((data) => (this.code = data));
+  }
+
+  ngOnDestroy(): void {
+    this.filemanager.setSourceText(this.code);
   }
 
   registerLanguage(monaco: any): void {
@@ -221,6 +212,10 @@ program teste;
     this.registerLanguage(this.monaco);
     this.setCommands(editor);
 
+    this.monaco.editor.getModels()[0].onDidChangeContent(() => {
+      this.onChange();
+    });
+
     this.errorService.errors$.subscribe((errors) => {
       this.monaco.editor.setModelMarkers(
         editor.getModel(),
@@ -251,6 +246,12 @@ program teste;
     const tabs = [this.panel1, this.panel2, this.panel3];
     for (const tab of tabs) tab?.nativeElement.setAttribute('hidden', true);
     tabs[index]?.nativeElement.removeAttribute('hidden');
+  }
+
+  onChange(): void {
+    this.compilerService.updateLineCount(
+      this.monaco.editor.getModels()[0].getValue(),
+    );
   }
 
   compile(): void {
