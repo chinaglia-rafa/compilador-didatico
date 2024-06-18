@@ -4,7 +4,6 @@ import {
   EPSILON,
   Grammar,
   LinhaSintatica,
-  Production,
   TabelaSintatica,
 } from '../../grammar/grammar.model';
 import { lalg } from '../../grammar/LALG';
@@ -20,6 +19,28 @@ export interface FirstList {
 export interface FollowList {
   symbol: string;
   follow: string[];
+}
+
+export interface SyntacticTreeNode {
+  id: string;
+  label: string;
+}
+
+export interface SyntacticTreeLink {
+  id: string;
+  source: string;
+  target: string;
+  label: string;
+}
+
+export interface SyntacticTree {
+  nodes: SyntacticTreeNode[];
+  links: SyntacticTreeLink[];
+}
+
+export interface StackElement {
+  value: string;
+  id: string;
 }
 
 @Injectable({
@@ -39,7 +60,7 @@ export class SyntacticAnalysisService {
   originalInput: Token[] = [];
 
   /** Pilha usada na análise sintática descendente */
-  stack: string[] = [];
+  stack: StackElement[] = [];
 
   /** Lista de símbolos não terminais e seus firsts */
   firsts: FirstList[] = [];
@@ -70,6 +91,14 @@ export class SyntacticAnalysisService {
   /** Indica se a compilação foi iniciada */
   started: boolean = false;
 
+  /** Representação da árvore sintática */
+  syntacticTree: SyntacticTree;
+  /** Contagem ascendente para controlar IDs únicos */
+  idCounter = 0;
+  parentNodeID = '';
+
+  popped: StackElement = { value: '', id: '' };
+
   private _path: string[] = ['Compilador', 'Análise Sintática'];
 
   constructor(
@@ -91,6 +120,10 @@ export class SyntacticAnalysisService {
     this.follows = [];
     this.syntacticTable = new TabelaSintatica();
     this.started = false;
+    this.syntacticTree = {
+      nodes: [],
+      links: [],
+    };
   }
 
   startStepByStep(): void {
@@ -441,9 +474,28 @@ export class SyntacticAnalysisService {
 
       this.input.push(endToken);
 
-      this.stack = [endToken.lexema];
+      this.idCounter = 0;
+      this.popped = { value: '', id: '' };
+
+      this.syntacticTree = {
+        nodes: [],
+        links: [],
+      };
+
+      this.stack = [
+        {
+          value: endToken.lexema,
+          id: `node_${this.idCounter++}`,
+        },
+      ];
+      // this.addNode(endToken.lexema, this.idCounter.toString());
       const root = this.selectedGrammar.productions[0].leftSide;
-      this.stack.push(root);
+      const rootId = `node_${this.idCounter++}`;
+      this.stack.push({
+        value: root,
+        id: rootId,
+      });
+      this.addNode(root, rootId);
 
       this.started = true;
     }
@@ -471,7 +523,7 @@ export class SyntacticAnalysisService {
     let currentToken = this.input[0];
     if (!currentToken) return 'break';
 
-    console.log('stack:', this.stack.join(' | '));
+    console.log('stack:', this.stack.map((el) => el.value).join(' | '));
     //console.log('input:', input[0].lexema);
     console.log('input:', this.input.map((el) => el.lexema).join(' | '));
     console.log('================================');
@@ -481,7 +533,7 @@ export class SyntacticAnalysisService {
      * foi validada com sucesso.
      */
     if (
-      this.stack[this.stack.length - 1] === '$' &&
+      this.stack[this.stack.length - 1].value === '$' &&
       this.input[0].lexema === '$'
     ) {
       this.loggerService.log(
@@ -492,12 +544,28 @@ export class SyntacticAnalysisService {
         path,
         1,
       );
+
+      console.log('SYNTACTIC TREE', this.syntacticTree);
+
+      /*for (const link of this.syntacticTree.links) {
+        const foundSource = this.syntacticTree.nodes.find(
+          (el) => el.id === link.source,
+        );
+        const foundTarget = this.syntacticTree.nodes.find(
+          (el) => el.id === link.target,
+        );
+        if (!foundSource)
+          console.error('ERRO em foundSource para', link, ':', foundSource);
+        if (!foundTarget)
+          console.error('ERRO em foundTarget para', link, ':', foundTarget);
+      }*/
+
       this.started = false;
       return 'break';
     } else if (
-      (this.stack[this.stack.length - 1] === '$' &&
+      (this.stack[this.stack.length - 1].value === '$' &&
         this.input[0].lexema !== '$') ||
-      (this.stack[this.stack.length - 1] !== '$' &&
+      (this.stack[this.stack.length - 1].value !== '$' &&
         this.input[0].lexema === '$')
     ) {
       if (!this.eof) {
@@ -516,12 +584,12 @@ export class SyntacticAnalysisService {
     }
 
     // TODO: análise semântica
-    if (this.stack[this.stack.length - 1].match(/\[\[.+\]\]/g)) {
+    if (this.stack[this.stack.length - 1].value.match(/\[\[.+\]\]/g)) {
       return 'continue';
     }
 
-    if (this.stack[this.stack.length - 1].match(/<.+>/g) !== null) {
-      if (this.stack[this.stack.length - 1] === '<identificador>') {
+    if (this.stack[this.stack.length - 1].value.match(/<.+>/g) !== null) {
+      if (this.stack[this.stack.length - 1].value === '<identificador>') {
         console.log('identificador esperado');
         if (
           ![
@@ -540,7 +608,7 @@ export class SyntacticAnalysisService {
             `${currentToken.lexema} (${currentToken.token}) encontrado.`,
           );
           this.hasErrors = true;
-          this.stack.pop();
+          this.popped = this.stack.pop();
           this.lastTerminal = this.input.shift();
           return 'continue';
         } else {
@@ -550,10 +618,12 @@ export class SyntacticAnalysisService {
             'manualmente',
           );
         }
-        this.stack.pop();
+        this.popped = this.stack.pop();
+        this.addNode(currentToken.lexema, `node_${this.idCounter++}`);
+
         this.lastTerminal = this.input.shift();
         return 'continue';
-      } else if (this.stack[this.stack.length - 1] === '<número>') {
+      } else if (this.stack[this.stack.length - 1].value === '<número>') {
         if (
           currentToken.token !== 'número-natural' &&
           currentToken.token !== 'número-real'
@@ -568,17 +638,19 @@ export class SyntacticAnalysisService {
             `${currentToken.lexema} (${currentToken.token}) encontrado.`,
           );
           this.hasErrors = true;
-          this.stack.pop();
+          this.popped = this.stack.pop();
+
           this.lastTerminal = this.input.shift();
           return 'continue';
         }
-        this.stack.pop();
+        this.popped = this.stack.pop();
+        this.addNode(currentToken.lexema, `node_${this.idCounter++}`);
         this.lastTerminal = this.input.shift();
         return 'continue';
       }
 
       const row = this.syntacticTable.row.find(
-        (r) => r.header === this.stack[this.stack.length - 1],
+        (r) => r.header === this.stack[this.stack.length - 1].value,
       );
       const col = row.col.find((c) => {
         let searchFor = currentToken.lexema;
@@ -618,7 +690,8 @@ export class SyntacticAnalysisService {
       }
       if (col?.cell[0] === 'TOKEN_SYNC') {
         if (this.input[0].lexema !== '$') {
-          this.stack.pop();
+          this.popped = this.stack.pop();
+
           return 'continue';
         } else {
           this.errorService.add(
@@ -636,37 +709,86 @@ export class SyntacticAnalysisService {
         }
       }
 
-      this.stack.pop();
-      if (col.cell[0] === EPSILON) return 'continue';
+      this.popped = this.stack.pop();
+      if (col.cell[0] === EPSILON) {
+        this.addNode(EPSILON, `node_${this.idCounter++}`);
+        return 'continue';
+      }
       /**
        * Inversão da derivação a ser empilhada em stack, para que seja
        * empilhada na ordem correta.
        */
       const invertedDerivation = [];
-      for (const e of col?.cell) invertedDerivation.unshift(e);
-      this.stack.push(...invertedDerivation);
+
+      const ids: string[] = [];
+
+      for (const e of col?.cell) {
+        invertedDerivation.unshift(e);
+        /*const newNode = {
+          id: `node_${this.idCounter++}`,
+          label: e,
+        };
+        const newLink: syntacticTreeLink = {
+          id: `link_${this.idCounter++}`,
+          label: '',
+          source: parentId,
+          target: newNode.id,
+        };
+        this.syntacticTree.nodes.push(newNode);
+        this.syntacticTree.links.push(newLink);*/
+        ids.unshift(`node_${this.idCounter++}`);
+        this.addNode(e, ids[0]);
+      }
+
+      this.stack.push(
+        ...invertedDerivation.map((el) => ({
+          value: el,
+          id: ids.shift(),
+        })),
+      );
     } else {
       console.log(
         '>> comparando',
-        this.stack[this.stack.length - 1],
+        this.stack[this.stack.length - 1].value,
         'e',
         currentToken.lexema,
         '<<',
       );
+
       // O topo da stack é um terminal
-      if (this.stack[this.stack.length - 1] === currentToken.lexema) {
+      if (this.stack[this.stack.length - 1].value === currentToken.lexema) {
         console.log('equals');
         this.lastTerminal = this.input.shift();
-        this.stack.pop();
+        this.popped = this.stack.pop();
       } else {
         console.log(
           'descartando topo da pilha:',
           this.stack[this.stack.length - 1],
         );
-        this.stack.pop();
+        this.popped = this.stack.pop();
       }
     }
 
     return '';
+  }
+
+  addNode(content: string, id: string = ''): void {
+    console.log('Should add', content, id, 'with parent', this.popped.id);
+    const newNode = {
+      id,
+      label: content,
+    };
+
+    this.syntacticTree.nodes = [...this.syntacticTree.nodes, newNode];
+
+    if (this.popped.id !== '') {
+      const newLink: SyntacticTreeLink = {
+        id: `link_${this.idCounter++}`,
+        label: '',
+        source: this.popped.id,
+        target: newNode.id,
+      };
+      this.syntacticTree.links = [...this.syntacticTree.links, newLink];
+    }
   }
 }

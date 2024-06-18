@@ -5,11 +5,12 @@ import '@material/web/button/text-button';
 import '@material/web/button/filled-tonal-button';
 
 import { SyntacticAnalysisService } from '../../../services/syntactic-analysis/syntactic-analysis.service';
+import { NgxGraphModule } from '@kr0san89/ngx-graph';
 
 @Component({
   selector: 'app-syntactic-analysis',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgxGraphModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './syntactic-analysis.component.html',
   styleUrl: './syntactic-analysis.component.scss',
