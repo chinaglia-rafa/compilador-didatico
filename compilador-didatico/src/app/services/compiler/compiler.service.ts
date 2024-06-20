@@ -35,7 +35,9 @@ export class CompilerService implements OnInit {
     });
 
     setTimeout(() => {
-      const c = `// teste
+      const c = `
+
+// teste
 {
   teste
   teste
@@ -44,6 +46,10 @@ export class CompilerService implements OnInit {
 program teste;
   int alfa, beta;
   boolean omega;
+  procedure soma(um, dois: int; tres: boolean);
+  begin
+    waka := um + dois;
+    end;
   begin
       aaaaaa := 0;
       alfa:= false;

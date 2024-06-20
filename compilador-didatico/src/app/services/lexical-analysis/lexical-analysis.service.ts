@@ -114,7 +114,12 @@ export class LexicalAnalysisService implements OnInit {
         )
       ) {
         token.symbolIndex = this.symbolsTable.add(token.lexema, token.token);
+      } else if (token.token === 'boolean-verdadeiro') {
+        token.symbolIndex = 0;
+      } else if (token.token === 'boolean-falso') {
+        token.symbolIndex = 1;
       }
+
       return token;
     });
     return a;

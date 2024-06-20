@@ -45,4 +45,8 @@ export const ERROR_CODES = {
     code: 203,
     desc: 'O arquivo acabou de forma inesperada. Token esperada não foi encontrada.',
   },
+  SEM_VARIABLE_NOT_DECLARED: {
+    code: 300,
+    desc: 'A seguinte variável foi utilizada antes de sua declaração neste escopo:',
+  },
 };

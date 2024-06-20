@@ -74,6 +74,7 @@
               <div *ngIf="i > 0" class="vertical-divider"></div>
               <div
                 *ngFor="let part of derivation"
+                [class.hidden]="part[0] === '[' && part[1] === '['"
                 [class.secondary-container]="
                   part[0] === '<' &&
                   part[1] &&

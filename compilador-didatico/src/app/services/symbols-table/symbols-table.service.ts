@@ -9,13 +9,38 @@ export interface TableItem {
   value?: number;
   /** tipo de dado, quando presente */
   type?: string;
+  /** Escopo onde a variável existe */
+  scope: string;
+  /** Indica se a variável foi usada */
+  used?: boolean;
+}
+
+/** Dados que podem ser atualizados em um símbolo */
+export interface UpdateData {
+  type?: string;
+  scope?: string;
+  value?: number;
+  used?: boolean;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class SymbolsTableService {
-  table$ = new BehaviorSubject<TableItem[]>([]);
+  table$ = new BehaviorSubject<TableItem[]>([
+    {
+      lexema: 'true',
+      type: 'boolean',
+      scope: 'global',
+      used: true,
+    },
+    {
+      lexema: 'false',
+      type: 'boolean',
+      scope: 'global',
+      used: true,
+    },
+  ]);
   /** tamanho da tabela de símbolos */
   count$ = new BehaviorSubject<number>(0);
 
@@ -31,6 +56,8 @@ export class SymbolsTableService {
   add(lexema: string, tokenType: string): number {
     const newTableItem: TableItem = {
       lexema: '',
+      scope: '',
+      used: false,
     };
 
     newTableItem.lexema = lexema;
@@ -62,7 +89,29 @@ export class SymbolsTableService {
     return this.table$.value[index] || null;
   }
 
+  update(index: number, updateData: UpdateData): void {
+    if (updateData.type !== undefined) this.get(index).type = updateData.type;
+    if (updateData.scope !== undefined)
+      this.get(index).scope = updateData.scope;
+    if (updateData.value !== undefined)
+      this.get(index).value = updateData.value;
+    if (updateData.used !== undefined) this.get(index).used = updateData.used;
+  }
+
   reset(): void {
-    this.table$.next([]);
+    this.table$.next([
+      {
+        lexema: 'true',
+        type: 'boolean',
+        scope: 'global',
+        used: true,
+      },
+      {
+        lexema: 'false',
+        type: 'boolean',
+        scope: 'global',
+        used: true,
+      },
+    ]);
   }
 }

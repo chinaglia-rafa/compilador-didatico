@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { LoggerService } from '../logger/logger.service';
 
-const dummyText = `// teste
+const dummyText = `
+// teste
 {
   teste
   teste
@@ -11,6 +12,10 @@ const dummyText = `// teste
 program teste;
   int alfa, beta;
   boolean omega;
+  procedure soma(um, dois: int; tres: boolean);
+  begin
+    waka := um + dois;
+    end;
   begin
       aaaaaa := 0;
       alfa:= false;

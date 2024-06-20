@@ -11,6 +11,7 @@ import { Token } from '../lexical-analysis/lexical-analysis.service';
 import { LoggerService } from '../logger/logger.service';
 import { BehaviorSubject } from 'rxjs';
 import { ErrorsService } from '../errors/errors.service';
+import { SemanticAnalysisService } from '../semantic-analysis/semantic-analysis.service';
 
 export interface FirstList {
   symbol: string;
@@ -97,6 +98,7 @@ export class SyntacticAnalysisService {
   idCounter = 0;
   parentNodeID = '';
 
+  /** último símbolo da pilha que foi resolvido */
   popped: StackElement = { value: '', id: '' };
 
   private _path: string[] = ['Compilador', 'Análise Sintática'];
@@ -104,6 +106,7 @@ export class SyntacticAnalysisService {
   constructor(
     private loggerService: LoggerService,
     private errorService: ErrorsService,
+    private semanticAnalysisService: SemanticAnalysisService,
   ) {
     this.selectedGrammar = lalg;
 
@@ -233,6 +236,7 @@ export class SyntacticAnalysisService {
       for (const part of production) {
         // TODO: implementar a análise semântica
         if (part.match(/\[\[.+\]\]/g)) {
+          console.log('pulei', part);
           continue;
         }
         // Se part for <não-terminal>
@@ -243,10 +247,12 @@ export class SyntacticAnalysisService {
             // Regra 2: dado um <X> não-terminal que tem uma produção <X> -> <A>,
             // então first(<A>) faz parte de first(<X>)
             firstsForCurrentPart = new Set(
-              this.findFirtsFor(part).map((element) => {
-                first.add(element);
-                return element;
-              }),
+              this.findFirtsFor(part)
+                .filter((element) => !element.match(/\[\[.+\]\]/g))
+                .map((element) => {
+                  first.add(element);
+                  return element;
+                }),
             );
             // Regra 4: se um dado <X> não-terminal tem uma produção -> <A><B> e
             // first(<A>) contém ε, então first(<X>) inclui first(<B>) também
@@ -301,6 +307,7 @@ export class SyntacticAnalysisService {
     // Regra 1: Se um dado não-temrinal <X> é raiz, então $ é parte de follow(<X>)
     if (symbolName === this.selectedGrammar.productions[0].leftSide)
       follows.add('$');
+
     // Caso o símbolo já esteja na fila para ter seu conjunto follow
     // calculado, ignore-o.
     if (this.pendingFollowRecursions.includes(symbolName)) return [];
@@ -329,7 +336,10 @@ export class SyntacticAnalysisService {
         // first(β), exceto ε, é parte de follow(<X>)
         for (const part of production) {
           // TODO: análise semântica
-          if (part.match(/\[\[.+\]\]/g)) continue;
+          if (part.match(/\[\[.+\]\]/g)) {
+            console.log(symbolName, 'pulei', part);
+            continue;
+          }
 
           if (
             previousPart === symbolName &&
@@ -352,11 +362,14 @@ export class SyntacticAnalysisService {
 
             firstFromCurrentSymbol.first
               .filter((f) => f !== EPSILON)
+              .filter((f) => !f.match(/\[\[.+\]\]/g))
               .map((f) => follows.add(f));
             // Regra 3: Se existe uma produção do tipo <A> -> α<X> ou <A> -> α<X>β onde
             // first(β) contém ε, então follow(<X>) deve conter follow(<A>)
             if (firstFromCurrentSymbol.first.includes(EPSILON)) {
-              this.findFollowsFor(symbol.leftSide).map((f) => follows.add(f));
+              this.findFollowsFor(symbol.leftSide)
+                .filter((f) => !f.match(/\[\[.+\]\]/g))
+                .map((f) => follows.add(f));
             }
           }
           previousPart = part;
@@ -367,7 +380,9 @@ export class SyntacticAnalysisService {
           previousPart === symbolName &&
           symbol.leftSide !== previousPart
         ) {
-          this.findFollowsFor(symbol.leftSide).map((f) => follows.add(f));
+          this.findFollowsFor(symbol.leftSide)
+            .filter((f) => !f.match(/\[\[.+\]\]/g))
+            .map((f) => follows.add(f));
         }
       }
     }
@@ -464,6 +479,8 @@ export class SyntacticAnalysisService {
       this.input = [].concat(ipt);
       this.originalInput = [].concat(ipt);
 
+      this.semanticAnalysisService.setScope('global');
+
       /** token representando o final da entrada de tokens */
       const endToken: Token = {
         lexema: '$',
@@ -523,10 +540,10 @@ export class SyntacticAnalysisService {
     let currentToken = this.input[0];
     if (!currentToken) return 'break';
 
-    console.log('stack:', this.stack.map((el) => el.value).join(' | '));
+    //console.log('stack:', this.stack.map((el) => el.value).join(' | '));
     //console.log('input:', input[0].lexema);
-    console.log('input:', this.input.map((el) => el.lexema).join(' | '));
-    console.log('================================');
+    //console.log('input:', this.input.map((el) => el.lexema).join(' | '));
+    //console.log('================================');
 
     /**
      * Verifica se, no passo atual da análise, toda a cadeia de entrada
@@ -583,19 +600,15 @@ export class SyntacticAnalysisService {
       return 'break';
     }
 
-    // TODO: análise semântica
-    if (this.stack[this.stack.length - 1].value.match(/\[\[.+\]\]/g)) {
-      return 'continue';
-    }
-
     if (this.stack[this.stack.length - 1].value.match(/<.+>/g) !== null) {
       if (this.stack[this.stack.length - 1].value === '<identificador>') {
-        console.log('identificador esperado');
         if (
           ![
             'identificador-válido',
             'boolean-verdadeiro',
             'boolean-falso',
+            'tipo-inteiro',
+            'tipo-booleano',
           ].includes(currentToken.token)
         ) {
           this.errorService.add(
@@ -611,16 +624,39 @@ export class SyntacticAnalysisService {
           this.popped = this.stack.pop();
           this.lastTerminal = this.input.shift();
           return 'continue';
-        } else {
-          console.log(
-            'tudo certo, validei',
-            currentToken.lexema,
-            'manualmente',
-          );
         }
         this.popped = this.stack.pop();
         this.addNode(currentToken.lexema, `node_${this.idCounter++}`);
 
+        if (
+          this.semanticAnalysisService.getMode() ===
+            'declaracao_de_variaveis' ||
+          this.semanticAnalysisService.getMode() === 'nome_programa'
+        ) {
+          this.semanticAnalysisService.addIdentifier(currentToken.symbolIndex);
+        } else if (
+          this.semanticAnalysisService.getMode() ===
+          'declaracao_de_procedimento'
+        ) {
+          this.semanticAnalysisService.setType('procedure-name');
+          this.semanticAnalysisService.addIdentifier(currentToken.symbolIndex);
+          this.semanticAnalysisService.setScope('func_' + currentToken.lexema);
+          this.semanticAnalysisService.done();
+        } else if (
+          this.semanticAnalysisService.getMode() === 'parametros_formais'
+        ) {
+          if (
+            this.semanticAnalysisService.getMode() === 'parametros_formais' &&
+            this.lastTerminal.lexema === ':'
+          ) {
+            this.semanticAnalysisService.setType(currentToken.lexema);
+            this.semanticAnalysisService.consolidate();
+          }
+
+          this.semanticAnalysisService.accumulate(currentToken.symbolIndex);
+        } else {
+          this.semanticAnalysisService.checkIdentifier(currentToken);
+        }
         this.lastTerminal = this.input.shift();
         return 'continue';
       } else if (this.stack[this.stack.length - 1].value === '<número>') {
@@ -746,25 +782,35 @@ export class SyntacticAnalysisService {
           id: ids.shift(),
         })),
       );
+
+      if (this.popped.value === '<seção_de_parâmetros_formais>') {
+        this.semanticAnalysisService.setMode('parametros_formais');
+      }
     } else {
-      console.log(
+      /*console.log(
         '>> comparando',
         this.stack[this.stack.length - 1].value,
         'e',
         currentToken.lexema,
         '<<',
-      );
+      );*/
 
+      if (this.popped.value === '<programa>') {
+        this.semanticAnalysisService.setMode('nome_programa');
+        this.semanticAnalysisService.setType('nome_programa');
+      } else if (this.popped.value === '<tipo>') {
+        this.semanticAnalysisService.setMode('declaracao_de_variaveis');
+        this.semanticAnalysisService.setType(currentToken.lexema);
+      } else if (this.popped.value === '<declaração_de_procedimento>') {
+        this.semanticAnalysisService.setMode('declaracao_de_procedimento');
+      } else if (currentToken.lexema === ';') {
+        this.semanticAnalysisService.done();
+      }
       // O topo da stack é um terminal
       if (this.stack[this.stack.length - 1].value === currentToken.lexema) {
-        console.log('equals');
         this.lastTerminal = this.input.shift();
         this.popped = this.stack.pop();
       } else {
-        console.log(
-          'descartando topo da pilha:',
-          this.stack[this.stack.length - 1],
-        );
         this.popped = this.stack.pop();
       }
     }
@@ -773,7 +819,6 @@ export class SyntacticAnalysisService {
   }
 
   addNode(content: string, id: string = ''): void {
-    console.log('Should add', content, id, 'with parent', this.popped.id);
     const newNode = {
       id,
       label: content,

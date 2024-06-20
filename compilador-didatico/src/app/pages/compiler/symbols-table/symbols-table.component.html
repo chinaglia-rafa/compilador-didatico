@@ -11,6 +11,7 @@
         <th>símbolo</th>
         <th>tipo</th>
         <th>valor</th>
+        <th>usada</th>
         <th>escopo</th>
       </tr>
       <tr
@@ -21,7 +22,8 @@
         <td class="monospace">{{ symbol.lexema }}</td>
         <td>{{ symbol.type }}</td>
         <td>{{ symbol.value }}</td>
-        <td></td>
+        <td>{{ symbol.used ? "Sim" : "Não" }}</td>
+        <td>{{ symbol.scope }}</td>
       </tr>
     </table>
   </ng-scrollbar>
