@@ -114,4 +114,8 @@ export class SymbolsTableService {
       },
     ]);
   }
+
+  getIdentifiersCount(): number {
+    return this.table$.value.filter((el) => el?.scope != '').length;
+  }
 }

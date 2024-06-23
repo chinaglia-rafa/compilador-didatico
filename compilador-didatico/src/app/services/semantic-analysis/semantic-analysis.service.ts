@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { SymbolsTableService } from '../symbols-table/symbols-table.service';
 import { Token } from '../lexical-analysis/lexical-analysis.service';
 import { ErrorsService } from '../errors/errors.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,11 +13,21 @@ export class SemanticAnalysisService {
   mode: string;
   /** lista de identificadores acumulados para receber o mesmo tipo */
   acc: number[] = [];
+  count$ = new BehaviorSubject<number>(0);
+  errors$ = new BehaviorSubject<number>(0);
 
   constructor(
     private symbols: SymbolsTableService,
     private errorService: ErrorsService,
   ) {}
+
+  reset(): void {
+    this.currentType = '';
+    this.currentScope = 'global';
+    this.mode = '';
+    this.acc = [];
+    this.errors$.next(0);
+  }
 
   setType(type: string): void {
     this.currentType = type;
@@ -92,8 +103,13 @@ export class SemanticAnalysisService {
         path,
         symbol.lexema,
       );
+      this.errors$.next(this.errors$.value + 1);
     } else {
       this.symbols.update(token.symbolIndex, { used: true });
     }
+  }
+
+  nextIdentifiersCount() {
+    this.count$.next(this.symbols.getIdentifiersCount());
   }
 }

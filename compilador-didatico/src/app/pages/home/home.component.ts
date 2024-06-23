@@ -9,6 +9,8 @@ import { customAnimations } from '../../animations';
 import { CompilerService } from '../../services/compiler/compiler.service';
 import { LexicalAnalysisService } from '../../services/lexical-analysis/lexical-analysis.service';
 import { SymbolsTableService } from '../../services/symbols-table/symbols-table.service';
+import { SyntacticAnalysisService } from '../../services/syntactic-analysis/syntactic-analysis.service';
+import { SemanticAnalysisService } from '../../services/semantic-analysis/semantic-analysis.service';
 
 @Component({
   selector: 'app-home',
@@ -76,6 +78,8 @@ export class HomeComponent implements AfterViewInit, OnInit {
     private compilerService: CompilerService,
     private lexicalAnalysisService: LexicalAnalysisService,
     private symbolsTableService: SymbolsTableService,
+    private syntacticAnalysisService: SyntacticAnalysisService,
+    private semanticAnalysisService: SemanticAnalysisService,
   ) {}
 
   ngOnInit(): void {
@@ -101,6 +105,16 @@ export class HomeComponent implements AfterViewInit, OnInit {
 
     this.lexicalAnalysisService.tokens$.subscribe((data) => {
       this.analiseLexicaCardCompItems[0].value = data.length.toString();
+    });
+    this.syntacticAnalysisService.nodeCount$.subscribe((data) => {
+      this.analiseSintaticaCardCompItems[0].value = data.toString();
+    });
+    this.semanticAnalysisService.count$.subscribe((data) => {
+      this.analiseSemanticaCardCompItems[0].value = data.toString();
+    });
+    this.semanticAnalysisService.errors$.subscribe((data) => {
+      this.analiseSemanticaCardCompItems[1].value = data.toString();
+      this.analiseSemanticaCardCompItems[1].visible = data > 0;
     });
   }
 

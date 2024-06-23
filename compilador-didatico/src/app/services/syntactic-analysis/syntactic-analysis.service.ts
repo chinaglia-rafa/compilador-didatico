@@ -97,6 +97,9 @@ export class SyntacticAnalysisService {
   /** Contagem ascendente para controlar IDs únicos */
   idCounter = 0;
   parentNodeID = '';
+  /** Contagem de nós da tabela sintática */
+  nodeCount$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  loading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   /** último símbolo da pilha que foi resolvido */
   popped: StackElement = { value: '', id: '' };
@@ -476,9 +479,11 @@ export class SyntacticAnalysisService {
 
   parse(ipt: Token[]): void {
     if (!this.started) {
+      this.loading$.next(true);
       this.input = [].concat(ipt);
       this.originalInput = [].concat(ipt);
 
+      this.semanticAnalysisService.reset();
       this.semanticAnalysisService.setScope('global');
 
       /** token representando o final da entrada de tokens */
@@ -562,22 +567,11 @@ export class SyntacticAnalysisService {
         1,
       );
 
-      console.log('SYNTACTIC TREE', this.syntacticTree);
-
-      /*for (const link of this.syntacticTree.links) {
-        const foundSource = this.syntacticTree.nodes.find(
-          (el) => el.id === link.source,
-        );
-        const foundTarget = this.syntacticTree.nodes.find(
-          (el) => el.id === link.target,
-        );
-        if (!foundSource)
-          console.error('ERRO em foundSource para', link, ':', foundSource);
-        if (!foundTarget)
-          console.error('ERRO em foundTarget para', link, ':', foundTarget);
-      }*/
+      this.nodeCount$.next(this.syntacticTree.nodes.length);
+      this.semanticAnalysisService.nextIdentifiersCount();
 
       this.started = false;
+      this.loading$.next(false);
       return 'break';
     } else if (
       (this.stack[this.stack.length - 1].value === '$' &&
@@ -597,6 +591,7 @@ export class SyntacticAnalysisService {
         this.hasErrors = true;
       }
       this.started = false;
+      this.loading$.next(false);
       return 'break';
     }
 

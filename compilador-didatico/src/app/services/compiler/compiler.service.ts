@@ -18,6 +18,11 @@ export class CompilerService implements OnInit {
       states[1] = loading;
       this.loading$.next(states);
     });
+    this.syntacticAnalysisService.loading$.subscribe((loading) => {
+      const states = this.loading$.value;
+      states[3] = loading;
+      this.loading$.next(states);
+    });
 
     this.lexicalAnalysisService.errors$.subscribe((errors) => {
       this.errorsService.reset();
@@ -75,7 +80,6 @@ program teste;
   linesCount$ = new BehaviorSubject<number>(0);
 
   ngOnInit(): void {}
-
   updateLineCount(code: string): void {
     this.linesCount$.next(code.split('\n').length);
   }
