@@ -67,12 +67,15 @@
       ></master-card>
       <master-card
         title="Geração de código"
+        sublink-title="Máquina Virtual MEPA"
+        sublink-button="dns"
         [items]="geracaoDeCodigoCardCompItems"
         action="Ver código gerado"
         icon="send"
         #geracaoDeCodigoCard
         (select)="clicked($event, geracaoDeCodigoCard, 'code-generation')"
         (actionClick)="clicked($event, geracaoDeCodigoCard, 'code-generation')"
+        (sublinkClick)="clicked($event, geracaoDeCodigoCard, 'mepa', true)"
       ></master-card>
       <master-card
         title="Otimização de código"

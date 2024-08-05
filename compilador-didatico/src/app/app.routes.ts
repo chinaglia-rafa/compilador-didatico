@@ -6,6 +6,7 @@ import { LexicalAnalysisComponent } from './pages/compiler/lexical-analysis/lexi
 import { SymbolsTableComponent } from './pages/compiler/symbols-table/symbols-table.component';
 import { SyntacticAnalysisComponent } from './pages/compiler/syntactic-analysis/syntactic-analysis.component';
 import { LanguageViewerComponent } from './pages/compiler/language-viewer/language-viewer.component';
+import { MepaComponent } from './pages/compiler/mepa/mepa.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'compiler' },
@@ -47,6 +48,11 @@ export const routes: Routes = [
       {
         path: 'language-viewer',
         component: LanguageViewerComponent,
+        data: { animation: 'LexicalAnalysisPage' },
+      },
+      {
+        path: 'mepa',
+        component: MepaComponent,
         data: { animation: 'LexicalAnalysisPage' },
       },
     ],

@@ -153,7 +153,10 @@ export class HomeComponent implements AfterViewInit, OnInit {
       this.cards[3]?.toggleSublink();
     } else if (path === 'semantic-analysis') this.cards[4]?.toggle();
     else if (path === 'code-generation') this.cards[5]?.toggle();
-    else if (path === 'optimization') this.cards[6]?.toggle();
+    else if (path === 'mepa') {
+      this.cards[5]?.toggle();
+      this.cards[5]?.toggleSublink();
+    } else if (path === 'optimization') this.cards[6]?.toggle();
     else if (path === 'final-results') this.cards[7]?.toggle();
   }
 
