@@ -14,10 +14,9 @@ program teste;
   boolean omega;
   procedure soma(um, dois: int; tres: boolean);
   begin
-    waka := um + dois;
+    um := um + dois;
     end;
   begin
-      aaaaaa := 0;
       alfa:= false;
       beta:= 1 + 1;
   end.
