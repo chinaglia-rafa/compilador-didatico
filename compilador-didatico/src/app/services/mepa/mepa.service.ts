@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 /**
  * Representa uma instrução da MEPA, como ARMZ ou RTPR, seu número
@@ -9,11 +10,27 @@ export interface InstructionDef {
   name: string;
   /** número de parâmetros aceitos pela instrução */
   paramsCount: number;
+  /** breve descrição do comando */
+  description: string;
   /** função a ser executada pela instrução */
   run:
     | (() => void)
     | ((p1: number) => void)
     | ((p1: number, p2: number) => void);
+}
+
+/**
+ * Representa um comando da MEPA, com até dois parâmetros possíveis.
+ */
+export interface Command {
+  /** Nome do comando */
+  name: string;
+  /** Primeiro parâmetro do comando, se existir */
+  p1?: number;
+  /** Segundo parâmetro do comando, se existir */
+  p2?: number;
+  /** Referência para a definição do comando */
+  commandRef: InstructionDef;
 }
 
 @Injectable({
@@ -26,7 +43,7 @@ export class MepaService {
    *
    * Na literatura, chama-se P.
    */
-  programQueue: string[] = [];
+  programQueue: Command[] = [];
   /**
    * contador de programa, responsável por indicar em qual
    * item da lista programCounter (P) a MEPA está.
@@ -40,7 +57,7 @@ export class MepaService {
    *
    * Na literatura, chama-se M.
    */
-  memoryStack: number[] = [];
+  memoryStack: number[] = Array(100);
   /**
    * indica o topo da pilha da memória principal da MEPA.
    *
@@ -54,7 +71,7 @@ export class MepaService {
    *
    * Na literatura, chama-se D.
    */
-  lexicalLevelsTable: number[] = [];
+  lexicalLevelsTable: number[] = Array(12);
   /**
    * nível léxico atual, começando de 0 (global).
    *
@@ -63,18 +80,75 @@ export class MepaService {
   lexicalLevel: number = 0;
   /** Mapa de instruções registradas na MEPA */
   instructions: Map<string, InstructionDef> = new Map();
+
+  /** Emite valores quando há atualização na memória principal */
+  memoryChanges$ = new Subject();
+
+  /** Indica se a execução foi concluída com sucesso */
+  done: boolean = false;
+
   constructor() {
+    this.reset();
     this.loadInstructions();
+    /**
+     * =====================================
+     * =====================================
+     * PROGRAMA DE EXEMPLO! (pág. 104)
+     * =====================================
+     * =====================================
+     */
+    this.addNewCommand('INPP');
+    this.addNewCommand('AMEM', 0, 2);
+    this.addNewCommand('AMEM', 0, 3);
+    this.addNewCommand('LEIT');
+    this.addNewCommand('ARMZ', 0, 0);
+    this.addNewCommand('CRCT', 0);
+    this.addNewCommand('ARMZ', 0, 2);
+    this.addNewCommand('CRCT', 1);
+    this.addNewCommand('ARMZ', 0, 3);
+    this.addNewCommand('CRCT', 1);
+    this.addNewCommand('ARMZ', 0, 1);
+    this.addNewCommand('NADA');
+    this.addNewCommand('CRVL', 0, 1);
+    this.addNewCommand('CRVL', 0, 0);
+    this.addNewCommand('CMEG');
+    this.addNewCommand('DSVF', 28);
+    this.addNewCommand('CRVL', 0, 2);
+    this.addNewCommand('CRVL', 0, 3);
+    this.addNewCommand('SOMA');
+    this.addNewCommand('ARMZ', 0, 4);
+    this.addNewCommand('CRVL', 0, 3);
+    this.addNewCommand('ARMZ', 0, 2);
+    this.addNewCommand('CRVL', 0, 4);
+    this.addNewCommand('ARMZ', 0, 3);
+    this.addNewCommand('CRVL', 0, 1);
+    this.addNewCommand('CRCT', 1);
+    this.addNewCommand('SOMA');
+    this.addNewCommand('ARMZ', 0, 1);
+    this.addNewCommand('DSVS', 11);
+    this.addNewCommand('NADA');
+    this.addNewCommand('CRVL', 0, 0);
+    this.addNewCommand('IMPR');
+    this.addNewCommand('CRVL', 0, 2);
+    this.addNewCommand('IMPR');
+    this.addNewCommand('PARA');
   }
 
   /** reinicia todas as variáveis do serviço */
   reset(): void {
     this.programQueue = [];
     this.programCounter = -1;
-    this.memoryStack = [];
+    this.memoryStack = Array(100);
     this.stackTop = -1;
-    this.lexicalLevelsTable = [];
+    this.lexicalLevelsTable = Array(12);
+    this.lexicalLevelsTable[0] = 0;
     this.lexicalLevel = 0;
+    this.done = false;
+  }
+
+  /** Retorna true caso a MEPA esteja ociosa. */
+  isDone(): boolean {
+    return this.done;
   }
 
   /**
@@ -82,7 +156,7 @@ export class MepaService {
    *
    * @param program lista de comandos a ser carregados.
    */
-  loadProgram(program: string[]): void {
+  loadProgram(program: Command[]): void {
     this.programQueue = program;
   }
 
@@ -108,6 +182,8 @@ export class MepaService {
   pushToMemory(value: number): void {
     this.moveStackTop(1);
     this.memoryStack[this.stackTop] = value;
+    this.memoryStack = [...this.memoryStack];
+    this.memoryChanges$.next(true);
   }
 
   /**
@@ -138,6 +214,7 @@ export class MepaService {
    */
   setMemorySlot(index: number, value: number): void {
     this.memoryStack[index] = value;
+    this.memoryStack = [...this.memoryStack];
   }
 
   /**
@@ -198,6 +275,7 @@ export class MepaService {
     this.instructions.set(name, {
       name,
       paramsCount,
+      description,
       run,
     });
   }
@@ -261,7 +339,14 @@ export class MepaService {
     });
 
     this.defineInstruction('CRVL', 'Carregar valor', 2, (p1, p2) => {
-      this.pushToMemory(this.getLexicalLevelOffset(p1) + p2);
+      this.pushToMemory(
+        this.getValueFromMemory(this.getLexicalLevelOffset(p1) + p2),
+      );
+      console.log(
+        'Valor',
+        this.getValueFromMemory(this.getLexicalLevelOffset(p1) + p2),
+        'está no topo da pilha',
+      );
     });
 
     this.defineInstruction(
@@ -282,11 +367,13 @@ export class MepaService {
 
     this.defineInstruction('PARA', 'Parar', 0, () => {
       // TODO: implementar uma "chamada de sistema" para parar a execução da MEPA.
+      this.done = true;
     });
 
     this.defineInstruction('AMEM', 'Aloca memória', 2, (p1, p2) => {
-      for (let k = 0; k < p2 - 1; k++) {
+      for (let k = 0; k < p2; k++) {
         this.pushToMemory(this.getValueFromMemory(p1 + k));
+        console.log('alocando elemento', k);
       }
     });
 
@@ -297,7 +384,13 @@ export class MepaService {
 
     this.defineInstruction('LEIT', 'Leitura', 0, () => {
       // TODO: implementar "chamada de sistema"
-      this.pushToMemory(parseInt(prompt('Digite o valor para a entrada:')));
+      let v = parseInt(prompt('Digite o valor (numérico) para a entrada:'));
+      console.log('captured value is', v);
+      if (v === null) {
+        console.log('ERRO: entrada inválida! Será 0.');
+        v = 0;
+      }
+      this.pushToMemory(v);
     });
 
     this.defineInstruction('NADA', 'Faz nada', 0, () => {
@@ -307,8 +400,6 @@ export class MepaService {
     this.defineInstruction('DSVF', 'Desvia se falso', 1, (p1) => {
       if (this.popFromMemory() === 0) {
         this.setProgramCounter(p1);
-      } else {
-        this.next();
       }
     });
 
@@ -454,6 +545,12 @@ export class MepaService {
     });
 
     this.defineInstruction('SOMA', 'Somar', 0, () => {
+      console.log(
+        'Tentando somar',
+        this.getValueFromMemory(this.stackTop - 1),
+        '+',
+        this.getValueFromMemory(this.stackTop),
+      );
       this.setMemorySlot(
         this.stackTop - 1,
         this.getValueFromMemory(this.stackTop - 1) +
@@ -467,5 +564,60 @@ export class MepaService {
     });
 
     console.log(this.instructions);
+  }
+
+  /**
+   * Adiciona um comando com base nas definições existentes na META
+   *
+   * @param name Nome do comando como PARA, CRCT, etc
+   * @param p1 Primeiro parâmetro, se existir
+   * @param p2 Segundo parâmetro, se existir
+   */
+  addNewCommand(name: string, p1: number = null, p2: number = null): void {
+    if (!this.instructions.has(name)) {
+      // TODO: adicionar erro
+      console.log('ERRO, COMANDO NÃO ENCONTRADO!', name, p1, p2);
+      return;
+    }
+
+    const commandRef = this.instructions.get(name);
+
+    if (
+      (commandRef.paramsCount === 1 && p1 === null) ||
+      (commandRef.paramsCount === 2 && p1 === null && p2 === null)
+    ) {
+      console.log('ERRO: NÚMERO INCORRETO DE PARÂMETROS');
+      return;
+    }
+
+    const newCommand: Command = {
+      name,
+      p1,
+      p2,
+      commandRef,
+    };
+
+    this.programQueue.push(newCommand);
+  }
+
+  /** Executa o próximo comando e retorna true quando a MEPA estiver ociosa. */
+  run(): boolean {
+    if (this.isDone()) return true;
+    this.next();
+    if (this.programCounter > this.programQueue.length) {
+      console.log('Acabou.');
+      return true;
+    }
+
+    const currentCommand = this.programQueue[this.programCounter];
+    console.log(
+      '[COMANDO]',
+      currentCommand.commandRef.description,
+      currentCommand.p1,
+      currentCommand.p2,
+    );
+    currentCommand.commandRef.run(currentCommand.p1, currentCommand.p2);
+
+    return false;
   }
 }

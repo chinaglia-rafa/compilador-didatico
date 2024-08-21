@@ -1,0 +1,163 @@
+.padded {
+  padding: 16px;
+}
+
+.no-padding {
+  padding: 0 !important;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flex {
+  width: 100%;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  overflow: hidden;
+
+  &.flex--column {
+    flex-direction: column;
+    height: 100%;
+  }
+}
+
+.dont-shrink {
+  flex-shrink: 0;
+}
+
+.memory {
+  .more-emph td {
+    border-top: 2px solid var(--md-sys-color-outline);
+  }
+  tr:last-of-type {
+    td {
+      border-bottom: 2px solid var(--md-sys-color-outline);
+    }
+  }
+  tr td {
+    &:nth-child(1) {
+      border-left: 2px solid var(--md-sys-color-outline);
+    }
+    &:nth-child(3) {
+      border-right: 2px solid var(--md-sys-color-outline);
+    }
+  }
+}
+
+.commands,
+.memory,
+.lexical-table {
+  border-radius: var(--md-sys-shape-corner-medium);
+
+  display: flex;
+  flex-direction: column;
+
+  table {
+    width: 100%;
+    padding-bottom: 8px;
+
+    tr th {
+      padding: 8px;
+    }
+
+    tr:nth-child(odd) td {
+      background: var(--md-sys-color-surface-variant);
+    }
+
+    tr td:nth-child(1) {
+      md-icon {
+        position: relative;
+        top: 2px;
+      }
+    }
+
+    tr td:nth-child(2) {
+      color: var(--md-sys-color-outline);
+      text-align: right;
+      padding-right: 8px;
+    }
+
+    tr th:nth-child(2) {
+      text-align: right;
+      padding-right: 8px;
+    }
+
+    tr td {
+      padding: 4px;
+      height: 27px;
+    }
+
+    .less-emph {
+      opacity: 0.5;
+
+      td {
+        border-color: transparent !important;
+      }
+    }
+    .more-emph td {
+      background: var(--md-sys-color-secondary-container) !important;
+    }
+  }
+
+  h2 {
+    margin: 8px;
+  }
+
+  .scrollable-container {
+    overflow: hidden;
+  }
+}
+
+.highlight {
+  color: var(--md-sys-color-secondary);
+  font-weight: bold;
+  display: inline-block;
+  padding-right: 8px;
+}
+
+.commands {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.memory {
+  flex: 1 auto;
+}
+
+.console {
+  height: 200px;
+}
+
+.registers {
+  height: 80px;
+
+  .register,
+  .last-command {
+    width: 70px;
+    height: 70px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+
+    label {
+      padding-left: 8px;
+    }
+
+    .value {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  .last-command {
+    width: auto;
+    flex: 1 auto;
+
+    .value {
+      padding: 5px 5px 5px 8px;
+      text-align: left;
+    }
+  }
+}

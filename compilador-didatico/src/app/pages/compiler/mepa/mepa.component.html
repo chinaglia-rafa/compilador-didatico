@@ -1,0 +1,241 @@
+<div class="flex flex--column padded">
+  <div class="actions">
+    <md-text-button
+      (click)="next()"
+      (document:keydown.control.enter)="next()"
+      [disabled]="working"
+      >Executar próximo comando
+      <span style="font-size: 12px; opacity: 0.7"
+        >ctrl + enter</span
+      ></md-text-button
+    >
+    <md-filled-tonal-button
+      (click)="all()"
+      (document:keydown.control.alt.enter)="all()"
+      *ngIf="!working"
+      >Executar tudo
+      <span style="font-size: 12px; opacity: 0.7"
+        >ctrl + alt + enter</span
+      ></md-filled-tonal-button
+    >
+    <md-filled-tonal-button
+      (click)="pause()"
+      (document:keydown.escape)="pause()"
+      *ngIf="working"
+      >Pausar
+      <span style="font-size: 12px; opacity: 0.7"
+        >esc</span
+      ></md-filled-tonal-button
+    >
+  </div>
+  <div class="flex">
+    <div class="surface-container-low commands">
+      <h2>Programa</h2>
+      <div class="scrollable-container">
+        <ng-scrollbar
+          #scrollbarProgramComponent
+          visibility="hover"
+          appearance="compact"
+          class="scrollable"
+        >
+          <table cellspacing="0" #programTableComponent cellpadding="0">
+            <tr class="label-medium on-surface-variant-text">
+              <th width="24"></th>
+              <th width="40"></th>
+              <th align="left">Comando</th>
+            </tr>
+            <tr
+              class="body-large"
+              [class.less-emph]="i < this.mepaService.programCounter"
+              [class.more-emph]="i === this.mepaService.programCounter"
+              [id]="'program-id-' + i"
+              *ngFor="let command of mepaService.programQueue; let i = index"
+            >
+              <td [class.no-padding]="i === this.mepaService.programCounter">
+                <md-icon
+                  class="primary-text"
+                  *ngIf="i === this.mepaService.programCounter"
+                  >arrow_right</md-icon
+                >
+              </td>
+              <td>{{ i }}</td>
+              <td class="monospace">
+                {{ command.name }}
+                <span
+                  *ngIf="command.p1 !== undefined && command.p1 !== null"
+                  class="highlight"
+                  >{{ command.p1 }}</span
+                >
+                <span
+                  *ngIf="command.p2 !== undefined && command.p2 !== null"
+                  class="highlight"
+                  >{{ command.p2 }}</span
+                >
+              </td>
+            </tr>
+          </table>
+        </ng-scrollbar>
+      </div>
+    </div>
+    <div class="flex flex--column">
+      <div class="flex">
+        <div class="surface-container-low memory">
+          <h2>Memória</h2>
+          <div class="scrollable-container">
+            <ng-scrollbar
+              #scrollbarMemoryComponent
+              visibility="hover"
+              appearance="compact"
+              class="scrollable"
+            >
+              <table #memoryTableComponent cellspacing="0" cellpadding="0">
+                <tr class="label-medium on-surface-variant-text">
+                  <th width="24"></th>
+                  <th width="40">#</th>
+                  <th align="left">Valor</th>
+                </tr>
+                <tr
+                  [id]="'memory-id-' + (mepaService.memoryStack.length - i - 1)"
+                  class="body-large"
+                  [class.less-emph]="
+                    mepaService.memoryStack.length - i - 1 >
+                    mepaService.stackTop
+                  "
+                  [class.more-emph]="
+                    this.mepaService.stackTop ===
+                    mepaService.memoryStack.length - i - 1
+                  "
+                  *ngFor="
+                    let memorySlot of mepaService.memoryStack | reverse;
+                    let i = index
+                  "
+                >
+                  <td
+                    [class.no-padding]="
+                      this.mepaService.stackTop ===
+                      mepaService.memoryStack.length - i - 1
+                    "
+                  >
+                    <md-icon
+                      class="primary-text"
+                      *ngIf="
+                        this.mepaService.stackTop ===
+                        mepaService.memoryStack.length - i - 1
+                      "
+                      >arrow_right</md-icon
+                    >
+                  </td>
+
+                  <td>{{ mepaService.memoryStack.length - i - 1 }}</td>
+                  <td class="monospace">
+                    {{ memorySlot }}
+                  </td>
+                </tr>
+              </table>
+            </ng-scrollbar>
+          </div>
+        </div>
+        <div class="surface-container-low lexical-table">
+          <h2>Níveis léxicos</h2>
+          <div class="scrollable-container">
+            <ng-scrollbar
+              #scrollbarLexicalComponent
+              visibility="hover"
+              appearance="compact"
+              class="scrollable"
+            >
+              <table cellspacing="0" cellpadding="0">
+                <tr class="label-medium on-surface-variant-text">
+                  <th width="24"></th>
+                  <th width="40">Nível</th>
+                  <th align="left">Endereço</th>
+                </tr>
+                <tr
+                  class="body-large"
+                  [class.less-emph]="i > mepaService.lexicalLevel"
+                  [class.more-emph]="i === mepaService.lexicalLevel"
+                  *ngFor="
+                    let level of mepaService.lexicalLevelsTable;
+                    let i = index
+                  "
+                >
+                  <td [class.no-padding]="i === mepaService.lexicalLevel">
+                    <md-icon
+                      class="primary-text"
+                      *ngIf="i === mepaService.lexicalLevel"
+                      >arrow_right</md-icon
+                    >
+                  </td>
+
+                  <td>{{ i }}</td>
+                  <td class="monospace">
+                    {{ level }}
+                  </td>
+                </tr>
+              </table>
+            </ng-scrollbar>
+          </div>
+        </div>
+      </div>
+      <div class="flex registers dont-shrink">
+        <div class="last-command">
+          <label class="label-medium secondary-text">último comando</label>
+          <div
+            *ngIf="this.mepaService.programCounter >= 0"
+            class="value body-large monospace"
+          >
+            {{
+              this.mepaService.programQueue[this.mepaService.programCounter]
+                .name
+            }}
+            <span
+              *ngIf="
+                this.mepaService.programQueue[this.mepaService.programCounter]
+                  .p1 !== undefined &&
+                this.mepaService.programQueue[this.mepaService.programCounter]
+                  .p1 !== null
+              "
+              class="highlight"
+              >{{
+                this.mepaService.programQueue[this.mepaService.programCounter]
+                  .p1
+              }}</span
+            >
+            <span
+              *ngIf="
+                this.mepaService.programQueue[this.mepaService.programCounter]
+                  .p2 !== undefined &&
+                this.mepaService.programQueue[this.mepaService.programCounter]
+                  .p2 !== null
+              "
+              class="highlight"
+              >{{
+                this.mepaService.programQueue[this.mepaService.programCounter]
+                  .p2
+              }}</span
+            >
+          </div>
+        </div>
+        <div class="register">
+          <label class="label-medium secondary-text">i</label>
+          <div class="value title-large monospace">
+            {{ mepaService.programCounter }}
+          </div>
+        </div>
+        <div class="register">
+          <label class="label-medium secondary-text">s</label>
+          <div class="value title-large monospace">
+            {{ mepaService.stackTop }}
+          </div>
+        </div>
+        <div class="register">
+          <label class="label-medium secondary-text">k</label>
+          <div class="value title-large monospace">
+            {{ mepaService.lexicalLevel }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="flex console dont-shrink">console aqui</div>
+</div>
