@@ -17,6 +17,7 @@ import '@material/web/slider/slider';
 import '@material/web/menu/menu';
 import '@material/web/menu/menu-item';
 import { ConsoleComponent } from '../../../components/console/console.component';
+import { ConsoleService } from '../../../services/console/console.service';
 
 @Component({
   selector: 'app-mepa',
@@ -40,7 +41,10 @@ export class MepaComponent implements OnDestroy {
   canScrollProgram: boolean = true;
   canScrollMemory: boolean = true;
 
-  constructor(public mepaService: MepaService) {}
+  constructor(
+    private consoleService: ConsoleService,
+    public mepaService: MepaService,
+  ) {}
 
   ngOnDestroy() {
     this.pause();
@@ -51,11 +55,23 @@ export class MepaComponent implements OnDestroy {
   }
 
   next(): void {
+    if (!this.working && this.mepaService.isDone()) {
+      this.consoleService.add(
+        '[MEPA]: Reiniciando estado da MEPA para uma nova execução!',
+      );
+      this.reset();
+    }
     this.mepaService.run();
     this.updateScrollbars();
   }
 
   all(): void {
+    if (!this.working && this.mepaService.isDone()) {
+      this.consoleService.add(
+        '[MEPA]: Reiniciando estado da MEPA para uma nova execução!',
+      );
+      this.reset();
+    }
     this.working = true;
     this.timer = setInterval(
       () => {
