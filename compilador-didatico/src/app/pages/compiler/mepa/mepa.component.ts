@@ -1,6 +1,5 @@
 import {
   CUSTOM_ELEMENTS_SCHEMA,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
@@ -12,6 +11,11 @@ import { CommonModule } from '@angular/common';
 import { ReversePipe } from '../../../pipes/reverse.pipe';
 import '@material/web/icon/icon';
 import '@material/web/button/filled-tonal-button';
+import '@material/web/iconbutton/icon-button';
+import '@material/web/switch/switch';
+import '@material/web/slider/slider';
+import '@material/web/menu/menu';
+import '@material/web/menu/menu-item';
 
 @Component({
   selector: 'app-mepa',
@@ -30,13 +34,14 @@ export class MepaComponent implements OnDestroy {
   timer: any;
   working: boolean = false;
 
-  constructor(
-    public mepaService: MepaService,
-    private changeDetection: ChangeDetectorRef,
-  ) {}
+  stepByStep: boolean = true;
+  speed: number = 800;
+  canScrollProgram: boolean = true;
+  canScrollMemory: boolean = true;
+
+  constructor(public mepaService: MepaService) {}
 
   ngOnDestroy() {
-    this.mepaService.memoryChanges$.unsubscribe();
     this.pause();
   }
 
@@ -51,15 +56,18 @@ export class MepaComponent implements OnDestroy {
 
   all(): void {
     this.working = true;
-    this.timer = setInterval(() => {
-      this.mepaService.run();
+    this.timer = setInterval(
+      () => {
+        this.mepaService.run();
 
-      this.updateScrollbars();
-      if (this.mepaService.isDone()) {
-        clearInterval(this.timer);
-        this.working = false;
-      }
-    }, 1000);
+        this.updateScrollbars();
+        if (this.mepaService.isDone()) {
+          clearInterval(this.timer);
+          this.working = false;
+        }
+      },
+      this.stepByStep === true ? this.speed : 0,
+    );
   }
   pause(): void {
     clearInterval(this.timer);
@@ -67,23 +75,50 @@ export class MepaComponent implements OnDestroy {
   }
 
   updateScrollbars(): void {
-    console.log(`#program-id-${this.mepaService.programCounter}`);
-    this.scrollbarProgram.scrollTo({
-      top:
-        this.programTable.nativeElement.querySelector(
-          `#program-id-${this.mepaService.programCounter}`,
-          // o 222 é um offset razoável entre o elemento a ser focado e o topo
-        ).offsetTop - 222,
-    });
+    if (this.canScrollProgram)
+      this.scrollbarProgram
+        .scrollTo({
+          duration: 200,
+          top:
+            this.programTable.nativeElement.querySelector(
+              `#program-id-${this.mepaService.programCounter}`,
+              // o 222 é um offset razoável entre o elemento a ser focado e o topo
+            ).offsetTop - 222,
+        })
+        .then(() => (this.canScrollProgram = true));
 
-    if (this.mepaService.stackTop >= 0) {
-      this.scrollbarMemory.scrollTo({
-        top:
-          this.memoryTable.nativeElement.querySelector(
-            `#memory-id-${this.mepaService.stackTop}`,
-            // o 222 é um offset razoável entre o elemento a ser focado e o topo
-          ).offsetTop - 30,
-      });
+    if (this.mepaService.stackTop >= 0 && this.canScrollMemory) {
+      this.scrollbarMemory
+        .scrollTo({
+          top:
+            this.memoryTable.nativeElement.querySelector(
+              `#memory-id-${this.mepaService.stackTop}`,
+              // o 30 é um offset razoável entre o elemento a ser focado e o topo
+            ).offsetTop - 30,
+        })
+        .then(() => (this.canScrollMemory = true));
+
+      this.canScrollMemory = false;
     }
+    this.canScrollProgram = false;
+  }
+
+  /** Evento ativado ao trocar o valor do switch de passo-a-passo */
+  stepByStepChanges(event: any): void {
+    this.stepByStep = event.target.selected;
+    this.pause();
+  }
+
+  /** Evento ativado ao trocar o valor do slider de velocidade */
+  speedChange(event: any): void {
+    this.speed = event.target.value;
+    this.pause();
+  }
+
+  reset(): void {
+    this.pause();
+    this.mepaService.restart();
+    this.scrollbarProgram.scrollTo({ top: 0 });
+    this.scrollbarMemory.scrollTo({ bottom: 0 });
   }
 }

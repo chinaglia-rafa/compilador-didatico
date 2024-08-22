@@ -134,6 +134,17 @@ export class MepaService {
     this.addNewCommand('PARA');
   }
 
+  /** Reinicia o serviço sem apagar o programa atual */
+  restart(): void {
+    this.programCounter = -1;
+    this.memoryStack = Array(100);
+    this.stackTop = -1;
+    this.lexicalLevelsTable = Array(12);
+    this.lexicalLevelsTable[0] = 0;
+    this.lexicalLevel = 0;
+    this.done = false;
+  }
+
   /** reinicia todas as variáveis do serviço */
   reset(): void {
     this.programQueue = [];

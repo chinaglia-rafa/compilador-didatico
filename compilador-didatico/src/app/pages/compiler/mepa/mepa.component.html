@@ -1,32 +1,91 @@
 <div class="flex flex--column padded">
   <div class="actions">
-    <md-text-button
-      (click)="next()"
-      (document:keydown.control.enter)="next()"
-      [disabled]="working"
-      >Executar próximo comando
-      <span style="font-size: 12px; opacity: 0.7"
-        >ctrl + enter</span
-      ></md-text-button
-    >
-    <md-filled-tonal-button
-      (click)="all()"
-      (document:keydown.control.alt.enter)="all()"
-      *ngIf="!working"
-      >Executar tudo
-      <span style="font-size: 12px; opacity: 0.7"
-        >ctrl + alt + enter</span
-      ></md-filled-tonal-button
-    >
-    <md-filled-tonal-button
-      (click)="pause()"
-      (document:keydown.escape)="pause()"
-      *ngIf="working"
-      >Pausar
-      <span style="font-size: 12px; opacity: 0.7"
-        >esc</span
-      ></md-filled-tonal-button
-    >
+    <div>
+      <md-text-button
+        (click)="next()"
+        (document:keydown.control.enter)="next()"
+        [disabled]="working"
+        >Próximo comando
+        <span style="font-size: 12px; opacity: 0.7">ctrl + enter</span>
+      </md-text-button>
+      <md-text-button
+        (click)="reset()"
+        (document:keydown.control.enter)="reset()"
+        *ngIf="mepaService.programCounter !== -1"
+        >Reiniciar
+      </md-text-button>
+    </div>
+    <div>
+      <md-filled-tonal-button
+        (click)="all()"
+        (document:keydown.control.alt.enter)="all()"
+        *ngIf="!working"
+        >Executar tudo
+        <span style="font-size: 12px; opacity: 0.7">ctrl + alt + enter</span>
+      </md-filled-tonal-button>
+      <md-filled-tonal-button
+        (click)="pause()"
+        (document:keydown.escape)="pause()"
+        *ngIf="working"
+      >
+        Pausar
+        <span style="font-size: 12px; opacity: 0.7">esc</span>
+      </md-filled-tonal-button>
+      <span style="position: relative">
+        <md-icon-button
+          [disabled]="working"
+          (click)="menu.open = !menu.open; $event.stopPropagation()"
+          id="menu-button"
+          style="margin-left: 8px"
+        >
+          <md-icon>more_vert</md-icon>
+        </md-icon-button>
+        <md-menu #menu anchor="menu-button">
+          <md-menu-item keep-open="true">
+            <div slot="headline">
+              <label>
+                <div>
+                  <span class="on-surface-text label-large"
+                    >Ir passo-a-passo</span
+                  >
+                  <br />
+                  <span class="on-surface-variant-text label-medium">
+                    Veja um comando por vez
+                  </span>
+                </div>
+                <md-switch
+                  [selected]="stepByStep"
+                  (change)="stepByStepChanges($event)"
+                ></md-switch>
+              </label>
+            </div>
+          </md-menu-item>
+          <md-menu-item keep-open="true" [disabled]="!stepByStep">
+            <div slot="headline">
+              <label>
+                <div>
+                  <span class="on-surface-text label-large">Velocidade</span>
+                  <br />
+                  <span class="on-surface-variant-text label-medium">
+                    Intervalo entre os passos de execução.
+                  </span>
+                </div>
+                <md-slider
+                  [disabled]="!stepByStep"
+                  #speedSlider
+                  min="0"
+                  step="200"
+                  max="2000"
+                  (change)="speedChange($event)"
+                  [value]="speed"
+                ></md-slider>
+                <span>{{ speedSlider.value / 1000 | number: "1.1-1" }}s</span>
+              </label>
+            </div>
+          </md-menu-item>
+        </md-menu>
+      </span>
+    </div>
   </div>
   <div class="flex">
     <div class="surface-container-low commands">

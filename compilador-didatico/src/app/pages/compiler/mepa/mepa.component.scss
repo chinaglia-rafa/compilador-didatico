@@ -9,6 +9,27 @@
 .actions {
   display: flex;
   justify-content: space-between;
+
+  md-menu-item {
+    min-width: 354px;
+
+    md-slider {
+      min-width: 100px;
+      width: 100px;
+    }
+
+    div label {
+      padding: 10px 10px 10px 0;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      div {
+        line-height: 1em;
+      }
+    }
+  }
 }
 
 .flex {
