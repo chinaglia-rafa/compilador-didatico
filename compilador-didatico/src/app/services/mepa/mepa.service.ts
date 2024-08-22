@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { ConsoleService } from '../console/console.service';
 
 /**
  * Representa uma instrução da MEPA, como ARMZ ou RTPR, seu número
@@ -87,7 +88,7 @@ export class MepaService {
   /** Indica se a execução foi concluída com sucesso */
   done: boolean = false;
 
-  constructor() {
+  constructor(private console: ConsoleService) {
     this.reset();
     this.loadInstructions();
     /**
@@ -379,6 +380,7 @@ export class MepaService {
     this.defineInstruction('PARA', 'Parar', 0, () => {
       // TODO: implementar uma "chamada de sistema" para parar a execução da MEPA.
       this.done = true;
+      this.console.add(`[MEPA]: Execução finalizada.`);
     });
 
     this.defineInstruction('AMEM', 'Aloca memória', 2, (p1, p2) => {
@@ -389,8 +391,9 @@ export class MepaService {
     });
 
     this.defineInstruction('IMPR', 'Impressão', 0, () => {
-      // TODO: implementar "chamada de sistema"
-      console.log('IMPRESSÃO:', this.popFromMemory());
+      const v = this.popFromMemory();
+      console.log('IMPRESSÃO:', v);
+      this.console.add(`[MEPA]: ${v}`);
     });
 
     this.defineInstruction('LEIT', 'Leitura', 0, () => {

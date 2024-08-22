@@ -1,1 +1,27 @@
-console works!
+<div class="container monospace">
+  <ng-scrollbar
+    #scrollbarComponent
+    visibility="hover"
+    appearance="compact"
+    class="scrollable"
+  >
+    <div class="previous-commands">
+      <div
+        #commandsComponent
+        class="command"
+        *ngFor="let c of consoleService.messages"
+      >
+        {{ c }}
+      </div>
+    </div>
+    <div class="prompt" *ngIf="false">
+      <md-icon>chevron_right</md-icon>
+      <input
+        type="text"
+        name="ipt"
+        class="ipt inverse-on-surface-text body-medium monospace"
+        value=""
+      />
+    </div>
+  </ng-scrollbar>
+</div>

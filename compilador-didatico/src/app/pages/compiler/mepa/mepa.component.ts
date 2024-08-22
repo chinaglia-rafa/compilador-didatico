@@ -16,11 +16,12 @@ import '@material/web/switch/switch';
 import '@material/web/slider/slider';
 import '@material/web/menu/menu';
 import '@material/web/menu/menu-item';
+import { ConsoleComponent } from '../../../components/console/console.component';
 
 @Component({
   selector: 'app-mepa',
   standalone: true,
-  imports: [CommonModule, NgScrollbarModule, ReversePipe],
+  imports: [CommonModule, NgScrollbarModule, ReversePipe, ConsoleComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './mepa.component.html',
   styleUrl: './mepa.component.scss',

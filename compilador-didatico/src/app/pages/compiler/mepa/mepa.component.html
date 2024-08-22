@@ -1,5 +1,5 @@
-<div class="flex flex--column padded">
-  <div class="actions">
+<div class="flex flex--column">
+  <div class="actions padded">
     <div>
       <md-text-button
         (click)="next()"
@@ -10,7 +10,6 @@
       </md-text-button>
       <md-text-button
         (click)="reset()"
-        (document:keydown.control.enter)="reset()"
         *ngIf="mepaService.programCounter !== -1"
         >Reiniciar
       </md-text-button>
@@ -87,7 +86,7 @@
       </span>
     </div>
   </div>
-  <div class="flex">
+  <div class="flex padded">
     <div class="surface-container-low commands">
       <h2>Programa</h2>
       <div class="scrollable-container">
@@ -296,5 +295,7 @@
       </div>
     </div>
   </div>
-  <div class="flex console dont-shrink">console aqui</div>
+  <div class="flex console dont-shrink">
+    <app-console></app-console>
+  </div>
 </div>
