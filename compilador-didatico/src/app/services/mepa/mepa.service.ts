@@ -354,11 +354,6 @@ export class MepaService {
       this.pushToMemory(
         this.getValueFromMemory(this.getLexicalLevelOffset(p1) + p2),
       );
-      console.log(
-        'Valor',
-        this.getValueFromMemory(this.getLexicalLevelOffset(p1) + p2),
-        'está no topo da pilha',
-      );
     });
 
     this.defineInstruction(
@@ -386,7 +381,6 @@ export class MepaService {
     this.defineInstruction('AMEM', 'Aloca memória', 2, (p1, p2) => {
       for (let k = 0; k < p2; k++) {
         this.pushToMemory(this.getValueFromMemory(p1 + k));
-        console.log('alocando elemento', k);
       }
     });
 
@@ -398,11 +392,20 @@ export class MepaService {
 
     this.defineInstruction('LEIT', 'Leitura', 0, () => {
       // TODO: implementar "chamada de sistema"
-      let v = parseInt(prompt('Digite o valor (numérico) para a entrada:'));
-      console.log('captured value is', v);
-      if (v === null) {
-        console.log('ERRO: entrada inválida! Será 0.');
+      let p: string;
+      do {
+        p = prompt('Digite o valor (numérico) para a entrada:');
+      } while (isNaN(parseInt(p)) && p != null);
+
+      let v: number;
+
+      if (p === null) {
+        this.console.add(
+          '[MEPA]: Entrada cancelada pelo usuário. A entrada será considerada como 0.',
+        );
         v = 0;
+      } else {
+        v = parseInt(p);
       }
       this.pushToMemory(v);
     });
@@ -559,12 +562,6 @@ export class MepaService {
     });
 
     this.defineInstruction('SOMA', 'Somar', 0, () => {
-      console.log(
-        'Tentando somar',
-        this.getValueFromMemory(this.stackTop - 1),
-        '+',
-        this.getValueFromMemory(this.stackTop),
-      );
       this.setMemorySlot(
         this.stackTop - 1,
         this.getValueFromMemory(this.stackTop - 1) +
@@ -576,8 +573,6 @@ export class MepaService {
     this.defineInstruction('CRCT', 'Carregar constante', 1, (p1) => {
       this.pushToMemory(p1);
     });
-
-    console.log(this.instructions);
   }
 
   /**
@@ -619,17 +614,10 @@ export class MepaService {
     if (this.isDone()) return true;
     this.next();
     if (this.programCounter > this.programQueue.length) {
-      console.log('Acabou.');
       return true;
     }
 
     const currentCommand = this.programQueue[this.programCounter];
-    console.log(
-      '[COMANDO]',
-      currentCommand.commandRef.description,
-      currentCommand.p1,
-      currentCommand.p2,
-    );
     currentCommand.commandRef.run(currentCommand.p1, currentCommand.p2);
 
     return false;
