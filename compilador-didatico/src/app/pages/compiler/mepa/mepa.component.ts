@@ -16,6 +16,7 @@ import '@material/web/switch/switch';
 import '@material/web/slider/slider';
 import '@material/web/menu/menu';
 import '@material/web/menu/menu-item';
+import '@material/web/divider/divider';
 import { ConsoleComponent } from '../../../components/console/console.component';
 import { ConsoleService } from '../../../services/console/console.service';
 
@@ -32,6 +33,7 @@ export class MepaComponent implements OnDestroy {
   @ViewChild('scrollbarProgramComponent') scrollbarProgram: NgScrollbar;
   @ViewChild('programTableComponent') programTable: ElementRef;
   @ViewChild('memoryTableComponent') memoryTable: ElementRef;
+  @ViewChild('fileInput') fileInputElement: ElementRef;
 
   timer: any;
   working: boolean = false;
@@ -55,6 +57,11 @@ export class MepaComponent implements OnDestroy {
   }
 
   next(): void {
+    if (
+      this.working ||
+      this.mepaService.programCounter === this.mepaService.programQueue.length
+    )
+      return;
     if (!this.working && this.mepaService.isDone()) {
       this.consoleService.add(
         '[MEPA]: Reiniciando estado da MEPA para uma nova execução!',
@@ -92,7 +99,12 @@ export class MepaComponent implements OnDestroy {
   }
 
   updateScrollbars(): void {
-    if (this.canScrollProgram)
+    console.log('program counter', this.mepaService.programCounter);
+    if (
+      this.mepaService.programCounter >= 0 &&
+      this.mepaService.programCounter < this.mepaService.programQueue.length &&
+      this.canScrollProgram
+    )
       this.scrollbarProgram
         .scrollTo({
           duration: 200,
@@ -137,5 +149,32 @@ export class MepaComponent implements OnDestroy {
     this.mepaService.restart();
     this.scrollbarProgram.scrollTo({ top: 0 });
     this.scrollbarMemory.scrollTo({ bottom: 0 });
+  }
+
+  openFile(): void {
+    this.fileInputElement.nativeElement.click();
+  }
+
+  upload(event: Event): void {
+    if (this.fileInputElement.nativeElement.value === '') return;
+    console.log('event', event);
+    console.log('file', this.fileInputElement.nativeElement.files[0]);
+
+    /*if (this.fileInputElement.nativeElement.files[0].type !== 'text/plain') {
+      alert(
+        'O arquivo escolhido não foi identificado como text/plain. Seu formato não é suportado.',
+      );
+      return;
+    }*/
+
+    const fileReader = new FileReader();
+
+    fileReader.onload = () => {
+      console.log(fileReader.result);
+      this.mepaService.processProgramText(fileReader.result as string);
+      this.fileInputElement.nativeElement.value = '';
+    };
+
+    fileReader.readAsText(this.fileInputElement.nativeElement.files[0]);
   }
 }

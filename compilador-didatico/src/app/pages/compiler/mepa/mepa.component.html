@@ -1,16 +1,27 @@
+<input
+  type="file"
+  (change)="upload($event)"
+  name="loadFile"
+  id="loadFile"
+  #fileInput
+  class="hidden"
+/>
 <div class="flex flex--column">
   <div class="actions padded">
     <div>
       <md-text-button
         (click)="next()"
         (document:keydown.control.enter)="next()"
-        [disabled]="working"
+        [disabled]="
+          working ||
+          mepaService.programCounter === mepaService.programQueue.length
+        "
         >Próximo comando
         <span style="font-size: 12px; opacity: 0.7">ctrl + enter</span>
       </md-text-button>
-      <md-text-button
-        (click)="reset()"
-        *ngIf="mepaService.programCounter !== -1"
+      <!-- LAAAAAAAAAAAAZY huahuahuahuahuahu -->
+      &nbsp;
+      <md-text-button (click)="reset()" *ngIf="mepaService.programCounter > 0"
         >Reiniciar
       </md-text-button>
     </div>
@@ -82,6 +93,10 @@
               </label>
             </div>
           </md-menu-item>
+          <md-divider></md-divider>
+          <md-menu-item (click)="openFile()">
+            <div slot="headline">Abrir programa</div>
+          </md-menu-item>
         </md-menu>
       </span>
     </div>
@@ -128,6 +143,11 @@
                   *ngIf="command.p2 !== undefined && command.p2 !== null"
                   class="highlight"
                   >{{ command.p2 }}</span
+                >
+                <span
+                  *ngIf="command.p3 !== undefined && command.p3 !== null"
+                  class="highlight"
+                  >{{ command.p3 }}</span
                 >
               </td>
             </tr>
@@ -242,35 +262,30 @@
             *ngIf="this.mepaService.programCounter >= 0"
             class="value body-large monospace"
           >
-            {{
-              this.mepaService.programQueue[this.mepaService.programCounter]
-                .name
-            }}
+            {{ this.mepaService.lastCommand?.name }}
             <span
               *ngIf="
-                this.mepaService.programQueue[this.mepaService.programCounter]
-                  .p1 !== undefined &&
-                this.mepaService.programQueue[this.mepaService.programCounter]
-                  .p1 !== null
+                this.mepaService.lastCommand?.p1 !== undefined &&
+                this.mepaService.lastCommand?.p1 !== null
               "
               class="highlight"
-              >{{
-                this.mepaService.programQueue[this.mepaService.programCounter]
-                  .p1
-              }}</span
+              >{{ this.mepaService.lastCommand?.p1 }}</span
             >
             <span
               *ngIf="
-                this.mepaService.programQueue[this.mepaService.programCounter]
-                  .p2 !== undefined &&
-                this.mepaService.programQueue[this.mepaService.programCounter]
-                  .p2 !== null
+                this.mepaService.lastCommand?.p2 !== undefined &&
+                this.mepaService.lastCommand?.p2 !== null
               "
               class="highlight"
-              >{{
-                this.mepaService.programQueue[this.mepaService.programCounter]
-                  .p2
-              }}</span
+              >{{ this.mepaService.lastCommand?.p2 }}</span
+            >
+            <span
+              *ngIf="
+                this.mepaService.lastCommand?.p3 !== undefined &&
+                this.mepaService.lastCommand?.p3 !== null
+              "
+              class="highlight"
+              >{{ this.mepaService.lastCommand?.p3 }}</span
             >
           </div>
         </div>
