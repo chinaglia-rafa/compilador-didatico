@@ -270,7 +270,7 @@ export class MepaService {
       this.setLexicalLevelSlot(0, 0);
     });
 
-    // O p1 é o nível léxico do procedimento que está RETORNANDO
+    // O p1 é o número de PARAMETROS FORMAIS DA FUNÇÃO QUE ESTÁ RETORNANDO
     this.defineInstruction('RTPR', 'Retornar de procedimento', 1, (p1) => {
       //this.setLexicalLevelSlot(p1, this.memoryStack[this.stackTop]);
       //this.setProgramCounter(this.memoryStack[this.stackTop - 2]);
