@@ -16,11 +16,21 @@ import {
 } from '../../../services/logger/logger.service';
 import { map } from 'rxjs';
 import { LogItemComponent } from '../../../components/log-item/log-item.component';
+import {
+  CdkVirtualScrollViewport,
+  ScrollingModule,
+} from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'app-syntactic-analysis',
   standalone: true,
-  imports: [CommonModule, IsTerminalPipe, NgScrollbarModule, LogItemComponent],
+  imports: [
+    CommonModule,
+    IsTerminalPipe,
+    NgScrollbarModule,
+    LogItemComponent,
+    ScrollingModule,
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './syntactic-analysis.component.html',
   styleUrl: './syntactic-analysis.component.scss',
@@ -28,6 +38,7 @@ import { LogItemComponent } from '../../../components/log-item/log-item.componen
 export class SyntacticAnalysisComponent implements OnInit {
   @ViewChild('scrollbarStackComponent') scrollbarStack: NgScrollbar;
   @ViewChild('scrollbarTokensComponent') scrollbarTokens: NgScrollbar;
+  @ViewChild('virtualViewport') virtualScroll: CdkVirtualScrollViewport;
 
   /** lista de logs filtrada apenas para momentos da análise sintática */
   logs: LogEntry[] = [];
@@ -44,7 +55,10 @@ export class SyntacticAnalysisComponent implements OnInit {
   }
 
   stepByStep(): void {
+    this.loggerService.clear();
+
     this.syntacticAnalysisService.startStepByStep();
+    this.virtualScroll.checkViewportSize();
   }
 
   next(): void {

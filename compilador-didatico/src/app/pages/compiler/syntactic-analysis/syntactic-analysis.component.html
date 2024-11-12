@@ -5,7 +5,6 @@
       #scrollbarTokensComponent
       visibility="hover"
       appearance="compact"
-      class="scrollable"
       orientation="horizontal"
     >
       <div class="tokens">
@@ -39,7 +38,6 @@
         #scrollbarStackComponent
         visibility="hover"
         appearance="compact"
-        class="scrollable"
       >
         <div class="stack-container">
           <div
@@ -100,14 +98,20 @@
         visibility="hover"
         appearance="compact"
         class="scrollable"
+        cdkVirtualScrollingElement
       >
-        <div class="logs">
+        <cdk-virtual-scroll-viewport
+          #virtualViewport
+          id="virtual-scroll"
+          itemSize="50"
+          class="logs"
+        >
           <log-item
             customBackgroundColor="var(--md-sys-color-surface-container)"
-            *ngFor="let log of logs"
+            *cdkVirtualFor="let log of logs"
             [log]="log"
           ></log-item>
-        </div>
+        </cdk-virtual-scroll-viewport>
       </ng-scrollbar>
     </div>
   </div>
