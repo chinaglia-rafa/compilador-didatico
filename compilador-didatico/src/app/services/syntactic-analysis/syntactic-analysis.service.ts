@@ -12,6 +12,10 @@ import { LoggerService } from '../logger/logger.service';
 import { BehaviorSubject } from 'rxjs';
 import { ErrorsService } from '../errors/errors.service';
 import { SemanticAnalysisService } from '../semantic-analysis/semantic-analysis.service';
+import {
+  SymbolCategory,
+  SymbolPassedAs,
+} from '../symbols-table/symbols-table.service';
 
 export interface FirstList {
   symbol: string;
@@ -25,6 +29,11 @@ export interface FollowList {
 export interface SyntacticTreeNode {
   id: string;
   label: string;
+  dimension: {
+    width: number;
+    height: number;
+  };
+  isTerminal: boolean;
 }
 
 export interface SyntacticTreeLink {
@@ -77,7 +86,6 @@ export class SyntacticAnalysisService {
   pendingFollowRecursions: string[] = [];
   /** Indica se a análise sintática deve ser feita automaticamente ou passo-a-passo */
   autoMode: boolean = true;
-
   /**
    * Evento que é emitido quando o serviço termina de preparar a
    * gramática.
@@ -91,7 +99,6 @@ export class SyntacticAnalysisService {
   lastTerminal: Token;
   /** Indica se a compilação foi iniciada */
   started: boolean = false;
-
   /** Representação da árvore sintática */
   syntacticTree: SyntacticTree;
   /** Contagem ascendente para controlar IDs únicos */
@@ -116,25 +123,41 @@ export class SyntacticAnalysisService {
     this.prepare();
   }
 
-  reset(): void {
+  /**
+   * Reseta o serviço de Análise Sintática
+   *
+   * @param hard indica se o reset deve conter cálculos do construtor
+   * como firsts e follows.
+   */
+  reset(hard: boolean = false): void {
     this.eof = false;
     this.lastTerminal = null;
     this.hasErrors = false;
     this.input = [];
     this.stack = [];
-    this.firsts = [];
-    this.follows = [];
-    this.syntacticTable = new TabelaSintatica();
+    if (hard) {
+      this.firsts = [];
+      this.follows = [];
+      this.syntacticTable = new TabelaSintatica();
+    }
     this.started = false;
     this.syntacticTree = {
       nodes: [],
       links: [],
     };
+
+    this.nodeCount$.next(0);
   }
 
   startStepByStep(): void {
     this.started = false;
     this.autoMode = false;
+    this.parse(this.originalInput);
+  }
+
+  /** Para o modo passo-a-passo e finaliza a análise */
+  stopStepByStep(): void {
+    this.autoMode = true;
     this.parse(this.originalInput);
   }
 
@@ -478,13 +501,17 @@ export class SyntacticAnalysisService {
   }
 
   parse(ipt: Token[]): void {
+    const path = this._path.concat(['parse()']);
+
     if (!this.started) {
       this.loading$.next(true);
       this.input = [].concat(ipt);
       this.originalInput = [].concat(ipt);
 
       this.semanticAnalysisService.reset();
-      this.semanticAnalysisService.setScope('global');
+      this.semanticAnalysisService.pushBlock('global');
+
+      this.loggerService.log('Iniciando análise sintática', 'stp', path, 1);
 
       /** token representando o final da entrada de tokens */
       const endToken: Token = {
@@ -493,6 +520,13 @@ export class SyntacticAnalysisService {
         col: this.input[this.input.length - 1].col,
         row: this.input[this.input.length - 1].row,
       };
+
+      this.loggerService.log(
+        'Anotando <i>token</i> final <span class="monospace>$</span> no fim da entrada',
+        'stp',
+        path,
+        1,
+      );
 
       this.input.push(endToken);
 
@@ -510,7 +544,14 @@ export class SyntacticAnalysisService {
           id: `node_${this.idCounter++}`,
         },
       ];
-      // this.addNode(endToken.lexema, this.idCounter.toString());
+
+      this.loggerService.log(
+        'Anotando <i>símbolo</i> final <span class="monospace">$</span> no fundo da pilha',
+        'stp',
+        path,
+        1,
+      );
+
       const root = this.selectedGrammar.productions[0].leftSide;
       const rootId = `node_${this.idCounter++}`;
       this.stack.push({
@@ -518,6 +559,12 @@ export class SyntacticAnalysisService {
         id: rootId,
       });
       this.addNode(root, rootId);
+      this.loggerService.log(
+        'Empilha o símbolo raiz da gramática para começar',
+        'stp',
+        path,
+        1,
+      );
 
       this.started = true;
     }
@@ -541,14 +588,17 @@ export class SyntacticAnalysisService {
   parseStep(): string {
     /** Variável usada para os logs */
     const path = this._path.concat(['parse()', 'parseStep()']);
+
+    this.loggerService.log(
+      'Começando um novo passo da análise sintática',
+      'stp',
+      path,
+      1,
+    );
+
     this.eof = false;
     let currentToken = this.input[0];
     if (!currentToken) return 'break';
-
-    //console.log('stack:', this.stack.map((el) => el.value).join(' | '));
-    //console.log('input:', input[0].lexema);
-    //console.log('input:', this.input.map((el) => el.lexema).join(' | '));
-    //console.log('================================');
 
     /**
      * Verifica se, no passo atual da análise, toda a cadeia de entrada
@@ -571,6 +621,8 @@ export class SyntacticAnalysisService {
       this.semanticAnalysisService.nextIdentifiersCount();
 
       this.started = false;
+      // reativa o modo automático
+      this.autoMode = true;
       this.loading$.next(false);
       return 'break';
     } else if (
@@ -595,8 +647,28 @@ export class SyntacticAnalysisService {
       return 'break';
     }
 
+    this.loggerService.log(
+      `Temos um símbolo <span class="monospace">${this.stack[this.stack.length - 1].value.match(/<.+>/g) !== null ? 'não-terminal' : 'terminal'}</span> no topo da pilha: ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)}`,
+      'stp',
+      path,
+      1,
+    );
+
     if (this.stack[this.stack.length - 1].value.match(/<.+>/g) !== null) {
+      this.loggerService.log(
+        'Ação de símbolo <span class="monospace">não-terminal</span>: encontrar uma derivação',
+        'stp',
+        path.concat(['não-terminal']),
+        1,
+      );
+
       if (this.stack[this.stack.length - 1].value === '<identificador>') {
+        this.loggerService.log(
+          `Símbolos do tipo ${this.wrapSymbolInTags('<identificador>')} serão validados diretamente`,
+          'stp',
+          path.concat(['derivação', 'validando identificador']),
+          1,
+        );
         if (
           ![
             'identificador-válido',
@@ -615,11 +687,60 @@ export class SyntacticAnalysisService {
             path,
             `${currentToken.lexema} (${currentToken.token}) encontrado.`,
           );
+
+          this.loggerService.log(
+            `👎 A token atual (${this.wrapSymbolInTags(currentToken.lexema)} do tipo ${currentToken.token}) não é um identificador válido`,
+            'err',
+            path.concat(['não-terminal', 'validando identificador']),
+            1,
+          );
+
+          this.loggerService.log(
+            `❌ Descartando token ${this.wrapSymbolInTags(currentToken.lexema)} em virtude de erro sintático`,
+            'err',
+            path.concat([
+              'derivação',
+              'validando identificador',
+              'tokens de entrada',
+            ]),
+            1,
+          );
+          this.loggerService.log(
+            `❌ Descartando símbolo ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} em virtude de erro sintático`,
+            'err',
+            path.concat([
+              'derivação',
+              'validando identificador',
+              'pilha de símbolos',
+            ]),
+            1,
+          );
+
           this.hasErrors = true;
           this.popped = this.stack.pop();
           this.lastTerminal = this.input.shift();
+
           return 'continue';
         }
+
+        this.loggerService.log(
+          `👍 A token atual (<span class="monospace">${currentToken.lexema}</span> do tipo ${currentToken.token}) é um identificador válido`,
+          'stp',
+          path.concat(['derivação', 'validando identificador']),
+          1,
+        );
+
+        this.loggerService.log(
+          `✅ Desempilhando símbolo ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} que foi derivado`,
+          'stp',
+          path.concat([
+            'derivação',
+            'validando identificador',
+            'pilha de símbolos',
+          ]),
+          1,
+        );
+
         this.popped = this.stack.pop();
         this.addNode(currentToken.lexema, `node_${this.idCounter++}`);
 
@@ -628,14 +749,18 @@ export class SyntacticAnalysisService {
             'declaracao_de_variaveis' ||
           this.semanticAnalysisService.getMode() === 'nome_programa'
         ) {
+          this.semanticAnalysisService.setCategory(SymbolCategory.Variable);
           this.semanticAnalysisService.addIdentifier(currentToken.symbolIndex);
         } else if (
           this.semanticAnalysisService.getMode() ===
           'declaracao_de_procedimento'
         ) {
           this.semanticAnalysisService.setType('procedure-name');
+          this.semanticAnalysisService.setCategory(SymbolCategory.Procedure);
           this.semanticAnalysisService.addIdentifier(currentToken.symbolIndex);
-          this.semanticAnalysisService.setScope('func_' + currentToken.lexema);
+          //this.semanticAnalysisService.setScope('func_' + currentToken.lexema);
+          this.semanticAnalysisService.pushBlock('func_' + currentToken.lexema);
+          this.semanticAnalysisService.enterNewLexicalLevel();
           this.semanticAnalysisService.done();
         } else if (
           this.semanticAnalysisService.getMode() === 'parametros_formais'
@@ -645,16 +770,37 @@ export class SyntacticAnalysisService {
             this.lastTerminal.lexema === ':'
           ) {
             this.semanticAnalysisService.setType(currentToken.lexema);
+            this.semanticAnalysisService.setCategory(
+              SymbolCategory.FormalParam,
+            );
             this.semanticAnalysisService.consolidate();
           }
-
           this.semanticAnalysisService.accumulate(currentToken.symbolIndex);
         } else {
           this.semanticAnalysisService.checkIdentifier(currentToken);
         }
+
+        this.loggerService.log(
+          `✅ Removendo token ${this.wrapSymbolInTags(currentToken.lexema)} que foi validada`,
+          'stp',
+          path.concat([
+            'derivação',
+            'validando identificador',
+            'tokens de entrada',
+          ]),
+          1,
+        );
+
         this.lastTerminal = this.input.shift();
         return 'continue';
       } else if (this.stack[this.stack.length - 1].value === '<número>') {
+        this.loggerService.log(
+          `Símbolos do tipo ${this.wrapSymbolInTags('<número>')} serão validados diretamente`,
+          'stp',
+          path.concat(['derivação', 'validando número']),
+          1,
+        );
+
         if (
           currentToken.token !== 'número-natural' &&
           currentToken.token !== 'número-real'
@@ -668,17 +814,72 @@ export class SyntacticAnalysisService {
             path,
             `${currentToken.lexema} (${currentToken.token}) encontrado.`,
           );
+
+          this.loggerService.log(
+            `👎 A token atual (${this.wrapSymbolInTags(currentToken.lexema)} do tipo ${currentToken.token}) não é um número válido.`,
+            'err',
+            path.concat(['derivação', 'validando número']),
+            1,
+          );
+
+          this.loggerService.log(
+            `❌ Descartando token ${this.wrapSymbolInTags(currentToken.lexema)} em virtude de erro sintático`,
+            'err',
+            path.concat(['derivação', 'validando número', 'tokens de entrada']),
+            1,
+          );
+
+          this.loggerService.log(
+            `❌ Descartando símbolo ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} em virtude de erro sintático`,
+            'err',
+            path.concat(['derivação', 'validando número', 'pilha de símbolos']),
+            1,
+          );
+
           this.hasErrors = true;
           this.popped = this.stack.pop();
 
           this.lastTerminal = this.input.shift();
           return 'continue';
         }
+
+        this.loggerService.log(
+          `👍 A token atual (${this.wrapSymbolInTags(currentToken.lexema)} do tipo ${currentToken.token}) é um número válido`,
+          'stp',
+          path.concat(['derivação', 'validando número', 'tokens de entrada']),
+          1,
+        );
+
+        this.loggerService.log(
+          `✅ Removendo token ${this.wrapSymbolInTags(currentToken.lexema)} que foi validada`,
+          'stp',
+          path.concat(['derivação', 'validando número', 'tokens de entrada']),
+          1,
+        );
+
+        this.loggerService.log(
+          `✅ Removendo símbolo ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} que foi validado`,
+          'stp',
+          path.concat([
+            'derivação',
+            'validando identificador',
+            'pilha de símbolos',
+          ]),
+          1,
+        );
+
         this.popped = this.stack.pop();
         this.addNode(currentToken.lexema, `node_${this.idCounter++}`);
         this.lastTerminal = this.input.shift();
         return 'continue';
       }
+
+      this.loggerService.log(
+        `Procurando derivação de ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} que aponte para ${this.wrapSymbolInTags(currentToken.lexema)} na tabela sintática`,
+        'stp',
+        path.concat(['derivação', 'tabela sintática']),
+        1,
+      );
 
       const row = this.syntacticTable.row.find(
         (r) => r.header === this.stack[this.stack.length - 1].value,
@@ -716,12 +917,34 @@ export class SyntacticAnalysisService {
           path,
           `Entretanto, "${currentToken.lexema}" (${currentToken.token}) foi encontrado. ${expected} esperado.`,
         );
+
+        this.loggerService.log(
+          `👎 Derivação de ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} que aponte para ${this.wrapSymbolInTags(currentToken.lexema)} não foi encontrada. Erro sintático encontrado!`,
+          'err',
+          path.concat(['derivação', 'tabela sintática']),
+          1,
+        );
+
         this.hasErrors = true;
         return 'continue';
       }
       if (col?.cell[0] === 'TOKEN_SYNC') {
+        this.loggerService.log(
+          `👎 Derivação de ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} que aponte para ${this.wrapSymbolInTags(currentToken.lexema)} encontrou <span class="monospace">TOKEN_SYNC</span>, o que significa que o estado de erro pode ser recuperado usando o modo pânico`,
+          'err',
+          path.concat(['derivação', 'tabela sintática']),
+          1,
+        );
+
         if (this.input[0].lexema !== '$') {
           this.popped = this.stack.pop();
+
+          this.loggerService.log(
+            `❌ Desempilhando símbolo ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)}  da pilha de símbolos para tentar recuperar do modo pânico`,
+            'err',
+            path.concat(['derivação', 'modo pânico', 'pilha de símbolos']),
+            1,
+          );
 
           return 'continue';
         } else {
@@ -734,14 +957,38 @@ export class SyntacticAnalysisService {
             path,
             `Uma das seguintes tokens era esperada: ${expected}.`,
           );
+
+          this.loggerService.log(
+            `❌ Não há mais tokens na entrada para se recuperar do modo pânico. EOF encontrado`,
+            'err',
+            path.concat(['derivação', 'modo pânico', 'pilha de símbolos']),
+            1,
+          );
+
           this.hasErrors = true;
           this.eof = true;
           return 'break';
         }
       }
 
+      const derivacaoLog = col.cell.map((s) => this.wrapSymbolInTags(s));
+
+      this.loggerService.log(
+        `👍 Derivação encontrada: ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)}</span> ➞ ${derivacaoLog.join(' ')}`,
+        'stp',
+        path.concat(['derivação']),
+        1,
+      );
+
       this.popped = this.stack.pop();
       if (col.cell[0] === EPSILON) {
+        this.loggerService.log(
+          `Derivação em <span class="monospace">${EPSILON}</span> encontrada. Nada será empilhado`,
+          'stp',
+          path.concat(['derivação']),
+          1,
+        );
+
         this.addNode(EPSILON, `node_${this.idCounter++}`);
         return 'continue';
       }
@@ -755,20 +1002,22 @@ export class SyntacticAnalysisService {
 
       for (const e of col?.cell) {
         invertedDerivation.unshift(e);
-        /*const newNode = {
-          id: `node_${this.idCounter++}`,
-          label: e,
-        };
-        const newLink: syntacticTreeLink = {
-          id: `link_${this.idCounter++}`,
-          label: '',
-          source: parentId,
-          target: newNode.id,
-        };
-        this.syntacticTree.nodes.push(newNode);
-        this.syntacticTree.links.push(newLink);*/
+
         ids.unshift(`node_${this.idCounter++}`);
         this.addNode(e, ids[0]);
+      }
+
+      // Um loop a mais apenas para imprimir os símbolos empilhados
+      // na ordem correta
+      for (const e of invertedDerivation) {
+        const partToBeStacked = this.wrapSymbolInTags(e);
+
+        this.loggerService.log(
+          `➕ Empilhando ${partToBeStacked} na pilha de símbolos`,
+          'stp',
+          path.concat(['derivação', 'pilha de símbolos']),
+          1,
+        );
       }
 
       this.stack.push(
@@ -780,16 +1029,11 @@ export class SyntacticAnalysisService {
 
       if (this.popped.value === '<seção_de_parâmetros_formais>') {
         this.semanticAnalysisService.setMode('parametros_formais');
+        // aqui o tipo padrão é setado como valor, e caso um <var> seja
+        // encontrado, ele mudado para .Reference
+        this.semanticAnalysisService.setPassedAs(SymbolPassedAs.Value);
       }
     } else {
-      /*console.log(
-        '>> comparando',
-        this.stack[this.stack.length - 1].value,
-        'e',
-        currentToken.lexema,
-        '<<',
-      );*/
-
       if (this.popped.value === '<programa>') {
         this.semanticAnalysisService.setMode('nome_programa');
         this.semanticAnalysisService.setType('nome_programa');
@@ -800,12 +1044,62 @@ export class SyntacticAnalysisService {
         this.semanticAnalysisService.setMode('declaracao_de_procedimento');
       } else if (currentToken.lexema === ';') {
         this.semanticAnalysisService.done();
+      } else if (currentToken.lexema === 'var') {
+        this.semanticAnalysisService.setPassedAs(SymbolPassedAs.Reference);
+      } else if (currentToken.lexema === 'begin') {
+        // mantém o nome do escopo atual
+        this.semanticAnalysisService.pushBlock('begin');
+      } else if (currentToken.lexema === 'end') {
+        this.semanticAnalysisService.popBlock();
       }
       // O topo da stack é um terminal
+
+      this.loggerService.log(
+        'Ação de símbolo <span class="monospace">terminal</span>: validar com a token atual',
+        'stp',
+        path.concat(['terminal']),
+        1,
+      );
+
       if (this.stack[this.stack.length - 1].value === currentToken.lexema) {
+        this.loggerService.log(
+          `👍 O símbolo no topo da pilha ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} é igual à token atual ${this.wrapSymbolInTags(currentToken.lexema)}. Token atual foi validada`,
+          'stp',
+          path.concat(['terminal', 'validação']),
+          1,
+        );
+
+        this.loggerService.log(
+          `✅ Removendo token ${this.wrapSymbolInTags(currentToken.lexema)} que foi validada`,
+          'stp',
+          path.concat(['terminal', 'validação', 'tokens de entrada']),
+          1,
+        );
+
+        this.loggerService.log(
+          `✅ Removendo símbolo ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} que foi validado`,
+          'stp',
+          path.concat(['terminal', 'validação', 'pilha de símbolos']),
+          1,
+        );
+
         this.lastTerminal = this.input.shift();
         this.popped = this.stack.pop();
       } else {
+        this.loggerService.log(
+          `👎 O símbolo no topo da pilha ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} não corresponde à token atual ${this.wrapSymbolInTags(currentToken.lexema)}. Deve ser então descartado como um erro sintático`,
+          'err',
+          path.concat(['terminal', 'validação']),
+          1,
+        );
+
+        this.loggerService.log(
+          `❌ Descartando símbolo ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} em virtude de erro sintático`,
+          'err',
+          path.concat(['terminal', 'validação', 'pilha de símbolos']),
+          1,
+        );
+
         this.popped = this.stack.pop();
       }
     }
@@ -817,6 +1111,11 @@ export class SyntacticAnalysisService {
     const newNode = {
       id,
       label: content,
+      dimension: {
+        width: 9.64 * content.length + 20,
+        height: 30,
+      },
+      isTerminal: content.match(/<.+>/g) === null,
     };
 
     this.syntacticTree.nodes = [...this.syntacticTree.nodes, newNode];
@@ -830,5 +1129,25 @@ export class SyntacticAnalysisService {
       };
       this.syntacticTree.links = [...this.syntacticTree.links, newLink];
     }
+  }
+
+  /** escapa uma tag HTML como texto plano */
+  escapeHTML(str: string): string {
+    return str.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;');
+  }
+
+  /**
+   * Faz a escolha certa de formatação para símbolos terminais e
+   * não-terminais durante a análise para logs
+   *
+   * @param symbol símbolo a ser formatado
+   */
+  wrapSymbolInTags(symbol: string): string {
+    let symbolText = '';
+    if (symbol.match(/<.+>/g) !== null)
+      symbolText = `<span class="monospace secondary-container on-secondary-container-text tiny-padding">${this.escapeHTML(symbol)}</span>`;
+    else symbolText = `<span class="monospace">${symbol}</span>`;
+
+    return symbolText;
   }
 }

@@ -15,7 +15,7 @@ export interface LexicalAnalysisInput {
 }
 
 export interface LexicalAnalysisOutput {
-  tokens: Token[];
+  tokens: (Token & { scope: number })[];
   errors: LexicalAnalysisError[];
 }
 
@@ -32,9 +32,19 @@ export interface LexicalAnalysisError {
 
 let receivedData: LexicalAnalysisInput;
 /** lista de tokens geradas pelo processo */
-const tokens: Token[] = [];
+const tokens: (Token & { scope: number })[] = [];
 /** lista de erros léxicos */
 const errors: LexicalAnalysisError[] = [];
+/** escopo lésico atual */
+let scope = -1;
+/** pilha de aberturas de blocos */
+let blockStack: string[] = [];
+/**
+ * quando true, mantém o nível léxico por mais uma consolidação
+ * de token. Isso é usado para que o nome da função gere um símbolo
+ * com o nível léxico que o declarou, ao invés do nível que ela criou
+ */
+let awaitForName: boolean = false;
 
 function isInAphabet(char: string): boolean {
   if (char === '') return false;
@@ -112,7 +122,36 @@ function consolidateToken(
     });
   }
 
-  tokens.push(token);
+  if (awaitForName) {
+    awaitForName = false;
+    tokens.push({ ...token, scope: scope - 1 });
+  } else {
+    tokens.push({ ...token, scope: scope });
+  }
+
+  /** lista de palavras reservadas que iniciam novos escopos */
+  const scopeStarters = ['program', 'procedure', 'begin'];
+  /** lista de palavras reservadas que fecham escopos abertos */
+  const scopeEnders = ['end'];
+
+  // Atualiza os dados de nível léxico
+  if (scopeStarters.includes(token.lexema)) {
+    blockStack.push(token.lexema);
+
+    // hax, sem tempo pra explicar...
+    if (token.lexema === 'procedure') awaitForName = true;
+
+    if (token.lexema !== 'begin') {
+      scope++;
+    }
+  } else if (scopeEnders.includes(token.lexema)) {
+    blockStack.pop();
+
+    if (blockStack[blockStack.length - 1] !== 'begin') {
+      scope--;
+      blockStack.pop();
+    }
+  }
 
   return token;
 }

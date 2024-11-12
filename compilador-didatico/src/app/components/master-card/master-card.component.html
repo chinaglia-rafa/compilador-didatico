@@ -16,21 +16,74 @@
         </div>
       </div>
     </div>
+    <span style="position: relative">
+      <md-icon-button
+        (click)="toggleOptions($event, optionsMenu)"
+        title="Mais opções"
+        *ngIf="sublinks.length > 1 && sublinkSelected === -1"
+        id="options-anchor"
+      >
+        <md-icon>{{
+          sublinkSelected >= 0 ? sublinks[sublinkSelected].icon : "more_vert"
+        }}</md-icon>
+      </md-icon-button>
+      <md-filled-icon-button
+        (click)="toggleOptions($event, optionsMenu)"
+        title="Mais opções"
+        *ngIf="sublinks.length > 1 && sublinkSelected >= 0"
+        id="options-anchor"
+      >
+        <md-icon>{{
+          sublinkSelected >= 0 ? sublinks[sublinkSelected].icon : "more_vert"
+        }}</md-icon>
+      </md-filled-icon-button>
+
+      <md-menu
+        positioning="popover"
+        id="options-menu"
+        #optionsMenu
+        anchor="options-anchor"
+      >
+        <md-menu-item
+          (click)="sublinkClicked($event, i, sublink.url)"
+          *ngFor="let sublink of sublinks; let i = index"
+          [selected]="sublinkSelected === i"
+        >
+          <div slot="headline">
+            {{ sublink.title }}
+            <md-icon
+              [title]="sublink.title"
+              [class.selected]="sublinkSelected === i"
+              >{{ sublink.icon }}</md-icon
+            >
+          </div>
+        </md-menu-item>
+      </md-menu>
+    </span>
+
     <md-icon-button
-      [title]="sublinlkTitle"
-      [class.selected]="sublinkSelected"
-      (click)="sublinkClicked($event)"
-      *ngIf="!sublinkSelected && sublinkButton !== ''"
+      [title]="sublinks[0].title"
+      [class.selected]="sublinkSelected === 0"
+      (click)="sublinkClicked($event, 0, sublinks[0].url)"
+      *ngIf="
+        sublinks.length === 1 &&
+        sublinkSelected !== 0 &&
+        sublinks[0].icon !== ''
+      "
     >
-      <md-icon>{{ sublinkButton }}</md-icon>
+      <md-icon>{{ sublinks[0].icon }}</md-icon>
     </md-icon-button>
     <md-filled-icon-button
-      [title]="sublinlkTitle"
-      [class.selected]="sublinkSelected"
-      (click)="sublinkClicked($event)"
-      *ngIf="sublinkSelected && sublinkButton !== ''"
+      [title]="sublinks[0].title"
+      [class.selected]="sublinkSelected === 0"
+      (click)="sublinkClicked($event, 0, sublinks[0].url)"
+      *ngIf="
+        sublinks.length === 1 &&
+        sublinkSelected === 0 &&
+        sublinks[0].icon !== ''
+      "
     >
-      <md-icon>{{ sublinkButton }}</md-icon>
+      <md-icon>{{ sublinks[0].icon }}</md-icon>
     </md-filled-icon-button>
   </div>
   <div class="content">

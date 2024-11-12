@@ -1,6 +1,22 @@
 <div class="container">
   <div class="actions">
-    <md-text-button>Novo</md-text-button>
+    <md-text-button (click)="newFilePrompt()">Novo</md-text-button>
+    <md-dialog
+      type="alert"
+      (close)="dialogClosed()"
+      [open]="confirmNewDialogOpen"
+      #confirmNewDialog
+    >
+      <form slot="content" id="form-id" method="dialog">
+        Limpar o arquivo e começar do zero?
+      </form>
+      <div slot="actions">
+        <md-text-button form="form-id" value="cancel">Cancelar</md-text-button>
+        <md-filled-tonal-button form="form-id" value="ok">
+          Começar um novo
+        </md-filled-tonal-button>
+      </div>
+    </md-dialog>
     <open-file></open-file>
     <md-text-button (click)="download()" [disabled]="code == ''"
       >Salvar</md-text-button

@@ -2,6 +2,7 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import {
   MasterCardComponent,
   MasterCardItem,
+  MasterCardSubItem,
 } from '../../components/master-card/master-card.component';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { ChildrenOutletContexts, Router, RouterOutlet } from '@angular/router';
@@ -67,6 +68,27 @@ export class HomeComponent implements AfterViewInit, OnInit {
   ];
   resultadoFinalCardCompItems: MasterCardItem[] = [
     { label: 'Kb', value: '0', color: 'default' },
+  ];
+
+  analiseSintaticaCardSubItems: MasterCardSubItem[] = [
+    {
+      title: 'Ver gramática',
+      icon: 'description',
+      url: 'language-viewer',
+    },
+    {
+      title: 'Árvore sintática',
+      icon: 'account_tree',
+      url: 'syntactic-tree',
+    },
+  ];
+
+  geracaoDeCodigoCardSubItems: MasterCardSubItem[] = [
+    {
+      title: 'Máquina Virtual MEPA',
+      icon: 'dns',
+      url: 'mepa',
+    },
   ];
 
   /** Lista de todos os cards presentes na tela inicial */
@@ -150,7 +172,7 @@ export class HomeComponent implements AfterViewInit, OnInit {
     else if (path === 'syntactic-analysis') this.cards[3]?.toggle();
     else if (path === 'language-viewer') {
       this.cards[3]?.toggle();
-      this.cards[3]?.toggleSublink();
+      this.cards[3]?.setSublinkSelected(0);
     } else if (path === 'semantic-analysis') this.cards[4]?.toggle();
     else if (path === 'code-generation') this.cards[5]?.toggle();
     else if (path === 'mepa') {
@@ -164,16 +186,16 @@ export class HomeComponent implements AfterViewInit, OnInit {
     event: MouseEvent,
     el: MasterCardComponent,
     route: string,
-    isSublink: boolean = false,
+    sublink: number = -1,
   ): void {
     el.toggleLoading();
     this.cards.map((card) => {
       card?.setSelected(false);
-      card?.setSublinkSelected(false);
+      card?.setSublinkSelected(-1);
     });
     el.toggleLoading();
     el.toggle();
-    if (isSublink) el.toggleSublink();
+    if (sublink >= 0) el.setSublinkSelected(sublink);
 
     this.router.navigate(['compiler', ...route.split('/')]);
   }

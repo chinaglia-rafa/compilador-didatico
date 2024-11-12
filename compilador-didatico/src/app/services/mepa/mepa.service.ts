@@ -371,12 +371,6 @@ export class MepaService {
       this.pushToMemory(
         this.getValueFromMemory(this.getLexicalLevelOffset(p1) + p2),
       );
-      console.log(
-        'Carregando o valor da posição',
-        this.getLexicalLevelOffset(p1) + p2,
-        'da pilha = ',
-        this.getValueFromMemory(this.getLexicalLevelOffset(p1) + p2),
-      );
     });
 
     // Pág 68 do PDF
@@ -690,7 +684,6 @@ export class MepaService {
     }
 
     const currentCommand = this.programQueue[this.programCounter];
-    console.log(currentCommand.commandRef.description);
     currentCommand.commandRef.run(
       currentCommand.p1,
       currentCommand.p2,
@@ -699,7 +692,7 @@ export class MepaService {
 
     this.lastCommand = currentCommand;
 
-    if (!['DSVF', 'DSVS', 'CHPR', 'RTPR'].includes(currentCommand.name))
+    if (!['DSVF', 'DSVS', 'CHPR', 'RTPR', 'CHPP'].includes(currentCommand.name))
       this.next();
 
     return false;
@@ -708,7 +701,6 @@ export class MepaService {
   processProgramText(text: string): boolean {
     const parsedCommands: Command[] = [];
     const lines = text.split('\n').map((s) => s.trim());
-    console.log(lines);
     while (lines.length > 0) {
       const current = lines.shift();
       if (current === undefined || current === '') break;

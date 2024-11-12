@@ -15,7 +15,11 @@
   <div class="text body-medium" [innerHTML]="log.text"></div>
   <div class="path label-medium">
     <span class="hidden-trick">{{ log.path[log.path.length - 1] }}</span>
-    <div class="path-full" [class.no-border]="log.path.length <= 1">
+    <div
+      class="path-full"
+      [style.backgroundColor]="customBackgroundColor"
+      [class.no-border]="log.path.length <= 1"
+    >
       <div class="path-part" *ngFor="let part of log.path">{{ part }}</div>
     </div>
   </div>

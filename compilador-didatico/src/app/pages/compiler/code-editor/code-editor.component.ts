@@ -24,6 +24,8 @@ import { FilemanagerService } from '../../../services/filemanager/filemanager.se
 import { CompilerService } from '../../../services/compiler/compiler.service';
 import { ErrorsService } from '../../../services/errors/errors.service';
 import { ErrorDisplayComponent } from '../../../components/error-display/error-display.component';
+import '@material/web/dialog/dialog';
+import { MdDialog } from '@material/web/dialog/dialog';
 
 export const EDITOR_KEYWORDS = [
   'program',
@@ -85,6 +87,10 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
   @ViewChild('panel1Element') panel1?: ElementRef;
   @ViewChild('panel2Element') panel2?: ElementRef;
   @ViewChild('panel3Element') panel3?: ElementRef;
+
+  @ViewChild('confirmNewDialog') confirmNewDialogComponent: ElementRef;
+
+  confirmNewDialogOpen: boolean = false;
 
   editorOptions = {
     minimap: { enabled: false },
@@ -273,5 +279,24 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
 
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
+  }
+
+  /** Abre o prompt confirmando o reset do conteúdo do editor */
+  newFilePrompt(): void {
+    this.confirmNewDialogOpen = true;
+  }
+
+  /** limpa o conteúdo do editor de código e reseta a compilação prévia */
+  newFile(): void {
+    this.code = '';
+    this.compilerService.resetCompilation();
+  }
+
+  /** evento chamado ao fechar o dialog tendo escolhido uma opção */
+  dialogClosed(): void {
+    if (this.confirmNewDialogComponent.nativeElement.returnValue === 'ok') {
+      this.newFile();
+    }
+    this.confirmNewDialogOpen = false;
   }
 }

@@ -18,4 +18,7 @@ export class LogItemComponent {
     type: '',
     path: [],
   };
+
+  /** Indica uma cor de fundo personalizada para a sobreposição de path-full */
+  @Input('customBackgroundColor') customBackgroundColor: string = '';
 }

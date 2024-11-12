@@ -3,6 +3,8 @@ import { LexicalAnalysisService } from '../lexical-analysis/lexical-analysis.ser
 import { BehaviorSubject, first, skip, take } from 'rxjs';
 import { ErrorsService } from '../errors/errors.service';
 import { SyntacticAnalysisService } from '../syntactic-analysis/syntactic-analysis.service';
+import { SemanticAnalysisService } from '../semantic-analysis/semantic-analysis.service';
+import { SymbolsTableService } from '../symbols-table/symbols-table.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +13,8 @@ export class CompilerService implements OnInit {
   constructor(
     private lexicalAnalysisService: LexicalAnalysisService,
     private syntacticAnalysisService: SyntacticAnalysisService,
+    private semanticAnalysisService: SemanticAnalysisService,
+    private symbolsTable: SymbolsTableService,
     private errorsService: ErrorsService,
   ) {
     this.lexicalAnalysisService.loading$.subscribe((loading) => {
@@ -80,7 +84,8 @@ program teste;
 
   ngOnInit(): void {}
   updateLineCount(code: string): void {
-    this.linesCount$.next(code.split('\n').length);
+    if (code === '') this.linesCount$.next(0);
+    else this.linesCount$.next(code.split('\n').length);
   }
 
   /**
@@ -98,5 +103,12 @@ program teste;
         if (!tokens || tokens.length === 0) return;
         this.syntacticAnalysisService.parse(tokens);
       });
+  }
+
+  resetCompilation(): void {
+    this.lexicalAnalysisService.reset();
+    this.syntacticAnalysisService.reset();
+    this.semanticAnalysisService.reset();
+    this.symbolsTable.reset();
   }
 }

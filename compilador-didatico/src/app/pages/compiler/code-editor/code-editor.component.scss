@@ -29,6 +29,12 @@
     height: 300px;
     // display: flex;
     // flex-direction: column;
+    //
+    md-tabs {
+      // acredite se quiser, no @material/web@2.2 isso é necessário
+      // para que  a aba fique abaixo do scrim do dialog
+      z-index: 0;
+    }
 
     md-tabs md-secondary-tab {
       --md-secondary-tab-label-text-font: var(

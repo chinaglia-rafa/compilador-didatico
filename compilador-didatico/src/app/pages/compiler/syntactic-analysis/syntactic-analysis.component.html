@@ -1,69 +1,114 @@
-<div class="fullscreen surface" [class.fullscreen--full]="fullscreen">
-  <div class="actions">
-    <div>
-      <md-text-button (click)="stepByStep()">Ver passo-a-passo</md-text-button>
-      <md-filled-tonal-button
-        (click)="next()"
-        [disabled]="
-          syntacticAnalysisService.autoMode ||
-          syntacticAnalysisService.started !== true
-        "
-        >Próximo passo</md-filled-tonal-button
-      >
-    </div>
-    <md-icon-button
-      class="fullscreen-button"
-      (document:keydown.escape)="fullscreen = false"
-      (document:keydown.alt.enter)="fullscreen = !fullscreen"
-      (click)="fullscreen = !fullscreen"
+<div class="flex flex--column">
+  <div class="token-list surface-container-low round-corners">
+    <h2 class="label-large">Tokens</h2>
+    <ng-scrollbar
+      #scrollbarTokensComponent
+      visibility="hover"
+      appearance="compact"
+      class="scrollable"
+      orientation="horizontal"
     >
-      <md-icon *ngIf="!fullscreen">fullscreen</md-icon>
-      <md-icon *ngIf="fullscreen">close_fullscreen</md-icon>
-    </md-icon-button>
-  </div>
-  <ngx-graph
-    class="chart-container"
-    [showMiniMap]="true"
-    [links]="syntacticAnalysisService.syntacticTree.links"
-    [nodes]="syntacticAnalysisService.syntacticTree.nodes"
-    [draggingEnabled]="false"
-    [layoutSettings]="{ orientation: 'TB' }"
-  >
-    <ng-template #nodeTemplate let-node>
-      <svg:g class="node">
-        <svg:rect
-          [attr.width]="node.dimension.width"
-          [attr.height]="node.dimension.height"
-          [attr.fill]="node.data.color"
-        />
-        <svg:text
-          alignment-baseline="central"
-          [attr.x]="10"
-          [attr.y]="node.dimension.height / 2"
+      <div class="tokens">
+        <div
+          class="token bordered title-medium bold on-surface-text"
+          [class.tertiary-fixed]="
+            i === 0 &&
+            (token.lexema ===
+              syntacticAnalysisService.stack[
+                syntacticAnalysisService.stack.length - 1
+              ].value ||
+              (syntacticAnalysisService.stack[
+                syntacticAnalysisService.stack.length - 1
+              ].value === '<identificador>' &&
+                token.token === 'identificador-válido') ||
+              (syntacticAnalysisService.stack[
+                syntacticAnalysisService.stack.length - 1
+              ].value === '<número>' &&
+                ['número-natural', 'número-real'].includes(token.token)))
+          "
+          *ngFor="let token of syntacticAnalysisService.input; let i = index"
         >
-          {{ node.label }}
-        </svg:text>
-      </svg:g>
-    </ng-template>
-
-    <ng-template #linkTemplate let-link>
-      <svg:g class="edge">
-        <svg:path
-          class="line"
-          stroke-width="2"
-          marker-end="url(#arrow)"
-        ></svg:path>
-        <svg:text class="edge-label" text-anchor="middle">
-          <textPath
-            class="text-path"
-            [attr.href]="'#' + link.id"
-            [style.dominant-baseline]="link.dominantBaseline"
-            startOffset="50%"
+          {{ token.lexema }}
+        </div>
+      </div>
+    </ng-scrollbar>
+  </div>
+  <div class="flex-row">
+    <div class="stack surface-container-low round-corners">
+      <ng-scrollbar
+        #scrollbarStackComponent
+        visibility="hover"
+        appearance="compact"
+        class="scrollable"
+      >
+        <div class="stack-container">
+          <div
+            [class]="
+              'token ' +
+              ((stackItem.value | isTerminal)
+                ? 'bordered title-medium bold on-surface-text'
+                : 'secondary-container on-secondary-container-text')
+            "
+            [class.tertiary-fixed]="
+              i === syntacticAnalysisService.stack.length - 1 &&
+              (syntacticAnalysisService.input[0].lexema === stackItem.value ||
+                (stackItem.value === '<identificador>' &&
+                  syntacticAnalysisService.input[0].token ===
+                    'identificador-válido') ||
+                (stackItem.value === '<número>' &&
+                  ['número-natural', 'número-real'].includes(
+                    syntacticAnalysisService.input[0].token
+                  )))
+            "
+            *ngFor="
+              let stackItem of syntacticAnalysisService.stack;
+              let i = index
+            "
           >
-            {{ link.label }}
-          </textPath>
-        </svg:text>
-      </svg:g>
-    </ng-template>
-  </ngx-graph>
+            {{ stackItem.value }}
+          </div>
+        </div>
+      </ng-scrollbar>
+      <!-- esse H2 está no final para poupar minha cabeça de lidar com column-reverse de novo -->
+      <h2 class="label-large">Pilha de símbolos</h2>
+    </div>
+    <div
+      class="control-panel flex flex--column surface-container round-corners"
+    >
+      <div class="actions">
+        <md-text-button
+          (click)="stopStepByStep()"
+          *ngIf="syntacticAnalysisService.started"
+          >Concluir</md-text-button
+        >
+        <md-filled-tonal-button
+          (click)="next()"
+          *ngIf="
+            !syntacticAnalysisService.autoMode &&
+            syntacticAnalysisService.started
+          "
+          >Próximo passo</md-filled-tonal-button
+        >
+        <md-filled-tonal-button
+          (click)="stepByStep()"
+          *ngIf="!syntacticAnalysisService.started"
+          >Iniciar</md-filled-tonal-button
+        >
+      </div>
+      <ng-scrollbar
+        #scrollbarLogsComponent
+        visibility="hover"
+        appearance="compact"
+        class="scrollable"
+      >
+        <div class="logs">
+          <log-item
+            customBackgroundColor="var(--md-sys-color-surface-container)"
+            *ngFor="let log of logs"
+            [log]="log"
+          ></log-item>
+        </div>
+      </ng-scrollbar>
+    </div>
+  </div>
 </div>

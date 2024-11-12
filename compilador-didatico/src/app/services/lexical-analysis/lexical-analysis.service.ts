@@ -5,7 +5,10 @@ import {
   LexicalAnalysisError,
   LexicalAnalysisInput,
 } from './lexical-analysis.worker';
-import { SymbolsTableService } from '../symbols-table/symbols-table.service';
+import {
+  SymbolCategory,
+  SymbolsTableService,
+} from '../symbols-table/symbols-table.service';
 
 /** Interface representando cada token processada */
 export interface Token {
@@ -106,14 +109,20 @@ export class LexicalAnalysisService implements OnInit {
 
   ngOnInit(): void {}
 
-  process(tokens: Token[]): Token[] {
+  process(tokens: (Token & { scope: number })[]): Token[] {
     const a = tokens.map((token) => {
       if (
         ['identificador-válido', 'número-real', 'número-natural'].includes(
           token.token,
         )
       ) {
-        token.symbolIndex = this.symbolsTable.add(token.lexema, token.token);
+        token.symbolIndex = this.symbolsTable.add(
+          token.lexema,
+          token.token,
+          SymbolCategory.Variable,
+          null,
+          token.scope,
+        );
       } else if (token.token === 'boolean-verdadeiro') {
         token.symbolIndex = 0;
       } else if (token.token === 'boolean-falso') {

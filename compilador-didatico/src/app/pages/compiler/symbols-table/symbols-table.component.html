@@ -10,8 +10,11 @@
         <th></th>
         <th>símbolo</th>
         <th>tipo</th>
+        <th>categoria</th>
         <th>valor</th>
+        <th>passada como</th>
         <th>usada</th>
+        <th>nível léxico</th>
         <th>escopo</th>
       </tr>
       <tr
@@ -21,8 +24,11 @@
         <td>{{ i + 1 }}</td>
         <td class="monospace">{{ symbol.lexema }}</td>
         <td>{{ symbol.type }}</td>
+        <td>{{ symbol.category }}</td>
         <td>{{ symbol.value }}</td>
+        <td>{{ symbol.passedAs }}</td>
         <td>{{ symbol.used ? "Sim" : "Não" }}</td>
+        <td>{{ symbol.lexicalLevel }}</td>
         <td>{{ symbol.scope }}</td>
       </tr>
     </table>

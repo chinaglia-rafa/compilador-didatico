@@ -7,6 +7,8 @@ import { SymbolsTableComponent } from './pages/compiler/symbols-table/symbols-ta
 import { SyntacticAnalysisComponent } from './pages/compiler/syntactic-analysis/syntactic-analysis.component';
 import { LanguageViewerComponent } from './pages/compiler/language-viewer/language-viewer.component';
 import { MepaComponent } from './pages/compiler/mepa/mepa.component';
+import { CodeGenerationComponent } from './pages/compiler/code-generation/code-generation.component';
+import { SyntacticTreeComponent } from './pages/compiler/syntactic-tree/syntactic-tree.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'compiler' },
@@ -46,6 +48,11 @@ export const routes: Routes = [
         data: { animation: 'LexicalAnalysisPage' },
       },
       {
+        path: 'syntactic-tree',
+        component: SyntacticTreeComponent,
+        data: { animation: 'LexicalAnalysisPage' },
+      },
+      {
         path: 'language-viewer',
         component: LanguageViewerComponent,
         data: { animation: 'LexicalAnalysisPage' },
@@ -53,6 +60,11 @@ export const routes: Routes = [
       {
         path: 'mepa',
         component: MepaComponent,
+        data: { animation: 'LexicalAnalysisPage' },
+      },
+      {
+        path: 'code-generation',
+        component: CodeGenerationComponent,
         data: { animation: 'LexicalAnalysisPage' },
       },
     ],

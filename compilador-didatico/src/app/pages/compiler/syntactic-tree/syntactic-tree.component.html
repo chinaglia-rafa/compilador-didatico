@@ -1,0 +1,108 @@
+<div class="fullscreen surface" [class.fullscreen--full]="fullscreen">
+  <div class="actions">
+    <div>
+      <md-text-button
+        *ngIf="syntacticAnalysisService.autoMode"
+        (click)="stepByStep()"
+        >Ver passo-a-passo</md-text-button
+      >
+      <md-text-button
+        *ngIf="!syntacticAnalysisService.autoMode"
+        (click)="stopStepByStep()"
+        >Finalizar</md-text-button
+      >
+      <md-filled-tonal-button
+        (click)="next()"
+        [disabled]="
+          syntacticAnalysisService.autoMode ||
+          syntacticAnalysisService.started !== true
+        "
+        >Próximo passo</md-filled-tonal-button
+      >
+    </div>
+    <div>
+      <md-icon-button
+        (click)="centerOnRoot()"
+        title="Centralizar na raiz da árvore"
+      >
+        <md-icon style="transform: rotate(90deg)">line_start_circle</md-icon>
+      </md-icon-button>
+      <md-icon-button
+        class="fullscreen-button"
+        (document:keydown.escape)="toggleFullscreen(false)"
+        (document:keydown.alt.enter)="toggleFullscreen()"
+        (click)="toggleFullscreen()"
+        title="Tela cheia"
+      >
+        <md-icon *ngIf="!fullscreen">fullscreen</md-icon>
+        <md-icon *ngIf="fullscreen">close_fullscreen</md-icon>
+      </md-icon-button>
+    </div>
+  </div>
+  <ngx-graph
+    #graph
+    *ngIf="
+      syntacticAnalysisService.syntacticTree?.links.length > 0 &&
+      syntacticAnalysisService.syntacticTree?.nodes.length > 0
+    "
+    class="chart-container"
+    [showMiniMap]="true"
+    [links]="syntacticAnalysisService.syntacticTree.links"
+    [nodes]="syntacticAnalysisService.syntacticTree.nodes"
+    [draggingEnabled]="false"
+    [layoutSettings]="{ orientation: 'TB' }"
+    [update$]="update$"
+    [center$]="center$"
+    [panToNode$]="panToNode$"
+    [zoomToFit$]="zoomToFit$"
+    layout="dagreNodesOnly"
+    (stateChange)="stateChange($event)"
+  >
+    <ng-template #nodeTemplate let-node>
+      <svg:g class="node monospace">
+        <svg:rect
+          rx="15"
+          [attr.width]="node.dimension.width"
+          [attr.height]="node.dimension.height"
+          [attr.fill]="
+            node.isTerminal
+              ? 'var(--md-sys-color-primary)'
+              : 'var(--md-sys-color-secondary-container)'
+          "
+        />
+        <svg:text
+          [style.fill]="
+            node.isTerminal
+              ? 'var(--md-sys-color-on-primary)'
+              : 'var(--md-sys-color-on-secondary-container)'
+          "
+          alignment-baseline="central"
+          [attr.x]="10"
+          [attr.y]="node.dimension.height / 2"
+        >
+          {{ node.label }}
+        </svg:text>
+      </svg:g>
+    </ng-template>
+
+    <ng-template #linkTemplate let-link>
+      <svg:g class="edge">
+        <svg:path
+          class="line"
+          stroke-width="2"
+          marker-end="url(#arrow)"
+        ></svg:path>
+        <svg:text class="edge-label" text-anchor="middle">
+          <textPath
+            class="text-path"
+            [attr.href]="'#' + link.id"
+            [style.dominant-baseline]="link.dominantBaseline"
+            startOffset="50%"
+          >
+            {{ link.label }}
+          </textPath>
+        </svg:text>
+      </svg:g>
+    </ng-template>
+  </ngx-graph>
+</div>

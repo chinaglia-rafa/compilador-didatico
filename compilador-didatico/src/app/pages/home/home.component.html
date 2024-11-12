@@ -16,6 +16,9 @@
         (select)="clicked($event, codigoFonteCard, 'code-editor')"
         (actionClick)="clicked($event, codigoFonteCard, 'code-editor')"
       ></master-card>
+      <div class="divider"></div>
+      <div class="divider title-medium on-surface-variant-text">Análise</div>
+      <div class="divider"></div>
       <div class="same-line">
         <master-card
           title="Análise léxica"
@@ -38,11 +41,14 @@
           (actionClick)="clicked($event, simbolosCard, 'symbols')"
         ></master-card>
       </div>
+      <div class="divider surface">
+        <div class="part"></div>
+        <div class="part"></div>
+      </div>
       <master-card
         title="Análise sintática"
-        sublink-title="Ver gramática"
+        [sublinks]="analiseSintaticaCardSubItems"
         [items]="analiseSintaticaCardCompItems"
-        sublink-button="description"
         action="Visualizar"
         icon="account_tree"
         #analiseSintaticaCard
@@ -51,9 +57,13 @@
           clicked($event, analiseSintaticaCard, 'syntactic-analysis')
         "
         (sublinkClick)="
-          clicked($event, analiseSintaticaCard, 'language-viewer', true)
+          clicked($event.event, analiseSintaticaCard, $event.url, $event.index)
         "
       ></master-card>
+      <div class="divider surface">
+        <div class="part"></div>
+        <div class="part"></div>
+      </div>
       <master-card
         title="Análise semântica"
         [items]="analiseSemanticaCardCompItems"
@@ -65,18 +75,23 @@
           clicked($event, analiseSemanticaCard, 'semantic-analysis')
         "
       ></master-card>
+      <div class="divider"></div>
+      <div class="divider title-medium on-surface-variant-text">Síntese</div>
+      <div class="divider"></div>
       <master-card
         title="Geração de código"
-        sublink-title="Máquina Virtual MEPA"
-        sublink-button="dns"
         [items]="geracaoDeCodigoCardCompItems"
+        [sublinks]="geracaoDeCodigoCardSubItems"
         action="Ver código gerado"
         icon="send"
         #geracaoDeCodigoCard
         (select)="clicked($event, geracaoDeCodigoCard, 'code-generation')"
         (actionClick)="clicked($event, geracaoDeCodigoCard, 'code-generation')"
-        (sublinkClick)="clicked($event, geracaoDeCodigoCard, 'mepa', true)"
+        (sublinkClick)="
+          clicked($event.event, geracaoDeCodigoCard, 'mepa', $event.index)
+        "
       ></master-card>
+      <div class="divider"></div>
       <master-card
         title="Otimização de código"
         [items]="otimizacaoDeCodigoCardCompItems"
@@ -86,6 +101,7 @@
         (select)="clicked($event, otimizacaoDeCodigoCard, 'optimization')"
         (actionClick)="clicked($event, otimizacaoDeCodigoCard, 'optimization')"
       ></master-card>
+      <div class="divider"></div>
       <master-card
         title="Resultado final"
         [items]="resultadoFinalCardCompItems"

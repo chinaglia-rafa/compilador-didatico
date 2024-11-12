@@ -10,7 +10,10 @@ import '@material/web/button/text-button';
 import '@material/web/iconbutton/filled-tonal-icon-button';
 import '@material/web/iconbutton/filled-icon-button';
 import '@material/web/iconbutton/icon-button';
+import '@material/web/menu/menu';
+//import '@material/web/menu/menu-item';
 import { LiveIconComponent } from '../live-icon/live-icon.component';
+import { MdMenu } from '@material/web/menu/menu';
 
 /** Interface de cada item mostrado na parte inferior dos Cards */
 export interface MasterCardItem {
@@ -29,6 +32,13 @@ export interface MasterCardItem {
   visible?: boolean;
 }
 
+/** Sub-item de um master-card */
+export interface MasterCardSubItem {
+  title: string;
+  icon: string;
+  url: string;
+}
+
 @Component({
   selector: 'master-card',
   standalone: true,
@@ -40,8 +50,10 @@ export interface MasterCardItem {
 export class MasterCardComponent {
   /** Título do card */
   @Input('title') title: string = '';
-  /** Título do sublink */
-  @Input('sublink-title') sublinlkTitle: string = '';
+  /** Lista de sublinks */
+  @Input('sublinks') sublinks: MasterCardSubItem[] = [];
+  @Input('sublinkButton') sublinkButton: string;
+  @Input('sublinkTitle') sublinkTitle: string;
   /** Subtítulo do card */
   @Input('subhead') subhead: string = '';
   /** Texto do botão de ação do card. Se estiver vazio, nenhum botão será exibido. */
@@ -50,20 +62,22 @@ export class MasterCardComponent {
   @Input('icon') icon: string = '';
   /** Lista de itens no formato MasterCardItem[] para serem exibidos na parte inferior do card */
   @Input('items') items: MasterCardItem[] = [];
-  /** Ícone do botão de sub-link */
-  @Input('sublink-button') sublinkButton: string = '';
   /** Evento quando o card é clicado */
   @Output('select') selectEmitter = new EventEmitter<MouseEvent>();
   /** Evento quando o botão de ação é clicado */
   @Output('actionClick') actionClickEmitter = new EventEmitter<MouseEvent>();
-  @Output('sublinkClick') sublinkClickEmitter = new EventEmitter<MouseEvent>();
+  @Output('sublinkClick') sublinkClickEmitter = new EventEmitter<{
+    event: MouseEvent;
+    index: number;
+    url: string;
+  }>();
 
   /** Controla o estado de carregamento do componente */
   protected loading = false;
   /** Controla o estado de seleção do componente */
   protected selected = false;
   /** Controla o estado de seleção do subitem do componente */
-  protected sublinkSelected = false;
+  protected sublinkSelected: number = -1;
 
   /**
    * Função chamada ao clicar no componente
@@ -116,7 +130,7 @@ export class MasterCardComponent {
    * Atribui valor para sublinkSelected
    * @param state Valor a ser atribuído
    */
-  setSublinkSelected(state: boolean): void {
+  setSublinkSelected(state: number): void {
     this.sublinkSelected = state;
   }
 
@@ -124,7 +138,8 @@ export class MasterCardComponent {
    * Alterna o estado do componente para "subitem selecionado"
    */
   toggleSublink(): void {
-    this.sublinkSelected = !this.sublinkSelected;
+    //this.sublinkSelected = !this.sublinkSelected;
+    console.warn('TO BE IMPLEMENTED');
   }
 
   /**
@@ -135,8 +150,21 @@ export class MasterCardComponent {
     this.selected = state;
   }
 
-  sublinkClicked(event: MouseEvent): void {
+  /**
+   * Função chamada pelo evento de clique do sublink, usada
+   * para emitir o output para outros componentes
+   *
+   * @param event evento de clique
+   * @param index índice do sublink clicado
+   * @param url endereço da página a ser aberta
+   */
+  sublinkClicked(event: MouseEvent, index: number, url: string): void {
     event.stopPropagation();
-    this.sublinkClickEmitter.emit(event);
+    this.sublinkClickEmitter.emit({ event, index, url });
+  }
+
+  toggleOptions(event: MouseEvent, menu: MdMenu): void {
+    event.stopPropagation();
+    menu.open = !menu.open;
   }
 }

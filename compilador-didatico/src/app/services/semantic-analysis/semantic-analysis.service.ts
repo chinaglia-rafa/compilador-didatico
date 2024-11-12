@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { SymbolsTableService } from '../symbols-table/symbols-table.service';
+import {
+  SymbolCategory,
+  SymbolPassedAs,
+  SymbolsTableService,
+} from '../symbols-table/symbols-table.service';
 import { Token } from '../lexical-analysis/lexical-analysis.service';
 import { ErrorsService } from '../errors/errors.service';
 import { BehaviorSubject } from 'rxjs';
@@ -9,7 +13,12 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class SemanticAnalysisService {
   currentType: string;
+  currentCategory: SymbolCategory;
+  /** Indica se a variável é passada por valor ou referência */
+  currentPassedAs: SymbolPassedAs;
   currentScope: string = 'global';
+  blocks: string[] = [];
+  currentLexicalLevel: number = 0;
   mode: string;
   /** lista de identificadores acumulados para receber o mesmo tipo */
   acc: number[] = [];
@@ -24,17 +33,43 @@ export class SemanticAnalysisService {
   reset(): void {
     this.currentType = '';
     this.currentScope = 'global';
+    this.blocks = [];
     this.mode = '';
     this.acc = [];
     this.errors$.next(0);
+    this.count$.next(0);
   }
 
   setType(type: string): void {
     this.currentType = type;
   }
 
+  setCategory(category: SymbolCategory): void {
+    this.currentCategory = category;
+  }
+
+  setPassedAs(passedAs: SymbolPassedAs): void {
+    this.currentPassedAs = passedAs;
+  }
+
   setScope(scope: string): void {
     this.currentScope = scope;
+  }
+
+  pushBlock(block: string): void {
+    console.log('current block list BEFORE', this.blocks.join('|'));
+    console.log('Novo bloco:', block);
+    this.blocks.push(block);
+    if (block !== 'begin') this.setScope(block);
+    console.log('current block list AFTER', this.blocks.join('|'));
+  }
+
+  popBlock(): void {
+    console.log('current block list BEFORE', this.blocks.join('|'));
+    const a = this.blocks.pop();
+    console.log('Bloco fechado:', a);
+    if (a !== 'begin') this.setScope(a);
+    console.log('current block list AFTER', this.blocks.join('|'));
   }
 
   getMode(): string {
@@ -81,12 +116,22 @@ export class SemanticAnalysisService {
     this.symbols.update(index, {
       type: this.currentType,
       scope: this.currentScope,
+      category: this.currentCategory,
+      passedAs: this.currentPassedAs,
     });
   }
 
   done(): void {
     this.currentType = '';
+    this.currentCategory = null;
+    this.currentPassedAs = null;
     this.setMode('');
+  }
+
+  enterNewLexicalLevel(): number {
+    this.currentLexicalLevel++;
+
+    return this.currentLexicalLevel;
   }
 
   checkIdentifier(token: Token): void {
