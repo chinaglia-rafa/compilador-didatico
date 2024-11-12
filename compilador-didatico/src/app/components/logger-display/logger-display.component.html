@@ -41,8 +41,14 @@
   appearance="compact"
   class="scrollable"
   (scroll)="scrollUpdate()"
+  cdkVirtualScrollingElement
 >
-  <div class="logs">
-    <log-item *ngFor="let log of logs" [log]="log"></log-item>
-  </div>
+  <cdk-virtual-scroll-viewport
+    #virtualViewport
+    id="virtual-scroll"
+    itemSize="50"
+    class="logs"
+  >
+    <log-item *cdkVirtualFor="let log of logs" [log]="log"></log-item>
+  </cdk-virtual-scroll-viewport>
 </ng-scrollbar>

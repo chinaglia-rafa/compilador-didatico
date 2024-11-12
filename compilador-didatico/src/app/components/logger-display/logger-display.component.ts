@@ -11,17 +11,22 @@ import { CommonModule } from '@angular/common';
 import '@material/web/iconbutton/icon-button';
 import '@material/web/select/outlined-select';
 import '@material/web/select/select-option';
+import {
+  CdkVirtualScrollViewport,
+  ScrollingModule,
+} from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'logger-display',
   standalone: true,
-  imports: [CommonModule, NgScrollbarModule, LogItemComponent],
+  imports: [CommonModule, NgScrollbarModule, LogItemComponent, ScrollingModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './logger-display.component.html',
   styleUrl: './logger-display.component.scss',
 })
 export class LoggerDisplayComponent implements OnInit {
   @ViewChild('scrollbarComponent') scrollbar: NgScrollbar;
+  @ViewChild('virtualViewport') virtualScroll: CdkVirtualScrollViewport;
 
   logs: LogEntry[] = [];
 
@@ -47,6 +52,8 @@ export class LoggerDisplayComponent implements OnInit {
             this.scrollbar.nativeElement.clientHeight
       )
         this.scrollbar.scrollTo({ bottom: -48 });
+
+      this.virtualScroll?.checkViewportSize();
     });
 
     this.currentLogLevel = this.loggerService.level;
