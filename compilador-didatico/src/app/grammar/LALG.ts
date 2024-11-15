@@ -136,7 +136,7 @@ lalg.productions.push(
 
 lalg.productions.push(
   new Production("<chamada_de_procedimento'>", [
-    ['(', '<lista_de_expressões>', ')'],
+    ['<lista_de_expressões>', ')'],
     [EPSILON],
   ]),
 );
