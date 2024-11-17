@@ -211,7 +211,11 @@ lalg.productions.push(
 );
 
 lalg.productions.push(
-  new Production("<variável'>", [['[', '<expressão>', ']'], [EPSILON]]),
+  new Production("<variável'>", [
+    ['[', '<expressão>', ']'],
+    ['(', '<lista_de_expressões>', ')'],
+    [EPSILON],
+  ]),
 );
 
 lalg.productions.push(
