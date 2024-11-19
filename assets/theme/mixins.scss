@@ -1,0 +1,32 @@
+@mixin interactiveStates($on-color) {
+  &::before {
+    content: '';
+    display: block;
+    width: inherit;
+    height: inherit;
+    background-color: $on-color;
+    position: absolute;
+    opacity: 0.0;
+    top: 0;
+    left: 0;
+    z-index: 0;
+  }
+  
+  &:hover {
+    &::before {
+      opacity: var(--md-sys-state-layer-hover);
+    }
+  }
+
+  &:focus {
+    &::before {
+      opacity: var(--md-sys-state-layer-focus);
+    }
+  }
+
+  &:active {
+    &::before {
+      opacity: var(--md-sys-state-layer-press);
+    }
+  }
+}

@@ -1,0 +1,40 @@
+@import "animations.scss";
+
+@import "light.scss";
+@import "dark.scss";
+@import "colors.module.scss";
+
+@import "typography.scss";
+@import "typography.module.scss";
+
+/** state layers **/
+:root {
+  --md-sys-state-layer-hover: 0.08;
+  --md-sys-state-layer-focus: 0.1;
+  --md-sys-state-layer-press: 0.1;
+  --md-sys-state-layer-drag: 0.16;
+}
+
+/** borders */
+:root {
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+  //--md-sys-shape-corner-full: 50%; TODO: verificar porque isso buga botões
+}
+
+/** Setup dos ícones usados pelos componentes do M3 **/
+@import url(https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1);
+:root {
+  --md-icon-font: "Material Symbols Rounded";
+}
+md-icon[filled],
+md-icon.filled {
+  font-variation-settings: "FILL" 1;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");

@@ -1,0 +1,48 @@
+/* Custom transition */
+@keyframes scale-out {
+  to {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-20px);
+  }
+  to {
+    transform: translateX(0px);
+  }
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateX(-20px);
+  }
+}
+
+::view-transition-old(slide),
+::view-transition-new(slide) {
+  animation-duration: 200ms;
+  animation-name: -ua-view-transition-fade-in, slide-in;
+}
+
+::view-transition-old(slide) {
+  animation-name: -ua-view-transition-fade-out;
+}
+
+::view-transition-old(fade),
+::view-transition-new(fade) {
+  animation-duration: 200ms;
+  animation-name: -ua-view-transition-fade-in;
+}
+
+::view-transition-old(fade) {
+  animation-delay: 1000ms;
+  animation-name: -ua-view-transition-fade-out;
+}
