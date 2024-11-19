@@ -16,6 +16,13 @@ program teste;
   begin
     um := um + dois;
     end;
+procedure sub(um, dois: int; tres: boolean);
+  begin
+    if (um = 1) then begin
+      dois := dois;
+    end;
+    um := um + dois;
+    end;
   begin
       alfa:= false;
       beta:= 1 + 1;
@@ -27,7 +34,7 @@ program teste;
 })
 export class FilemanagerService {
   /** Texto-fonte presente no editor de texto ou carregado do disco */
-  sourceText$ = new BehaviorSubject<string>(dummyText);
+  sourceText$ = new BehaviorSubject<string>('');
 
   constructor(private loggerService: LoggerService) {}
 

@@ -1,4 +1,19 @@
-<div class="flex flex--column">
+<div
+  class="flex flex--column fullscreen surface"
+  [class.fullscreen--full]="fullscreen"
+>
+  <div class="actions">
+    <md-icon-button
+      class="fullscreen-button"
+      (document:keydown.escape)="toggleFullscreen(false)"
+      (document:keydown.alt.enter)="toggleFullscreen()"
+      (click)="toggleFullscreen()"
+      title="Tela cheia"
+    >
+      <md-icon *ngIf="!fullscreen">fullscreen</md-icon>
+      <md-icon *ngIf="fullscreen">close_fullscreen</md-icon>
+    </md-icon-button>
+  </div>
   <div class="token-list surface-container-low round-corners">
     <h2 class="label-large">Tokens</h2>
     <ng-scrollbar

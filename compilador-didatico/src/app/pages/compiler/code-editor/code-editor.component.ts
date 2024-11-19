@@ -220,6 +220,7 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
 
     this.monaco.editor.getModels()[0].onDidChangeContent(() => {
       this.onChange();
+      this.monaco.editor.setModelMarkers(editor.getModel(), 'test', []);
     });
 
     this.errorService.errors$.subscribe((errors) => {

@@ -620,6 +620,8 @@ export class SyntacticAnalysisService {
       this.nodeCount$.next(this.syntacticTree.nodes.length);
       this.semanticAnalysisService.nextIdentifiersCount();
 
+      this.semanticAnalysisService.checkUnusedIdentifiers();
+
       this.started = false;
       // reativa o modo automático
       this.autoMode = true;
@@ -758,17 +760,13 @@ export class SyntacticAnalysisService {
           this.semanticAnalysisService.setType('procedure-name');
           this.semanticAnalysisService.setCategory(SymbolCategory.Procedure);
           this.semanticAnalysisService.addIdentifier(currentToken.symbolIndex);
-          //this.semanticAnalysisService.setScope('func_' + currentToken.lexema);
           this.semanticAnalysisService.pushBlock('func_' + currentToken.lexema);
           this.semanticAnalysisService.enterNewLexicalLevel();
           this.semanticAnalysisService.done();
         } else if (
           this.semanticAnalysisService.getMode() === 'parametros_formais'
         ) {
-          if (
-            this.semanticAnalysisService.getMode() === 'parametros_formais' &&
-            this.lastTerminal.lexema === ':'
-          ) {
+          if (this.lastTerminal.lexema === ':') {
             this.semanticAnalysisService.setType(currentToken.lexema);
             this.semanticAnalysisService.setCategory(
               SymbolCategory.FormalParam,
@@ -915,7 +913,7 @@ export class SyntacticAnalysisService {
           currentToken.row,
           currentToken.col + currentToken.lexema.length,
           path,
-          `Entretanto, "${currentToken.lexema}" (${currentToken.token}) foi encontrado. ${expected} esperado.`,
+          `"${currentToken.lexema}" (${currentToken.token}) foi encontrado. ${expected} esperado.`,
         );
 
         this.loggerService.log(

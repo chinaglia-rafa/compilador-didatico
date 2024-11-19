@@ -65,8 +65,8 @@ export const RESERVED_WORDS = [
   { token: 'boolean', desc: 'tipo-booleano' },
   { token: 'read', desc: 'entrada-dado' },
   { token: 'write', desc: 'saida-dado' },
-  { token: 'true', desc: 'boolean-verdadeiro' },
-  { token: 'false', desc: 'boolean-falso' },
+  //{ token: 'true', desc: 'boolean-verdadeiro' },
+  //{ token: 'false', desc: 'boolean-falso' },
   { token: 'begin', desc: 'inicio-bloco' },
   { token: 'end', desc: 'fim-bloco' },
   { token: ':=', desc: 'atribuição' },
@@ -122,7 +122,12 @@ export class LexicalAnalysisService implements OnInit {
           SymbolCategory.Variable,
           null,
           token.scope,
+          token.row,
+          token.col,
         );
+        if (['número-real', 'número-natural'].includes(token.token))
+          // Número são sempre já usados
+          this.symbolsTable.update(token.symbolIndex, { used: true });
       } else if (token.token === 'boolean-verdadeiro') {
         token.symbolIndex = 0;
       } else if (token.token === 'boolean-falso') {

@@ -38,10 +38,13 @@ import {
 export class SyntacticAnalysisComponent implements OnInit {
   @ViewChild('scrollbarStackComponent') scrollbarStack: NgScrollbar;
   @ViewChild('scrollbarTokensComponent') scrollbarTokens: NgScrollbar;
+  @ViewChild('scrollbarLogsComponent') scrollbarLogs: NgScrollbar;
   @ViewChild('virtualViewport') virtualScroll: CdkVirtualScrollViewport;
 
   /** lista de logs filtrada apenas para momentos da análise sintática */
   logs: LogEntry[] = [];
+  /** Indica se a tela está no modo tela cheia ou não */
+  fullscreen = false;
 
   constructor(
     public syntacticAnalysisService: SyntacticAnalysisService,
@@ -51,7 +54,9 @@ export class SyntacticAnalysisComponent implements OnInit {
   ngOnInit(): void {
     this.loggerService.logs$
       .pipe(map((logs) => logs.filter((log) => log.path.includes('parse()'))))
-      .subscribe((logs) => (this.logs = logs));
+      .subscribe((logs) => {
+        this.logs = logs;
+      });
   }
 
   stepByStep(): void {
@@ -72,5 +77,10 @@ export class SyntacticAnalysisComponent implements OnInit {
 
   stopStepByStep(): void {
     this.syntacticAnalysisService.stopStepByStep();
+  }
+
+  toggleFullscreen(force: boolean = null): void {
+    if (force !== null) this.fullscreen = force;
+    else this.fullscreen = !this.fullscreen;
   }
 }

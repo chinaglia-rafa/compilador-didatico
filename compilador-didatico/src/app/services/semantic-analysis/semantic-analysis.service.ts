@@ -16,7 +16,7 @@ export class SemanticAnalysisService {
   currentCategory: SymbolCategory;
   /** Indica se a variável é passada por valor ou referência */
   currentPassedAs: SymbolPassedAs;
-  currentScope: string = 'global';
+  currentScope: string[] = ['global'];
   blocks: string[] = [];
   currentLexicalLevel: number = 0;
   mode: string;
@@ -25,6 +25,13 @@ export class SemanticAnalysisService {
   count$ = new BehaviorSubject<number>(0);
   errors$ = new BehaviorSubject<number>(0);
 
+  /**
+   * Esse boolean é usado para que seja ignorado o primeiro begin encontrado
+   * após a declaração de uma procedure (isso porque o end que corresponde a esse)
+   * begin é, ao mesmo tempo, o end da procedure.
+   */
+  expectingProcedureBegin = false;
+
   constructor(
     private symbols: SymbolsTableService,
     private errorService: ErrorsService,
@@ -32,7 +39,7 @@ export class SemanticAnalysisService {
 
   reset(): void {
     this.currentType = '';
-    this.currentScope = 'global';
+    this.currentScope = ['global'];
     this.blocks = [];
     this.mode = '';
     this.acc = [];
@@ -52,24 +59,30 @@ export class SemanticAnalysisService {
     this.currentPassedAs = passedAs;
   }
 
-  setScope(scope: string): void {
+  setScope(scope: string[]): void {
+    this.expectingProcedureBegin = true;
     this.currentScope = scope;
   }
 
   pushBlock(block: string): void {
-    console.log('current block list BEFORE', this.blocks.join('|'));
-    console.log('Novo bloco:', block);
-    this.blocks.push(block);
-    if (block !== 'begin') this.setScope(block);
-    console.log('current block list AFTER', this.blocks.join('|'));
+    if (block !== 'begin') {
+      // quando o bloco não é um begin, pode empilhá-lo diretamente
+      this.blocks.push(block);
+
+      this.setScope(this.blocks.filter((el) => el !== 'begin'));
+    } else {
+      // Caso não se esteje esperando o begin que vem logo após
+      // a token procedure, então empilha o elemento
+      if (!this.expectingProcedureBegin) this.blocks.push(block);
+      this.expectingProcedureBegin = false;
+    }
   }
 
   popBlock(): void {
-    console.log('current block list BEFORE', this.blocks.join('|'));
     const a = this.blocks.pop();
-    console.log('Bloco fechado:', a);
-    if (a !== 'begin') this.setScope(a);
-    console.log('current block list AFTER', this.blocks.join('|'));
+    if (a !== 'begin')
+      this.setScope(this.blocks.filter((el) => el !== 'begin'));
+    // this.setScope(this.blocks.at(-1));
   }
 
   getMode(): string {
@@ -115,10 +128,13 @@ export class SemanticAnalysisService {
 
     this.symbols.update(index, {
       type: this.currentType,
-      scope: this.currentScope,
+      scope: this.currentScope.at(-1),
       category: this.currentCategory,
       passedAs: this.currentPassedAs,
     });
+    // O nome do programa é sempre já usado
+    if (this.mode === 'nome_programa')
+      this.symbols.update(index, { used: true });
   }
 
   done(): void {
@@ -138,7 +154,17 @@ export class SemanticAnalysisService {
     const path = ['Compilador', 'Análise Semântica', 'checkIdentifier()'];
     const symbol = this.symbols.get(token.symbolIndex);
 
-    if (!symbol || !symbol.type || symbol.type === '') {
+    // Procura pela declaração da variável nos escopos acessíveis
+    let declaration, index;
+    for (let i = this.currentScope.length - 1; i >= 0; i--) {
+      [declaration, index] = this.symbols.getByNameAndScope(
+        symbol.lexema,
+        this.currentScope.at(i),
+      );
+      if (declaration) break;
+    }
+
+    if (!symbol || !declaration) {
       this.errorService.add(
         300,
         token.row,
@@ -150,11 +176,43 @@ export class SemanticAnalysisService {
       );
       this.errors$.next(this.errors$.value + 1);
     } else {
-      this.symbols.update(token.symbolIndex, { used: true });
+      // Atualiza o símbolo em questão
+      this.symbols.update(token.symbolIndex, {
+        used: true,
+        category: SymbolCategory.Reference,
+        scope: this.currentScope.at(-1),
+        type: declaration.type,
+      });
+      // Atualiza sua declaração
+      this.symbols.update(index, {
+        used: true,
+      });
     }
   }
 
   nextIdentifiersCount() {
     this.count$.next(this.symbols.getIdentifiersCount());
+  }
+
+  checkUnusedIdentifiers(): void {
+    const path = [
+      'Compilador',
+      'Análise Semântica',
+      'checkUnusedIdentifiers()',
+    ];
+    for (const row of this.symbols.table$.value) {
+      if (row.used === false) {
+        this.errorService.add(
+          301,
+          row.row,
+          row.col,
+          row.row,
+          row.col + row.lexema.length,
+          path,
+          row.lexema,
+        );
+        this.errors$.next(this.errors$.value + 1);
+      }
+    }
   }
 }

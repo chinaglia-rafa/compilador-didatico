@@ -49,4 +49,8 @@ export const ERROR_CODES = {
     code: 300,
     desc: 'A seguinte variável foi utilizada antes de sua declaração neste escopo:',
   },
+  SEM_VARIABLE_NOT_USED: {
+    code: 301,
+    desc: 'A seguinte variável foi declarada, mas não foi utilizada:',
+  },
 };

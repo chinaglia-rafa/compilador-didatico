@@ -19,6 +19,13 @@
   }
 }
 
+.actions {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px;
+}
+
 .round-corners {
   border-radius: var(--md-sys-shape-corner-medium);
 }
@@ -102,4 +109,14 @@ cdk-virtual-scroll-viewport {
 
 log-item {
   margin-right: 8px;
+}
+
+.fullscreen {
+  height: 100%;
+  &.fullscreen--full {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+  }
 }

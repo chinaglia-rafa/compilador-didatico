@@ -9,6 +9,7 @@ import { LanguageViewerComponent } from './pages/compiler/language-viewer/langua
 import { MepaComponent } from './pages/compiler/mepa/mepa.component';
 import { CodeGenerationComponent } from './pages/compiler/code-generation/code-generation.component';
 import { SyntacticTreeComponent } from './pages/compiler/syntactic-tree/syntactic-tree.component';
+import { SemanticAnalysisComponent } from './pages/compiler/semantic-analysis/semantic-analysis.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'compiler' },
@@ -55,6 +56,11 @@ export const routes: Routes = [
       {
         path: 'language-viewer',
         component: LanguageViewerComponent,
+        data: { animation: 'LexicalAnalysisPage' },
+      },
+      {
+        path: 'semantic-analysis',
+        component: SemanticAnalysisComponent,
         data: { animation: 'LexicalAnalysisPage' },
       },
       {

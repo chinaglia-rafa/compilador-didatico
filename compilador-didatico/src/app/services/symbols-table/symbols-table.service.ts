@@ -10,6 +10,7 @@ export enum SymbolCategory {
   Variable = 'variável',
   FormalParam = 'parâmetro-formal',
   Procedure = 'procedimento',
+  Reference = 'referência',
 }
 
 /** Linha da tabela de símbolos */
@@ -36,6 +37,10 @@ export interface TableItem {
   label?: string;
   /** Lista de tipos de passagem de cada parâmetro formal do procedimento */
   paramsPassedAs?: SymbolPassedAs[];
+  /** Linha onde o símbolo se encontra no código-fonte */
+  row: number;
+  /** Coluna onde o símbolo se encontra no código-fonte */
+  col: number;
 }
 
 /** Dados que podem ser atualizados em um símbolo */
@@ -61,6 +66,8 @@ export class SymbolsTableService {
       lexicalLevel: 0,
       used: true,
       category: SymbolCategory.Variable,
+      row: 0,
+      col: 0,
     },
     {
       lexema: 'false',
@@ -69,6 +76,8 @@ export class SymbolsTableService {
       lexicalLevel: 0,
       used: true,
       category: SymbolCategory.Variable,
+      row: 0,
+      col: 0,
     },
   ]);
   /** tamanho da tabela de símbolos */
@@ -84,6 +93,8 @@ export class SymbolsTableService {
    * @param category categoria do símbolo
    * @param passedAs tipo de passagem de variável (valor ou referencia)
    * @param lexicalLevel nível léxico do elemento
+   * @param row linha onde o símbolo está no código
+   * @param col coluna onde o símbolo está no código
    * @returns índice da tabela de símbolos que contém o novo item adicionado.
    */
   add(
@@ -92,6 +103,8 @@ export class SymbolsTableService {
     category: SymbolCategory,
     passedAs: SymbolPassedAs = null,
     lexicalLevel: number,
+    row: number,
+    col: number,
   ): number {
     const newTableItem: TableItem = {
       lexema: '',
@@ -100,6 +113,8 @@ export class SymbolsTableService {
       category,
       passedAs,
       lexicalLevel,
+      row,
+      col,
     };
 
     newTableItem.lexema = lexema;
@@ -134,6 +149,19 @@ export class SymbolsTableService {
     return this.table$.value[index] || null;
   }
 
+  /**
+   * Busca um símbolo com base em seu nome e escopo
+   *
+   * @param name Nome do símbolo cuja declaração está sendo buscada
+   * @param scope Escopo do símbolo
+   */
+  getByNameAndScope(name: string, scope: string): [TableItem, number] {
+    const i = this.table$.value.findIndex(
+      (el) => el.scope === scope && el.lexema === name,
+    );
+    return [this.get(i), i];
+  }
+
   update(index: number, updateData: UpdateData): void {
     if (updateData.type !== undefined) this.get(index).type = updateData.type;
     if (updateData.scope !== undefined)
@@ -158,6 +186,8 @@ export class SymbolsTableService {
         lexicalLevel: 0,
         used: true,
         category: SymbolCategory.Variable,
+        row: 0,
+        col: 0,
       },
       {
         lexema: 'false',
@@ -166,6 +196,8 @@ export class SymbolsTableService {
         lexicalLevel: 0,
         used: true,
         category: SymbolCategory.Variable,
+        row: 0,
+        col: 0,
       },
     ]);
 

@@ -1,0 +1,41 @@
+.identifiers {
+  padding: 16px 0;
+  height: 100%;
+}
+
+.scrollable {
+  height: 100%;
+}
+
+table {
+  width: 100%;
+  padding: 16px;
+
+  tr th {
+    text-align: left;
+    padding: 0 8px 16px 8px;
+  }
+
+  tr:nth-child(even) {
+    background: var(--md-sys-color-surface-container-low);
+  }
+
+  tr td {
+    padding: 8px;
+    border: none;
+  }
+
+  .token-line {
+    td:first-of-type {
+      opacity: 0.5;
+    }
+  }
+}
+
+.center {
+  text-align: center;
+}
+
+.logs {
+  padding: 16px;
+}

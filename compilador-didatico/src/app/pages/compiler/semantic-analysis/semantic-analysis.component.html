@@ -1,0 +1,37 @@
+<div class="identifiers">
+  <ng-scrollbar
+    #scrollbarComponent
+    visibility="hover"
+    appearance="compact"
+    class="scrollable"
+  >
+    <table cellspacing="0" cellpadding="0">
+      <tr class="title-large on-surface-text">
+        <th></th>
+        <th>lexema</th>
+        <th>token</th>
+        <th>posição</th>
+        <th>símbolo</th>
+      </tr>
+      <tr
+        *ngFor="let identifier of identifiers$ | async; let i = index"
+        class="body-large token-line on-surface-text"
+      >
+        <td>{{ i + 1 }}</td>
+        <td class="monospace">{{ identifier.lexema }}</td>
+        <td>{{ identifier.token }}</td>
+        <td>{{ identifier.row + 1 }}:{{ identifier.col + 1 }}</td>
+        <td>
+          {{ identifier.symbolIndex >= 0 ? identifier.symbolIndex + 1 : "" }}
+        </td>
+      </tr>
+    </table>
+    <div class="logs">
+      <h2>Erros semânticos</h2>
+      <error-item
+        *ngFor="let error of errors$ | async"
+        [error]="error"
+      ></error-item>
+    </div>
+  </ng-scrollbar>
+</div>

@@ -43,7 +43,7 @@ export class CompilerService implements OnInit {
       }
     });
 
-    setTimeout(() => {
+    /*setTimeout(() => {
       const c = `
 
 // teste
@@ -59,13 +59,21 @@ program teste;
   begin
     um := um + dois;
     end;
+procedure sub(um, dois: int; tres: boolean);
+  begin
+    if (um = 1) then begin
+      dois := dois;
+    end;
+    um := um + dois;
+    end;
+
   begin
       alfa:= false;
       beta:= 1 + 1;
   end.
 `;
       this.compile(c);
-    }, 1000);
+    }, 1000);*/
   }
 
   /** Observable que emite booleanos indicando quais partes da compilação estão carregando */
