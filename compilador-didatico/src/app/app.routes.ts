@@ -10,6 +10,8 @@ import { MepaComponent } from './pages/compiler/mepa/mepa.component';
 import { CodeGenerationComponent } from './pages/compiler/code-generation/code-generation.component';
 import { SyntacticTreeComponent } from './pages/compiler/syntactic-tree/syntactic-tree.component';
 import { SemanticAnalysisComponent } from './pages/compiler/semantic-analysis/semantic-analysis.component';
+import { CodeOptimizationComponent } from './pages/compiler/code-optimization/code-optimization.component';
+import { FinalResultsComponent } from './pages/compiler/final-results/final-results.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'compiler' },
@@ -71,6 +73,16 @@ export const routes: Routes = [
       {
         path: 'code-generation',
         component: CodeGenerationComponent,
+        data: { animation: 'LexicalAnalysisPage' },
+      },
+      {
+        path: 'optimization',
+        component: CodeOptimizationComponent,
+        data: { animation: 'LexicalAnalysisPage' },
+      },
+      {
+        path: 'final-results',
+        component: FinalResultsComponent,
         data: { animation: 'LexicalAnalysisPage' },
       },
     ],

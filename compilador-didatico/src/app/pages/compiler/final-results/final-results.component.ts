@@ -4,11 +4,11 @@ import { RouterLink } from '@angular/router';
 import '@material/web/button/filled-button';
 
 @Component({
-  selector: 'app-code-generation',
+  selector: 'app-final-results',
   standalone: true,
   imports: [CommonModule, RouterLink],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  templateUrl: './code-generation.component.html',
-  styleUrl: './code-generation.component.scss',
+  templateUrl: './final-results.component.html',
+  styleUrl: './final-results.component.scss',
 })
-export class CodeGenerationComponent {}
+export class FinalResultsComponent {}
