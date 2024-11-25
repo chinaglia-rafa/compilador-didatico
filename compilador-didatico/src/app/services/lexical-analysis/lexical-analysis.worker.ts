@@ -176,7 +176,7 @@ addEventListener('message', ({ data }) => {
   let isInComment = false;
 
   /** Divide o código-fonte em linhas */
-  const code = receivedData.code.split('\n');
+  const code = receivedData.code.replace('\r', '').split('\n');
 
   for (let row = 0; row < code.length; row++) {
     /** linha sendo trabalhada no momento */
