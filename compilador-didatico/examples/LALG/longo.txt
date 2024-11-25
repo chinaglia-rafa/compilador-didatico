@@ -1,0 +1,16 @@
+program teste;
+    int a, b, c;
+    boolean isOkay;
+begin
+    isOkay := true;
+    b := 15;
+    c := 7;
+    { caso isOkay seja true, a receberá 10 vezes o valor de b }
+    if (isOkay = true) then begin
+        a := 10 * b
+    end
+    { caso contrário, a receberá 5 + o valor de c }
+    else begin
+        a := 5 + c
+    end
+end.
