@@ -1,0 +1,6 @@
+program teste;
+    int a, b; { b nunca foi usada! }
+begin
+    a := 3;
+    c := 2; {c nunca foi declarada nesse escopo! }
+end.
