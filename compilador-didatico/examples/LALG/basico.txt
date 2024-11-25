@@ -1,0 +1,6 @@
+program teste;
+int a;
+begin
+    { atribui o valor 1 à variável a }
+    a := 1 {o último comando dispensa o uso de ponto-e-vírgula ;}
+end.
