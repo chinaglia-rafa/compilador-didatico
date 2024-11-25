@@ -1,0 +1,5 @@
+program teste;
+    int 2a;
+begin
+    { erro léxico: identificadores não podem começar com número! }
+end.
