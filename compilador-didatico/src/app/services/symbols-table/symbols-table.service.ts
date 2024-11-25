@@ -79,6 +79,26 @@ export class SymbolsTableService {
       row: 0,
       col: 0,
     },
+    {
+      lexema: 'write',
+      type: 'procedure-name',
+      scope: 'global',
+      lexicalLevel: 0,
+      used: true,
+      category: SymbolCategory.Procedure,
+      row: 0,
+      col: 0,
+    },
+    {
+      lexema: 'read',
+      type: 'procedure-name',
+      scope: 'global',
+      lexicalLevel: 0,
+      used: true,
+      category: SymbolCategory.Procedure,
+      row: 0,
+      col: 0,
+    },
   ]);
   /** tamanho da tabela de símbolos */
   count$ = new BehaviorSubject<number>(0);
@@ -199,6 +219,26 @@ export class SymbolsTableService {
         row: 0,
         col: 0,
       },
+      {
+      lexema: 'write',
+      type: 'procedure-name',
+      scope: 'global',
+      lexicalLevel: 0,
+      used: true,
+      category: SymbolCategory.Procedure,
+      row: 0,
+      col: 0,
+    },
+    {
+      lexema: 'read',
+      type: 'procedure-name',
+      scope: 'global',
+      lexicalLevel: 0,
+      used: true,
+      category: SymbolCategory.Procedure,
+      row: 0,
+      col: 0,
+    },
     ]);
 
     this.count$.next(this.table$.value.length);
