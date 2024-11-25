@@ -1,0 +1,6 @@
+program teste;
+    int a;
+begin
+    { o comando if espera ( <expressão> ) e não := }
+    if := a;
+end.
