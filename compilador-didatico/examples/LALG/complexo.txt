@@ -1,0 +1,18 @@
+program teste;
+    int alfa, beta;
+    boolean omega;
+    procedure soma(a, b: int; var resultado: boolean);
+    begin
+    { aqui, resultado é o terceiro parâmetro passado por referência }
+        resultado := a > b
+    end;
+    procedure inicia_valores(init_alfa, init_beta: int; var a, b: int);
+    begin
+        { inicializa alfa e beta }
+        a := init_alfa;
+        b := init_beta
+    end;
+begin
+    inicia_valores(2, 3, alfa, beta);
+    soma(alfa, beta, omega)
+end.
