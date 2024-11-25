@@ -106,6 +106,8 @@ export class SyntacticAnalysisService {
   parentNodeID = '';
   /** Contagem de nós da tabela sintática */
   nodeCount$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  /** Contagem de erros */
+  errorCount$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   loading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   /** último símbolo da pilha que foi resolvido */
@@ -147,6 +149,7 @@ export class SyntacticAnalysisService {
     };
 
     this.nodeCount$.next(0);
+    this.errorCount$.next(0);
   }
 
   startStepByStep(): void {
@@ -508,6 +511,8 @@ export class SyntacticAnalysisService {
       this.input = [].concat(ipt);
       this.originalInput = [].concat(ipt);
 
+      this.errorCount$.next(0);
+
       this.semanticAnalysisService.reset();
       this.semanticAnalysisService.pushBlock('global');
 
@@ -642,6 +647,7 @@ export class SyntacticAnalysisService {
           this.input[0].col + this.input[0].lexema.length,
           path,
         );
+        this.errorCount$.next(this.errorCount$.value + 1);
         this.hasErrors = true;
       }
       this.started = false;
@@ -689,6 +695,7 @@ export class SyntacticAnalysisService {
             path,
             `${currentToken.lexema} (${currentToken.token}) encontrado.`,
           );
+          this.errorCount$.next(this.errorCount$.value + 1);
 
           this.loggerService.log(
             `👎 A token atual (${this.wrapSymbolInTags(currentToken.lexema)} do tipo ${currentToken.token}) não é um identificador válido`,
@@ -813,6 +820,8 @@ export class SyntacticAnalysisService {
             `${currentToken.lexema} (${currentToken.token}) encontrado.`,
           );
 
+          this.errorCount$.next(this.errorCount$.value + 1);
+
           this.loggerService.log(
             `👎 A token atual (${this.wrapSymbolInTags(currentToken.lexema)} do tipo ${currentToken.token}) não é um número válido.`,
             'err',
@@ -915,6 +924,7 @@ export class SyntacticAnalysisService {
           path,
           `"${currentToken.lexema}" (${currentToken.token}) foi encontrado. ${expected} esperado.`,
         );
+        this.errorCount$.next(this.errorCount$.value + 1);
 
         this.loggerService.log(
           `👎 Derivação de ${this.wrapSymbolInTags(this.stack[this.stack.length - 1].value)} que aponte para ${this.wrapSymbolInTags(currentToken.lexema)} não foi encontrada. Erro sintático encontrado!`,
@@ -955,6 +965,7 @@ export class SyntacticAnalysisService {
             path,
             `Uma das seguintes tokens era esperada: ${expected}.`,
           );
+          this.errorCount$.next(this.errorCount$.value + 1);
 
           this.loggerService.log(
             `❌ Não há mais tokens na entrada para se recuperar do modo pânico. EOF encontrado`,

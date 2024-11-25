@@ -131,6 +131,10 @@ export class HomeComponent implements AfterViewInit, OnInit {
     this.syntacticAnalysisService.nodeCount$.subscribe((data) => {
       this.analiseSintaticaCardCompItems[0].value = data.toString();
     });
+    this.syntacticAnalysisService.errorCount$.subscribe((data) => {
+      this.analiseSintaticaCardCompItems[1].value = data.toString();
+      this.analiseSintaticaCardCompItems[1].visible = data > 0;
+    });
     this.semanticAnalysisService.count$.subscribe((data) => {
       this.analiseSemanticaCardCompItems[0].value = data.toString();
     });
