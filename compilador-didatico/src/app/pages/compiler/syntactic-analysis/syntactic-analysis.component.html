@@ -104,9 +104,20 @@
         >
         <md-filled-tonal-button
           (click)="stepByStep()"
-          *ngIf="!syntacticAnalysisService.started"
+          *ngIf="
+            !syntacticAnalysisService.started &&
+            syntacticAnalysisService.input.length > 0
+          "
           >Iniciar</md-filled-tonal-button
         >
+        <div
+          *ngIf="
+            !syntacticAnalysisService.started &&
+            syntacticAnalysisService.input.length === 0
+          "
+        >
+          Compile o código antes de usar essa tela!
+        </div>
       </div>
       <ng-scrollbar
         #scrollbarLogsComponent

@@ -56,6 +56,7 @@ export class SyntacticAnalysisComponent implements OnInit {
       .pipe(map((logs) => logs.filter((log) => log.path.includes('parse()'))))
       .subscribe((logs) => {
         this.logs = logs;
+        this.virtualScroll.checkViewportSize();
       });
   }
 

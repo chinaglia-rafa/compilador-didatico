@@ -84,7 +84,7 @@ export const EDITOR_OPERATORS = [
   styleUrl: './code-editor.component.scss',
 })
 export class CodeEditorComponent implements OnInit, OnDestroy {
-  @ViewChild('panel1Element') panel1?: ElementRef;
+  //@ViewChild('panel1Element') panel1?: ElementRef;
   @ViewChild('panel2Element') panel2?: ElementRef;
   @ViewChild('panel3Element') panel3?: ElementRef;
 
@@ -120,7 +120,10 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.filemanager.sourceText$.subscribe((data) => (this.code = data));
+    this.filemanager.sourceText$.subscribe((data) => {
+      this.code = data;
+      this.compilerService.updateLineCount(this.code);
+    });
   }
 
   ngOnDestroy(): void {
@@ -250,7 +253,7 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
 
     if (index === undefined) return;
 
-    const tabs = [this.panel1, this.panel2, this.panel3];
+    const tabs = [/*this.panel1*/ this.panel2, this.panel3];
     for (const tab of tabs) tab?.nativeElement.setAttribute('hidden', true);
     tabs[index]?.nativeElement.removeAttribute('hidden');
   }

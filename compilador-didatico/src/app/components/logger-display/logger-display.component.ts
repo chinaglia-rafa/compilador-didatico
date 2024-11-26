@@ -37,6 +37,8 @@ export class LoggerDisplayComponent implements OnInit {
 
   scrolled = false;
 
+  timer: any;
+
   private lastKnownScrollPosition = 0;
   private ticking = false;
 
@@ -52,11 +54,17 @@ export class LoggerDisplayComponent implements OnInit {
             this.scrollbar.nativeElement.clientHeight
       )
         this.scrollbar.scrollTo({ bottom: -48 });
-
-      this.virtualScroll?.checkViewportSize();
     });
 
     this.currentLogLevel = this.loggerService.level;
+
+    this.timer = setInterval(() => {
+      this.virtualScroll?.checkViewportSize();
+    }, 2000);
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.timer);
   }
 
   scrollUpdate(): void {

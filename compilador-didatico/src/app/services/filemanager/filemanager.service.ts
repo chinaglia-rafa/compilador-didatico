@@ -2,31 +2,25 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { LoggerService } from '../logger/logger.service';
 
-const dummyText = `
-// teste
-{
-  teste
-  teste
-  teste!
-}
-program teste;
-  int alfa, beta;
-  boolean omega;
-  procedure soma(um, dois: int; tres: boolean);
-  begin
-    um := um + dois;
-    end;
-procedure sub(um, dois: int; tres: boolean);
-  begin
-    if (um = 1) then begin
-      dois := dois;
-    end;
-    um := um + dois;
-    end;
-  begin
-      alfa:= false;
-      beta:= 1 + 1;
-  end.
+const dummyText = `program ola_mundo;
+    { a LALG aceita tipos int e boolean! }
+    int alfa, beta;
+    boolean omega;
+{ você pode declarar e chamar procedimentos! }
+procedure soma(a, b: int);
+begin
+    write(a + b)
+end;
+begin
+    {
+      remova os comentários abaixo para remover o
+      erro semântico de omega
+    }
+    //omega := true;
+    alfa := 1;
+    beta := 2;
+    soma(alfa, beta)
+end.
 `;
 
 @Injectable({
@@ -34,7 +28,7 @@ procedure sub(um, dois: int; tres: boolean);
 })
 export class FilemanagerService {
   /** Texto-fonte presente no editor de texto ou carregado do disco */
-  sourceText$ = new BehaviorSubject<string>('');
+  sourceText$ = new BehaviorSubject<string>(dummyText);
 
   constructor(private loggerService: LoggerService) {}
 
