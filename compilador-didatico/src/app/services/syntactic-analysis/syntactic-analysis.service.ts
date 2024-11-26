@@ -512,6 +512,7 @@ export class SyntacticAnalysisService {
       this.originalInput = [].concat(ipt);
 
       this.errorCount$.next(0);
+      this.errorService.reset();
 
       this.semanticAnalysisService.reset();
       this.semanticAnalysisService.pushBlock('global');
